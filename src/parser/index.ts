@@ -2,9 +2,12 @@ import { SystemRemarkCall } from '../types/generated/calls';
 import { SubSclRemark } from '../remark';
 import { CallParsed } from './types';
 import { Ctx } from '../processor';
-import { parseDomainRegisterPayCall } from './utils';
+import {
+  parseDomainRegisterPayCall,
+  parseDomainRegisterCompletedCall
+} from './utils';
 
-export function parseBatches(ctx: Ctx): CallParsed[] {
+export function parseCalls(ctx: Ctx): CallParsed[] {
   let callsParsed: CallParsed[] = [];
 
   for (let block of ctx.blocks) {
@@ -37,7 +40,7 @@ export function parseBatches(ctx: Ctx): CallParsed[] {
             break;
           }
           case 'D_REG_COMP': {
-            const data = parseDomainRegisterPayCall(
+            const data = parseDomainRegisterCompletedCall(
               remark,
               item,
               block.header,
@@ -47,6 +50,11 @@ export function parseBatches(ctx: Ctx): CallParsed[] {
             break;
           }
           default:
+            console.log(
+              `Handler for action ${
+                remark.message!.action
+              } is not implemented yet.`
+            );
         }
       }
     }

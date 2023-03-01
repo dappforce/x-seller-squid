@@ -15,7 +15,7 @@ export class WsClient {
 
   private apiUrl: string = 'ws://127.0.0.1:9944';
 
-  protected clientError: ChainClientError = new ChainClientError();
+  public clientError: ChainClientError = new ChainClientError();
 
   private clientListeners: ApiClientListeners = {
     error: (e: Error): void => {},

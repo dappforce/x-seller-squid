@@ -10,7 +10,7 @@ import { Store, TypeormDatabase } from '@subsquid/typeorm-store';
 import { SellerChainClient, BuyerChainClient } from './wsClient';
 import { WalletClient } from './walletClient';
 import { handleSellerActions } from './handlers';
-import { parseBatches } from './parser';
+import { parseCalls } from './parser';
 
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
@@ -38,12 +38,12 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
 
-  let batchesData = parseBatches(ctx);
+  let callsData = parseCalls(ctx);
 
-  console.log('batchesData >>> ');
-  console.dir(batchesData, { depth: null });
+  console.log('callsData >>> ');
+  console.dir(callsData, { depth: null });
 
-  await handleSellerActions(batchesData);
+  await handleSellerActions(callsData, ctx);
 
   // let accountIds = new Set<string>();
   // for (let t of transfersData) {

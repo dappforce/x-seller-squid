@@ -13,4 +13,5 @@ export type ChainActionResult = {
   blockHeight?: number;
   blockHash?: string;
   reason?: string;
+  status?: number;
 };

@@ -1,8 +1,9 @@
 import { CallParsed } from '../parser/types';
 import { SubSclRemarkMessageAction } from '../remark/types';
 import { handleDomainRegisterPayment } from './domain';
+import { Ctx } from '../processor';
 
-export async function handleSellerActions(parsedActions: CallParsed[]) {
+export async function handleSellerActions(parsedActions: CallParsed[], ctx: Ctx) {
   for (const actionsData of parsedActions) {
     if (!actionsData.remark.valid) continue; // TODO add handling for such case
 
@@ -10,7 +11,7 @@ export async function handleSellerActions(parsedActions: CallParsed[]) {
       case 'D_REG_PAY': {
         // TODO fix types
         // @ts-ignore
-        await handleDomainRegisterPayment(actionsData);
+        await handleDomainRegisterPayment(actionsData, ctx);
         break;
       }
       case 'D_REG_COMP': {

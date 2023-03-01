@@ -2,7 +2,7 @@ import { SubSclRemarkMessage, SubSclRemarkMessageAction } from '../remark/types'
 import { CallItem } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 
 export interface CallParsed<
-  A extends SubSclRemarkMessageAction | string = ''
+  A extends SubSclRemarkMessageAction | string = '', V extends boolean = false
 > {
   id: string;
   blockNumber: number;
@@ -12,7 +12,7 @@ export interface CallParsed<
   from?: string;
   to?: string;
   amount: bigint;
-  remark: SubSclRemarkMessage<A>;
+  remark: SubSclRemarkMessage<A, V>;
 }
 
 export const requiredPurchaseBatchCalls = new Set([

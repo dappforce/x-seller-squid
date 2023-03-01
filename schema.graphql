@@ -1,17 +1,76 @@
-type Account @entity {
-  "Account address"
+type Username @entity {
   id: ID!
-  transfersTo: [Transfer!] @derivedFrom(field: "to")
-  transfersFrom: [Transfer!] @derivedFrom(field: "from")
+  name: String!
+  owner: Account
+  usernameRegistrations: [DomainRegistration!] @derivedFrom(field: "username")
+  createdAt: DateTime!
+  createdAtBlock: Int!
+}
+
+type Account @entity {
+  id: ID!
+  usernames: [Username!] @derivedFrom(field: "owner")
+  usernameRegPayments: [UsernameRegistration!] @derivedFrom(field: "registrant")
+
+  energyBoxes: [EnergyBox!] @derivedFrom(field: "owner")
+}
+
+type UsernameRegistration @entity {
+  "Attempt ID from remark and it's the same value for all purchase, confirmation and refund(if it's existing) remarks"
+  id: ID!
+  blockHashSellerChain: String
+  blockHashUnameHostChain: String
+  registrant: Account!
+  username: Username!
+  price: BigInt!
+  "TODO should be reviewed"
+  currency: String!
+  purchaseTx: Transfer
+  refundTx: Transfer
+  status: RegistrationStatus
+  refundStatus: RefundStatus
+  purchaseRmrk: JSON
+  confirmationRmrk: JSON
+  refundRmrk: JSON
+}
+
+type EnergyBox @entity {
+  "Attempt ID from remark and it's the same value for all generation, confirmation and refund(if it's existing) remarks"
+  id: ID!
+  blockHashSellerChain: String
+  blockHashEnergyHostChain: String
+  energyAmount: BigInt!
+  boxPrice: BigInt!
+  "TODO should be reviewed"
+  currency: String!
+  owner: Account
+  purchaseTx: Transfer
+  refundTx: Transfer
+  status: RegistrationStatus
+  refundStatus: RefundStatus
+  generationRmrk: JSON
+  confirmationRmrk: JSON
+  refundRmrk: JSON
 }
 
 type Transfer @entity {
   id: ID!
-  blockNumber: Int! @index
-  timestamp: DateTime! @index
-  extrinsicHash: String @index
+  blockHeight: Int!
+  timestamp: DateTime!
+  amount: BigInt!
+  "TODO should be reviewed"
+  currency: String
   from: Account!
   to: Account!
-  amount: BigInt! @index
-  fee: BigInt! #
+}
+
+enum RegistrationStatus {
+  Processing
+  Successful
+  Failed
+}
+enum RefundStatus {
+  Waiting
+  Fulfilled
+  Failed
 }

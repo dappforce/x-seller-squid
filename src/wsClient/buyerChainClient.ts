@@ -54,6 +54,11 @@ export class BuyerChainClient extends WsClient {
     return structs.filter((x) => x.isSome).map((x) => x.unwrap());
   }
 
+  async getDomainRegistrationPrice(): Promise<bigint> {
+    // TODO add implementation
+    return BigInt('1000000000');
+  }
+
   async registerDomain({
     registrant,
     domain
@@ -62,78 +67,6 @@ export class BuyerChainClient extends WsClient {
     domain: string;
   }): Promise<ChainActionResult> {
     return new Promise(async (resolve, reject) => {
-      const result: ChainActionResult = {
-        success: false,
-        blockHeight: undefined,
-        blockHash: undefined
-      };
-
-      const existingDomain = await this.registeredDomains([domain]);
-
-      if (!existingDomain) {
-        reject({
-          success: false,
-          status: 10100,
-          reason: `registeredDomains request is failed`,
-          ...(await this.getBlockMeta())
-        });
-        return;
-      }
-
-      // console.log('existingDomain >>> ');
-      // console.dir(existingDomain, { depth: null });
-
-      if (existingDomain.length > 0) {
-        // for (const dom of existingDomain) {
-        //   console.dir(dom.owner.toString(), { depth: null });
-        //   console.dir(dom.owner, { depth: null });
-        // }
-        const domainsOwnedByRegistrant = existingDomain.find(
-          (d) => d.get('owner').toString() === registrant
-        );
-
-        reject({
-          success: false,
-          ...(domainsOwnedByRegistrant
-            ? this.clientError.getError(20101)
-            : this.clientError.getError(20100)),
-          ...(await this.getBlockMeta())
-        });
-        return;
-      }
-
-      if (!domain.endsWith('sub')) {
-        reject({
-          success: false,
-          ...this.clientError.getError(20200),
-          ...(await this.getBlockMeta())
-        });
-        return;
-      }
-
-      // TODO use toNumber instead of toHuman
-      const minDomainLength =
-        this.api.consts.domains.minDomainLength.toString();
-
-      if (!minDomainLength) {
-        reject({
-          success: false,
-          status: 10100,
-          reason: 'minDomainLength request is failed',
-          ...(await this.getBlockMeta())
-        });
-        return;
-      }
-
-      if (domain.length < Number.parseInt(minDomainLength)) {
-        reject({
-          success: false,
-          ...this.clientError.getError(20300),
-          ...(await this.getBlockMeta())
-        });
-        return;
-      }
-
       try {
         const domainRegistrationTx = this.api.tx.domains.forceRegisterDomain(
           registrant,
@@ -234,7 +167,7 @@ export class BuyerChainClient extends WsClient {
     });
   }
 
-  private async getBlockMeta(): Promise<{
+  async getBlockMeta(): Promise<{
     blockHeight: number;
     blockHash: string;
   }> {

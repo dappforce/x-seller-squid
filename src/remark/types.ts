@@ -51,13 +51,14 @@ export type SubSclRemarkMessageContent<
   : never;
 
 export type SubSclRemarkMessage<
-  A extends SubSclRemarkMessageAction | string = ''
+  A extends SubSclRemarkMessageAction | string = '',
+  V extends true | false = false
 > = {
   title: SubSclRemarkMessageTitle;
   version: SubSclRemarkMessageVersion;
   action: A;
-  valid: boolean;
-  content: SubSclRemarkMessageContent<A> | null;
+  valid: V;
+  content: V extends true ? SubSclRemarkMessageContent<A> : null;
 };
 
 //TODO add type for variable

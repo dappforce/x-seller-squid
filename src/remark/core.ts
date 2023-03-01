@@ -8,7 +8,7 @@ import {
 } from './types';
 
 export class SubSclRemark {
-  private msgParsed: SubSclRemarkMessage<SubSclRemarkMessageAction> | null =
+  private msgParsed: SubSclRemarkMessage<SubSclRemarkMessageAction, boolean> | null =
     null;
 
   private titles: Set<SubSclRemarkMessageTitle> = new Set([
