@@ -2,7 +2,7 @@ type Username @entity {
   id: ID!
   name: String!
   owner: Account
-  usernameRegistrations: [DomainRegistration!] @derivedFrom(field: "username")
+  usernameRegistrations: [UsernameRegistration!] @derivedFrom(field: "username")
   createdAt: DateTime!
   createdAtBlock: Int!
 }

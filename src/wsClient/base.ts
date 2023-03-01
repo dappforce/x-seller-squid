@@ -1,6 +1,9 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { ApiClientListeners } from './types';
+import { ApiClientListeners, ChainActionResult } from './types';
 import { ChainClientError } from './chainClientError';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { ExtrinsicStatus } from '@polkadot/types/interfaces/author/types';
+import { DispatchError } from '@polkadot/types/interfaces/system/types';
 
 type ClientArgs = {
   apiUrl: string;
@@ -8,7 +11,7 @@ type ClientArgs = {
   clientListeners?: ApiClientListeners;
 };
 
-export class WsClient {
+class WsClient {
   protected client: ApiPromise | null = null;
 
   private maxRetries: number = 20;
@@ -30,6 +33,11 @@ export class WsClient {
     this.clientListeners = clientListeners
       ? { ...this.clientListeners, ...clientListeners }
       : this.clientListeners;
+  }
+
+  get api(): ApiPromise {
+    this.ensureClient();
+    return this.client!;
   }
 
   protected ensureClient(): void | never {
@@ -128,5 +136,86 @@ export class WsClient {
 
       wsProvider.connect();
     });
+  }
+}
+
+export class BaseChainClient extends WsClient {
+  constructor(props: ClientArgs) {
+    super(props);
+  }
+
+  async getBlockMeta(): Promise<{
+    blockHeight: number;
+    blockHash: string;
+  }> {
+    const height = Number.parseInt(
+      (await this.api.query.system.number()).toString()
+    );
+
+    return {
+      blockHeight: height,
+      blockHash: (await this.api.query.system.blockHash(height)).toString()
+    };
+  }
+
+  async sendRemark(
+    sender: KeyringPair,
+    msg: string
+  ): Promise<ChainActionResult> {
+    return new Promise(async (resolve, reject) => {
+      const unsub = await this.api.tx.system
+        .remark(msg)
+        .signAndSend(sender, async (resp) => {
+          const { status, txHash, txIndex, dispatchError } = resp;
+
+          if (dispatchError) {
+            reject({
+              success: false,
+              status: 10100,
+              reason: this.getTxSubDispatchErrorMessage(dispatchError),
+              blockHash: this.getTxSubDispatchErrorBlockHash(status)
+            });
+            unsub();
+            return;
+          }
+
+          if (status.isInBlock) {
+            resolve({
+              success: true,
+              blockHash: status.asInBlock.toHex(),
+              status: 201
+            });
+            unsub();
+            return;
+          } else {
+            console.log(`Status of sending: ${status.type}`);
+          }
+        });
+    });
+  }
+
+  protected getTxSubDispatchErrorMessage(error: DispatchError): string {
+    let errorMsg = '';
+    if (error.isModule) {
+      // for module errors, we have the section indexed, lookup
+      const decoded = this.api.registry.findMetaError(error.asModule);
+      const { docs, name, section } = decoded;
+      console.log(`${section}.${name}: ${docs.join(' ')}`);
+      errorMsg = `${section}.${name}: ${docs.join(' ')}`;
+    } else {
+      // Other, CannotLookup, BadOrigin, no extra info
+      console.log(error.toString());
+      errorMsg = error.toString();
+    }
+    return errorMsg;
+  }
+
+  protected getTxSubDispatchErrorBlockHash(status: ExtrinsicStatus): string {
+    if (status.asInBlock) {
+      return status.asInBlock.toHex();
+    } else if (status.asFinalized) {
+      return status.asFinalized.toHex();
+    }
+    return '';
   }
 }

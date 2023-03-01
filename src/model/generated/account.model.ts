@@ -1,5 +1,7 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
-import {Transfer} from "./transfer.model"
+import {Username} from "./username.model"
+import {UsernameRegistration} from "./usernameRegistration.model"
+import {EnergyBox} from "./energyBox.model"
 
 @Entity_()
 export class Account {
@@ -7,15 +9,15 @@ export class Account {
         Object.assign(this, props)
     }
 
-    /**
-     * Account address
-     */
     @PrimaryColumn_()
     id!: string
 
-    @OneToMany_(() => Transfer, e => e.to)
-    transfersTo!: Transfer[]
+    @OneToMany_(() => Username, e => e.owner)
+    usernames!: Username[]
 
-    @OneToMany_(() => Transfer, e => e.from)
-    transfersFrom!: Transfer[]
+    @OneToMany_(() => UsernameRegistration, e => e.registrant)
+    usernameRegPayments!: UsernameRegistration[]
+
+    @OneToMany_(() => EnergyBox, e => e.owner)
+    energyBoxes!: EnergyBox[]
 }

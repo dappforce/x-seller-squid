@@ -1,29 +1,22 @@
-import { WsClient } from './base';
+import { BaseChainClient } from './base';
 import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
 import { ChainActionResult } from './types';
-import { ApiPromise } from '@polkadot/api';
 import { IpfsContent } from '@subsocial/api/substrate/wrappers';
 const { config } = getChain();
 import { BN } from 'bn.js';
-import { encodeAccount } from '../utils';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
 const BLOCKS_IN_YEAR = new BN((SECS_IN_DAY * 365) / BLOCK_TIME);
 
-export class BuyerChainClient extends WsClient {
+export class BuyerChainClient extends BaseChainClient {
   private static instance: BuyerChainClient;
 
   constructor() {
     super({
       apiUrl: config.buyerChain.dataSource.chain
     });
-  }
-
-  get api(): ApiPromise {
-    this.ensureClient();
-    return this.client!;
   }
 
   static getInstance(): BuyerChainClient {
@@ -45,7 +38,7 @@ export class BuyerChainClient extends WsClient {
     );
   }
 
-  async registeredDomains(domainNames: string[]) {
+  async getRegisteredDomains(domainNames: string[]) {
     const structs = await this.api.query.domains.registeredDomains.multi(
       domainNames
     );
@@ -102,33 +95,11 @@ export class BuyerChainClient extends WsClient {
               console.dir(txIndex, { depth: null });
 
               if (dispatchError) {
-                let errorMsg = '';
-                if (dispatchError.isModule) {
-                  // for module errors, we have the section indexed, lookup
-                  const decoded = this.api.registry.findMetaError(
-                    dispatchError.asModule
-                  );
-                  const { docs, name, section } = decoded;
-                  console.log(`${section}.${name}: ${docs.join(' ')}`);
-                  errorMsg = `${section}.${name}: ${docs.join(' ')}`;
-                } else {
-                  // Other, CannotLookup, BadOrigin, no extra info
-                  console.log(dispatchError.toString());
-                  errorMsg = dispatchError.toString();
-                }
-
-                let blockHash = '';
-                if (status.asInBlock) {
-                  blockHash = status.asInBlock.toHex();
-                } else if (status.asFinalized) {
-                  blockHash = status.asFinalized.toHex();
-                }
-
                 reject({
                   success: false,
                   status: 10100,
-                  reason: errorMsg,
-                  blockHash
+                  reason: this.getTxSubDispatchErrorMessage(dispatchError),
+                  blockHash: this.getTxSubDispatchErrorBlockHash(status)
                 });
                 unsub();
                 return;
@@ -142,7 +113,11 @@ export class BuyerChainClient extends WsClient {
                   'status.asInBlock.toHex() - ',
                   status.asInBlock.toHex()
                 );
-                resolve({ success: true, blockHash: status.asInBlock.toHex(), status: 201});
+                resolve({
+                  success: true,
+                  blockHash: status.asInBlock.toHex(),
+                  status: 201
+                });
                 unsub();
                 return;
               } else {
@@ -166,19 +141,5 @@ export class BuyerChainClient extends WsClient {
         return;
       }
     });
-  }
-
-  async getBlockMeta(): Promise<{
-    blockHeight: number;
-    blockHash: string;
-  }> {
-    const height = Number.parseInt(
-      (await this.api.query.system.number()).toString()
-    );
-
-    return {
-      blockHeight: height,
-      blockHash: (await this.api.query.system.blockHash(height)).toString()
-    };
   }
 }

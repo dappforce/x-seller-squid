@@ -1,8 +1,9 @@
 import { CallParsed } from '../../parser/types';
-import { BuyerChainClient } from '../../wsClient';
+import { BuyerChainClient, SellerChainClient } from '../../wsClient';
 import { Ctx } from '../../processor';
-import { SubSclRemark, SubSclRemarkMessage } from '../../remark';
+import { SubSclRemark } from '../../remark';
 import { SubSclSource } from '../../remark/types';
+import { WalletClient } from '../../walletClient';
 
 export async function handleDomainRegisterPayment(
   callData: CallParsed<'D_REG_PAY', true>,
@@ -14,8 +15,6 @@ export async function handleDomainRegisterPayment(
       content: { domainName, registrant }
     }
   } = callData;
-
-  let result = null;
   const buyerChainClient = BuyerChainClient.getInstance();
 
   // TODO check purchase transfer amount
@@ -30,7 +29,9 @@ export async function handleDomainRegisterPayment(
     return;
   }
 
-  const existingDomain = await buyerChainClient.registeredDomains([domainName]);
+  const existingDomain = await buyerChainClient.getRegisteredDomains([
+    domainName
+  ]);
 
   if (!existingDomain) {
     ctx.log.error({
@@ -99,7 +100,7 @@ export async function handleDomainRegisterPayment(
     const { domainName, registrant, currency, attemptId } =
       callData.remark.content;
 
-    result = await BuyerChainClient.getInstance().registerDomain({
+    const result = await BuyerChainClient.getInstance().registerDomain({
       registrant: registrant,
       domain: domainName
     });
@@ -118,9 +119,14 @@ export async function handleDomainRegisterPayment(
           attemptId: attemptId
         }
       };
-      const registrationCompletedRmrkMessage = new SubSclRemark()
-        .fromSource(compRmrkMsg)
-        .toMessage();
+
+      const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
+        WalletClient.getInstance().account.sellerTreasury,
+        new SubSclRemark().fromSource(compRmrkMsg).toMessage()
+      );
+
+      console.log('compRemarkResult >>> ');
+      console.dir(compRemarkResult, { depth: null });
     }
   } catch (rejected) {
     console.log('handleDomainRegisterPayment result >>>');

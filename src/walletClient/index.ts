@@ -7,7 +7,7 @@ const { config } = getChain();
 export class WalletClient {
   private static instance: WalletClient;
 
-  public accs: WalletClientAccounts = {
+  private accs: WalletClientAccounts = {
     sellerTreasury: null,
     domainRegistrar: null,
     energyGenerator: null
@@ -20,7 +20,7 @@ export class WalletClient {
     return WalletClient.instance;
   }
 
-  public clientValid() {
+  public clientValid(): boolean {
     return !!(
       this.accs.sellerTreasury &&
       this.accs.domainRegistrar &&

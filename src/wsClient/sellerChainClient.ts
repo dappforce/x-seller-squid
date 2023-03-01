@@ -1,10 +1,10 @@
-import { WsClient } from './base';
+import { BaseChainClient } from './base';
 import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
 
 const { config } = getChain();
 
-export class SellerChainClient extends WsClient {
+export class SellerChainClient extends BaseChainClient {
   private static instance: SellerChainClient;
 
   constructor() {
@@ -23,12 +23,5 @@ export class SellerChainClient extends WsClient {
   async init() {
     if (this.client) return;
     await this.initConnection();
-  }
-
-  async getEventsCall() {
-    if (!this.client) throw new Error();
-    return this.client.query.system.account(
-      WalletClient.getInstance().account.sellerTreasury.address
-    );
   }
 }
