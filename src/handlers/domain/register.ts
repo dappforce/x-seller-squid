@@ -1,6 +1,8 @@
 import { CallParsed } from '../../parser/types';
 import { BuyerChainClient } from '../../wsClient';
 import { Ctx } from '../../processor';
+import { SubSclRemark, SubSclRemarkMessage } from '../../remark';
+import { SubSclSource } from '../../remark/types';
 
 export async function handleDomainRegisterPayment(
   callData: CallParsed<'D_REG_PAY', true>,
@@ -94,12 +96,32 @@ export async function handleDomainRegisterPayment(
   }
 
   try {
+    const { domainName, registrant, currency, attemptId } =
+      callData.remark.content;
+
     result = await BuyerChainClient.getInstance().registerDomain({
-      registrant: callData.remark.content.registrant,
-      domain: callData.remark.content.domainName
+      registrant: registrant,
+      domain: domainName
     });
     console.log('handleDomainRegisterPayment result >>>');
     console.dir(result, { depth: null });
+
+    if (result.success && result.status === 201) {
+      const compRmrkMsg: SubSclSource<'D_REG_COMP'> = {
+        title: 't_subscl',
+        action: 'D_REG_COMP',
+        version: '0.1',
+        content: {
+          domainName: domainName,
+          registrant: registrant,
+          currency: currency,
+          attemptId: attemptId
+        }
+      };
+      const registrationCompletedRmrkMessage = new SubSclRemark()
+        .fromSource(compRmrkMsg)
+        .toMessage();
+    }
   } catch (rejected) {
     console.log('handleDomainRegisterPayment result >>>');
     console.dir(rejected, { depth: null });

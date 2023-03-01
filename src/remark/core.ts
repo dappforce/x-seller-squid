@@ -4,18 +4,25 @@ import {
   SubSclRemarkMessage,
   SubSclRemarkMessageAction,
   SubSclRemarkMessageTitle,
-  SubSclRemarkMessageVersion
+  SubSclRemarkMessageVersion,
+  SubSclSource
 } from './types';
 
 export class SubSclRemark {
-  private msgParsed: SubSclRemarkMessage<SubSclRemarkMessageAction, boolean> | null =
-    null;
+  private maybeRemarkMsg: unknown;
+
+  private msgParsed: SubSclRemarkMessage<
+    SubSclRemarkMessageAction,
+    boolean
+  > | null = null;
 
   private titles: Set<SubSclRemarkMessageTitle> = new Set([
     't_subscl',
     'subscl'
   ]);
+
   private versions: Set<SubSclRemarkMessageVersion> = new Set(['0.1']);
+
   private actions: Set<SubSclRemarkMessageAction> = new Set([
     'D_REG_PAY',
     'D_REG_COMP',
@@ -28,22 +35,26 @@ export class SubSclRemark {
 
   private msgDelimiter: string = '::';
 
-  constructor(private maybeRemarkMsg: unknown) {
-    this.parseMsg(maybeRemarkMsg);
+  public get message(): SubSclRemarkMessage<
+    SubSclRemarkMessageAction,
+    boolean
+  > {
+    if (!this.msgParsed) throw new Error('Message is not available.');
+    return this.msgParsed!;
   }
 
-  get message() {
-    return this.msgParsed;
-  }
-
-  get content() {
+  public get content() {
     return this.msgParsed && this.msgParsed.valid
       ? this.msgParsed.content
       : null;
   }
 
-  get version() {
+  public get version() {
     return this.msgParsed ? this.msgParsed.version : null;
+  }
+
+  public get isValidMessage(): boolean {
+    return !!this.msgParsed && this.msgParsed.valid;
   }
 
   static bytesToString(src: unknown): string {
@@ -51,9 +62,69 @@ export class SubSclRemark {
     return Buffer.from(src).toString('utf-8');
   }
 
-  get isValidMessage(): boolean {
-    return !!this.msgParsed && this.msgParsed.valid;
+  public fromMessage(maybeRemarkMsg: unknown): SubSclRemark {
+    this.maybeRemarkMsg = maybeRemarkMsg;
+    this.parseMsg(maybeRemarkMsg);
+    return this;
   }
+
+  public fromSource(
+    rmrkSrc: SubSclSource<SubSclRemarkMessageAction>
+  ): SubSclRemark {
+    let isSrcValid = true;
+
+    if (
+      !rmrkSrc ||
+      !this.isValidTitle(rmrkSrc.title) ||
+      !this.isValidVersion(rmrkSrc.version) ||
+      !this.isValidAction(rmrkSrc.action)
+    )
+      isSrcValid = false;
+
+    // TODO add content validation
+
+    if (!isSrcValid) throw new Error('Remark source is invalid');
+    this.msgParsed = {
+      ...rmrkSrc,
+      valid: true
+    };
+    return this;
+  }
+
+  public toMessage(): string {
+    if (!this.isValidMessage)
+      throw new Error('Remark is not valid for build message.');
+
+    const msg: string[] = [];
+    msg.push(this.message.title);
+    msg.push(this.message.action);
+    msg.push(this.message.version);
+
+    try {
+      const contentPropsMap =
+        REMARK_CONTENT_VERSION_ACTION_MAP[this.message.version][
+          this.message.action
+        ];
+      for (const contentPropName in contentPropsMap) {
+        // @ts-ignore
+        msg[contentPropsMap[contentPropName]] =
+          // @ts-ignore
+          this.message.content[contentPropName];
+      }
+    } catch (e) {
+      console.log(e);
+      throw new Error(
+        'Error has been occurred during remark message creation.'
+      );
+    }
+
+    //TODO add validations
+    return msg.join(this.msgDelimiter);
+  }
+
+  /**
+   * ====== Private functionality ======
+   */
 
   private parseMsg(srcMsg: unknown): void {
     if (!srcMsg || typeof srcMsg !== 'string') return;
@@ -65,9 +136,9 @@ export class SubSclRemark {
     if (
       !chunkedMsg ||
       chunkedMsg.length === 0 ||
-      !this.isValidTitle(chunkedMsg) ||
-      !this.isValidVersion(chunkedMsg) ||
-      !this.isValidAction(chunkedMsg)
+      !this.isValidTitle(chunkedMsg[0]) ||
+      !this.isValidVersion(chunkedMsg[2]) ||
+      !this.isValidAction(chunkedMsg[1])
     )
       return;
 
@@ -99,18 +170,16 @@ export class SubSclRemark {
     }
   }
 
-  private isValidTitle(src: string[]): boolean {
+  private isValidTitle(src: string): boolean {
     // TODO remove type casting
-    return !!(src[0] && this.titles.has(src[0] as SubSclRemarkMessageTitle));
+    return !!(src && this.titles.has(src as SubSclRemarkMessageTitle));
   }
-  private isValidVersion(src: string[]): boolean {
+  private isValidVersion(src: string): boolean {
     // TODO remove type casting
-    return !!(
-      src[0] && this.versions.has(src[2] as SubSclRemarkMessageVersion)
-    );
+    return !!(src && this.versions.has(src as SubSclRemarkMessageVersion));
   }
-  private isValidAction(src: string[]): boolean {
+  private isValidAction(src: string): boolean {
     // TODO remove type casting
-    return !!(src[0] && this.actions.has(src[1] as SubSclRemarkMessageAction));
+    return !!(src && this.actions.has(src as SubSclRemarkMessageAction));
   }
 }

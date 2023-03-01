@@ -57,9 +57,12 @@ export type SubSclRemarkMessage<
   title: SubSclRemarkMessageTitle;
   version: SubSclRemarkMessageVersion;
   action: A;
-  valid: V;
+  valid: V; // TODO make this prop optional
   content: V extends true ? SubSclRemarkMessageContent<A> : null;
 };
+
+export type SubSclSource<A extends SubSclRemarkMessageAction | string = ''> =
+  Omit<SubSclRemarkMessage<A, true>, 'valid'>;
 
 //TODO add type for variable
 export const REMARK_CONTENT_VERSION_ACTION_MAP = {

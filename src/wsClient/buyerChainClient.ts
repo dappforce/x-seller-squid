@@ -86,7 +86,8 @@ export class BuyerChainClient extends WsClient {
 
         const sudoKey = await this.api.query.sudo.key();
 
-        // TODO add handling tx errors which is terminating app (e.g. RpcError: 1010: Invalid Transaction: Inability to pay some fees , e.g. account balance too low)
+        // TODO add handling tx errors which is terminating an app (e.g. RpcError: 1010: Invalid Transaction: Inability to pay some fees , e.g. account balance too low)
+
         const unsub = await this.api.tx.proxy
           .proxy(sudoKey.toString(), null, sudoWrappedTx)
           .signAndSend(
@@ -141,7 +142,7 @@ export class BuyerChainClient extends WsClient {
                   'status.asInBlock.toHex() - ',
                   status.asInBlock.toHex()
                 );
-                resolve({ success: true, blockHash: status.asInBlock.toHex() });
+                resolve({ success: true, blockHash: status.asInBlock.toHex(), status: 201});
                 unsub();
                 return;
               } else {

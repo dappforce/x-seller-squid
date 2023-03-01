@@ -21,7 +21,7 @@ export function parseCalls(ctx: Ctx): CallParsed[] {
 
         if (call.isV9190) {
           let data = call.asV9190;
-          remark = new SubSclRemark(SubSclRemark.bytesToString(data.remark));
+          remark = new SubSclRemark().fromMessage(SubSclRemark.bytesToString(data.remark));
         }
 
         if (!remark || !remark.isValidMessage) {
