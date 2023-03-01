@@ -1,0 +1,7 @@
+{
+  "outDir": "src/types/generated",
+  "specVersions": "https://rococo.archive.subsquid.io/graphql",
+  "events": ["Balances.Transfer"],
+  "calls": true,
+  "storage": []
+}

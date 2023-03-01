@@ -1,0 +1,1 @@
+export { handleDomainRegisterPayment } from './register';

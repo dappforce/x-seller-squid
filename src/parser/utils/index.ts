@@ -1,0 +1,1 @@
+export { parseDomainRegisterPayCall } from './domainRegisterPayCall';
