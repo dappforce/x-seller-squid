@@ -144,6 +144,12 @@ export class BaseChainClient extends WsClient {
     super(props);
   }
 
+  async init() {
+    if (this.client) return this;
+    await this.initConnection();
+    return this;
+  }
+
   async getBlockMeta(): Promise<{
     blockHeight: number;
     blockHash: string;
@@ -194,7 +200,7 @@ export class BaseChainClient extends WsClient {
     });
   }
 
-  protected getTxSubDispatchErrorMessage(error: DispatchError): string {
+  public getTxSubDispatchErrorMessage(error: DispatchError): string {
     let errorMsg = '';
     if (error.isModule) {
       // for module errors, we have the section indexed, lookup
@@ -210,7 +216,7 @@ export class BaseChainClient extends WsClient {
     return errorMsg;
   }
 
-  protected getTxSubDispatchErrorBlockHash(status: ExtrinsicStatus): string {
+  public getTxSubDispatchErrorBlockHash(status: ExtrinsicStatus): string {
     if (status.asInBlock) {
       return status.asInBlock.toHex();
     } else if (status.asFinalized) {

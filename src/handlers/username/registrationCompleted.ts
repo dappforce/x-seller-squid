@@ -42,12 +42,5 @@ export async function handleUsernameRegistrationCompleted(
   uName.owner = existingRegistrationEntity.registrant;
 
   await ctx.store.save(uName);
-
-  console.log('--------');
-  console.log('--------');
-  console.log('--------');
-  console.log('existingRegistrationEntity >>> ');
-  console.dir(existingRegistrationEntity, { depth: null });
-
   await ctx.store.save(existingRegistrationEntity);
 }

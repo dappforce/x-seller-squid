@@ -11,6 +11,7 @@ import { SellerChainClient, BuyerChainClient } from './wsClient';
 import { WalletClient } from './walletClient';
 import { handleSellerActions } from './handlers';
 import { parseCalls } from './parser';
+import { SubSclRemark } from './remark';
 
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
@@ -37,6 +38,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await WalletClient.getInstance().init();
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
+  SubSclRemark.setConfig({ titles: ['t2_subscl'] });
 
   let callsData = parseCalls(ctx);
 
@@ -44,43 +46,4 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   console.dir(callsData, { depth: null });
 
   await handleSellerActions(callsData, ctx);
-
-  // let accountIds = new Set<string>();
-  // for (let t of transfersData) {
-  //   accountIds.add(t.from);
-  //   accountIds.add(t.to);
-  // }
-  //
-  // let accounts = await ctx.store
-  //   .findBy(Account, { id: In([...accountIds]) })
-  //   .then((accounts) => {
-  //     return new Map(accounts.map((a) => [a.id, a]));
-  //   });
-  //
-  // let transfers: Transfer[] = [];
-  //
-  // for (let t of transfersData) {
-  //   let { id, blockNumber, timestamp, extrinsicHash, amount, fee } = t;
-  //
-  //   let from = getAccount(accounts, t.from);
-  //   let to = getAccount(accounts, t.to);
-  //
-  //   transfers.push(
-  //     new Transfer({
-  //       id,
-  //       blockNumber,
-  //       timestamp,
-  //       extrinsicHash,
-  //       from,
-  //       to,
-  //       amount,
-  //       fee
-  //     })
-  //   );
-  // }
-  //
-  // await ctx.store.save(Array.from(accounts.values()));
-  // await ctx.store.insert(transfers);
-
-  // throw Error();
 });

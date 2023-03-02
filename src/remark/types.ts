@@ -27,11 +27,13 @@ export type SubSclRemarkMessageAction =
   | 'D_REG_PAY'
   | 'D_REG_COMP'
   | 'D_REG_REFUND'
+
   | 'EN_GEN_PAY'
   | 'EN_GEN_COMP'
   | 'EN_GEN_REFUND'
+
   | 'M_G';
-export type SubSclRemarkMessageTitle = 't_subscl' | 'subscl';
+export type SubSclRemarkMessageTitle = 't_subscl' | 't2_subscl' | 'subscl';
 export type SubSclRemarkMessageContent<
   A extends SubSclRemarkMessageAction | string
 > = A extends 'D_REG_PAY'

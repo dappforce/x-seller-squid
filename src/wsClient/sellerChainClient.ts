@@ -19,9 +19,4 @@ export class SellerChainClient extends BaseChainClient {
     }
     return SellerChainClient.instance;
   }
-
-  async init() {
-    if (this.client) return;
-    await this.initConnection();
-  }
 }

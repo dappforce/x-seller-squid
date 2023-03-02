@@ -77,7 +77,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-
+    // TODO run refund if head of archive
     return;
   }
   if (existingDomain.length > 0) {
@@ -113,11 +113,6 @@ export async function handleUsernameRegisterPayment(
        */
       // TODO if it's head of archive we need initiate refund action right here.
     }
-    console.log('--------');
-    console.log('--------');
-    console.log('--------');
-    console.log('usernameRegistrationEntity >>>> ');
-    console.dir(usernameRegistrationEntity, { depth: null });
     await ctx.store.save(usernameRegistrationEntity);
     return;
   }
@@ -126,6 +121,7 @@ export async function handleUsernameRegisterPayment(
    * Check username ending
    */
 
+  // TODO get supported tlds from blockchain "domains.supportedTlds"
   if (!domainName.endsWith('sub')) {
     const eData = {
       success: false,
@@ -134,6 +130,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
+    // TODO run refund if head of archive
     return;
   }
 
@@ -154,9 +151,11 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
+    // TODO run refund if head of archive
     return;
   }
 
+  // TODO review is required
   if (domainName.length < Number.parseInt(minDomainLength)) {
     const eData = {
       success: false,
@@ -165,6 +164,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
+    // TODO run refund if head of archive
     return;
   }
 
@@ -186,16 +186,10 @@ export async function handleUsernameRegisterPayment(
     if (result.success && result.status === 201) {
       usernameRegistrationEntity.status = RegistrationStatus.Processing;
 
-      console.log('--------');
-      console.log('--------');
-      console.log('--------');
-      console.log('usernameRegistrationEntity >>>> ');
-      console.dir(usernameRegistrationEntity, { depth: null });
-
       await ctx.store.save(usernameRegistrationEntity);
 
       const compRmrkMsg: SubSclSource<'D_REG_COMP'> = {
-        title: 't_subscl',
+        title: 't2_subscl',
         action: 'D_REG_COMP',
         version: '0.1',
         content: {
@@ -221,6 +215,7 @@ export async function handleUsernameRegisterPayment(
       };
       ctx.log.error(eData);
       await saveUnameRegEntityOnFail(eData);
+      // TODO run refund process
     }
   } catch (rejected) {
     console.log('handleUsernameRegisterPayment result >>>');

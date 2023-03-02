@@ -41,19 +41,19 @@ export class WalletClient {
 
   public async init(): Promise<WalletClient> {
     if (this.clientValid()) return this;
-    this.accs.sellerTreasury = await this.createKeyringPair(
+    this.accs.sellerTreasury = await this.createKeyringPairFromMnem(
       config.sellerChain.accounts.sellerTreasury.mnemonic
     );
-    this.accs.domainRegistrar = await this.createKeyringPair(
+    this.accs.domainRegistrar = await this.createKeyringPairFromMnem(
       config.buyerChain.accounts.domainRegistrar.mnemonic
     );
-    this.accs.energyGenerator = await this.createKeyringPair(
+    this.accs.energyGenerator = await this.createKeyringPairFromMnem(
       config.buyerChain.accounts.energyGenerator.mnemonic
     );
     return this;
   }
 
-  private async createKeyringPair(mnem: string) {
+  public async createKeyringPairFromMnem(mnem: string) {
     if (!(await cryptoWaitReady())) {
       throw 'cryptoWaitReady() resolved to false';
     }

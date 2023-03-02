@@ -26,18 +26,6 @@ export class BuyerChainClient extends BaseChainClient {
     return BuyerChainClient.instance;
   }
 
-  async init() {
-    if (this.client) return;
-    await this.initConnection();
-  }
-
-  async getEventsCall() {
-    if (!this.client) throw new Error();
-    return this.client.query.system.account(
-      WalletClient.getInstance().account.sellerTreasury.address
-    );
-  }
-
   async getRegisteredDomains(domainNames: string[]) {
     const structs = await this.api.query.domains.registeredDomains.multi(
       domainNames

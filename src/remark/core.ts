@@ -18,7 +18,7 @@ class SubSclRemarkConfig {
   private static instance: SubSclRemarkConfig;
 
   private conf: Required<SubSclRemarkConfigData> = {
-    titles: ['t_subscl', 'subscl'],
+    titles: ['t_subscl', 't2_subscl', 'subscl'],
     actions: [
       'D_REG_PAY',
       'D_REG_COMP',
