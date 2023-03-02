@@ -1,9 +1,13 @@
 import { CallParsed } from '../parser/types';
 import { SubSclRemarkMessageAction } from '../remark/types';
-import { handleDomainRegisterPayment } from './domain';
+import { handleUsernameRegisterPayment } from './username';
 import { Ctx } from '../processor';
+import { handleUsernameRegistrationCompleted } from './username/registrationCompleted';
 
-export async function handleSellerActions(parsedActions: CallParsed[], ctx: Ctx) {
+export async function handleSellerActions(
+  parsedActions: CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[],
+  ctx: Ctx
+) {
   for (const actionsData of parsedActions) {
     if (!actionsData.remark.valid) continue; // TODO add handling for such case
 
@@ -11,10 +15,13 @@ export async function handleSellerActions(parsedActions: CallParsed[], ctx: Ctx)
       case 'D_REG_PAY': {
         // TODO fix types
         // @ts-ignore
-        await handleDomainRegisterPayment(actionsData, ctx);
+        await handleUsernameRegisterPayment(actionsData, ctx);
         break;
       }
       case 'D_REG_COMP': {
+        // TODO fix types
+        // @ts-ignore
+        await handleUsernameRegistrationCompleted(actionsData, ctx);
         break;
       }
       case 'D_REG_REFUND': {

@@ -8,30 +8,71 @@ import {
   SubSclSource
 } from './types';
 
+type SubSclRemarkConfigData = {
+  titles?: SubSclRemarkMessageTitle[];
+  actions?: SubSclRemarkMessageAction[];
+  versions?: SubSclRemarkMessageVersion[];
+};
+
+class SubSclRemarkConfig {
+  private static instance: SubSclRemarkConfig;
+
+  private conf: Required<SubSclRemarkConfigData> = {
+    titles: ['t_subscl', 'subscl'],
+    actions: [
+      'D_REG_PAY',
+      'D_REG_COMP',
+      'D_REG_REFUND',
+      'EN_GEN_PAY',
+      'EN_GEN_COMP',
+      'EN_GEN_REFUND',
+      'M_G'
+    ],
+    versions: ['0.1']
+  };
+
+  static getInstance(): SubSclRemarkConfig {
+    if (!SubSclRemarkConfig.instance) {
+      SubSclRemarkConfig.instance = new SubSclRemarkConfig();
+    }
+    return SubSclRemarkConfig.instance;
+  }
+
+  public get config() {
+    return this.conf;
+  }
+
+  public setConfig(data: SubSclRemarkConfigData) {
+    this.conf = {
+      ...this.conf,
+      ...data
+    };
+  }
+}
+
 export class SubSclRemark {
   private maybeRemarkMsg: unknown;
+
+  static setConfig(data: SubSclRemarkConfigData) {
+    SubSclRemarkConfig.getInstance().setConfig(data);
+  }
 
   private msgParsed: SubSclRemarkMessage<
     SubSclRemarkMessageAction,
     boolean
   > | null = null;
 
-  private titles: Set<SubSclRemarkMessageTitle> = new Set([
-    't_subscl',
-    'subscl'
-  ]);
+  private titles: Set<SubSclRemarkMessageTitle> = new Set(
+    SubSclRemarkConfig.getInstance().config.titles
+  );
 
-  private versions: Set<SubSclRemarkMessageVersion> = new Set(['0.1']);
+  private versions: Set<SubSclRemarkMessageVersion> = new Set(
+    SubSclRemarkConfig.getInstance().config.versions
+  );
 
-  private actions: Set<SubSclRemarkMessageAction> = new Set([
-    'D_REG_PAY',
-    'D_REG_COMP',
-    'D_REG_REFUND',
-    'EN_GEN_PAY',
-    'EN_GEN_COMP',
-    'EN_GEN_REFUND',
-    'M_G'
-  ]);
+  private actions: Set<SubSclRemarkMessageAction> = new Set(
+    SubSclRemarkConfig.getInstance().config.actions
+  );
 
   private msgDelimiter: string = '::';
 

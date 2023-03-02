@@ -8,15 +8,16 @@ import {
 } from '../types';
 import { encodeAccount } from '../../utils';
 import { UtilityBatchAllCall } from '../../types/generated/calls';
+import { getChain } from '../../chains';
+
+const { config } = getChain();
 
 export function parseDomainRegisterPayCall(
   remark: SubSclRemark,
   callItem: RemarkCallItem,
   blockHeader: Block['header'],
   ctx: Ctx
-): CallParsed | null {
-  // @ts-ignore
-  // console.dir(item, { depth: null });
+): CallParsed<'D_REG_PAY'> | null {
   // @ts-ignore
   if (callItem.call.parent.name !== 'Utility.batch_all') return;
   let signerEncoded: string | null = null;
@@ -29,11 +30,12 @@ export function parseDomainRegisterPayCall(
   ) {
     signerEncoded = encodeAccount(
       callItem.extrinsic.signature.address.value,
-      'polkadot'
+      config.sellerChain.prefix
     );
   }
 
   const ubc = new UtilityBatchAllCall(ctx, callItem.call.parent!);
+  const batchAllCallId = callItem.call.parent!.id;
 
   const geTransferCallData = <
     C extends { __kind: string; value: { __kind: string } }
@@ -49,8 +51,11 @@ export function parseDomainRegisterPayCall(
     if (!bTransferCall || bTransferCall.value.dest.__kind !== 'Id') return null;
 
     return {
-      // @ts-ignore
-      to: encodeAccount(bTransferCall.value.dest.value, 'polkadot'),
+      to: encodeAccount(
+        // @ts-ignore
+        bTransferCall.value.dest.value,
+        config.sellerChain.prefix
+      ),
       // @ts-ignore
       amount: bTransferCall.value.value
     };
@@ -119,7 +124,8 @@ export function parseDomainRegisterPayCall(
     return null;
 
   return {
-    id: callItem.call.id,
+    remarkCallId: callItem.call.id,
+    batchAllCallId: batchAllCallId,
     blockNumber: blockHeader.height,
     blockHash: blockHeader.hash,
     timestamp: new Date(blockHeader.timestamp),

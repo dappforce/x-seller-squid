@@ -5,10 +5,11 @@ import {Username} from "./username.model"
 import {Transfer} from "./transfer.model"
 import {RegistrationStatus} from "./_registrationStatus"
 import {RefundStatus} from "./_refundStatus"
+import {UsernameRegistrationOrderError} from "./_usernameRegistrationOrderError"
 
 @Entity_()
-export class UsernameRegistration {
-    constructor(props?: Partial<UsernameRegistration>) {
+export class UsernameRegistrationOrder {
+    constructor(props?: Partial<UsernameRegistrationOrder>) {
         Object.assign(this, props)
     }
 
@@ -23,6 +24,12 @@ export class UsernameRegistration {
 
     @Column_("text", {nullable: true})
     blockHashUnameHostChain!: string | undefined | null
+
+    @Column_("text", {nullable: true})
+    confirmedBlockHashSellerChain!: string | undefined | null
+
+    @Column_("text", {nullable: true})
+    confirmedRemarkCallId!: string | undefined | null
 
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
@@ -63,4 +70,7 @@ export class UsernameRegistration {
 
     @Column_("jsonb", {nullable: true})
     refundRmrk!: unknown | undefined | null
+
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new UsernameRegistrationOrderError(undefined, obj)}, nullable: true})
+    error!: UsernameRegistrationOrderError | undefined | null
 }

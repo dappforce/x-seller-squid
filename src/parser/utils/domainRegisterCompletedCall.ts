@@ -7,9 +7,9 @@ export function parseDomainRegisterCompletedCall(
   callItem: RemarkCallItem,
   blockHeader: Block['header'],
   ctx: Ctx
-): CallParsed | null {
+): CallParsed<'D_REG_COMP'> | null {
   return {
-    id: callItem.call.id,
+    remarkCallId: callItem.call.id,
     blockNumber: blockHeader.height,
     blockHash: blockHeader.hash,
     timestamp: new Date(blockHeader.timestamp),

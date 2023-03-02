@@ -7,8 +7,8 @@ import {
   parseDomainRegisterCompletedCall
 } from './utils';
 
-export function parseCalls(ctx: Ctx): CallParsed[] {
-  let callsParsed: CallParsed[] = [];
+export function parseCalls(ctx: Ctx): CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[] {
+  let callsParsed: CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[] = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
@@ -21,7 +21,9 @@ export function parseCalls(ctx: Ctx): CallParsed[] {
 
         if (call.isV9190) {
           let data = call.asV9190;
-          remark = new SubSclRemark().fromMessage(SubSclRemark.bytesToString(data.remark));
+          remark = new SubSclRemark().fromMessage(
+            SubSclRemark.bytesToString(data.remark)
+          );
         }
 
         if (!remark || !remark.isValidMessage) {

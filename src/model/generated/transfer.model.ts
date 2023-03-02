@@ -14,6 +14,9 @@ export class Transfer {
     @Column_("int4", {nullable: false})
     blockHeight!: number
 
+    @Column_("text", {nullable: false})
+    blockHash!: string
+
     @Column_("timestamp with time zone", {nullable: false})
     timestamp!: Date
 
@@ -33,4 +36,7 @@ export class Transfer {
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
     to!: Account
+
+    @Column_("text", {nullable: false})
+    addressChainPrefix!: string
 }

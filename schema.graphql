@@ -1,25 +1,28 @@
 type Username @entity {
   id: ID!
-  name: String!
   owner: Account
-  usernameRegistrations: [UsernameRegistration!] @derivedFrom(field: "username")
-  createdAt: DateTime!
-  createdAtBlock: Int!
+  unameRegistrationOrders: [UsernameRegistrationOrder!]
+    @derivedFrom(field: "username")
+  createdAt: DateTime
+  createdAtBlock: Int
 }
 
 type Account @entity {
   id: ID!
   usernames: [Username!] @derivedFrom(field: "owner")
-  usernameRegPayments: [UsernameRegistration!] @derivedFrom(field: "registrant")
+  unameRegistrationOrders: [UsernameRegistrationOrder!]
+    @derivedFrom(field: "registrant")
 
   energyBoxes: [EnergyBox!] @derivedFrom(field: "owner")
 }
 
-type UsernameRegistration @entity {
+type UsernameRegistrationOrder @entity {
   "Attempt ID from remark and it's the same value for all purchase, confirmation and refund(if it's existing) remarks"
   id: ID!
   blockHashSellerChain: String
   blockHashUnameHostChain: String
+  confirmedBlockHashSellerChain: String
+  confirmedRemarkCallId: String
   registrant: Account!
   username: Username!
   price: BigInt!
@@ -32,6 +35,7 @@ type UsernameRegistration @entity {
   purchaseRmrk: JSON
   confirmationRmrk: JSON
   refundRmrk: JSON
+  error: UsernameRegistrationOrderError
 }
 
 type EnergyBox @entity {
@@ -56,12 +60,14 @@ type EnergyBox @entity {
 type Transfer @entity {
   id: ID!
   blockHeight: Int!
+  blockHash: String!
   timestamp: DateTime!
   amount: BigInt!
   "TODO should be reviewed"
   currency: String
   from: Account!
   to: Account!
+  addressChainPrefix: String!
 }
 
 enum RegistrationStatus {
@@ -70,7 +76,13 @@ enum RegistrationStatus {
   Failed
 }
 enum RefundStatus {
+  None
   Waiting
   Fulfilled
   Failed
+}
+
+type UsernameRegistrationOrderError {
+  status: Int
+  reason: String
 }

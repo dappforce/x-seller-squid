@@ -1,10 +1,15 @@
-import { SubSclRemarkMessage, SubSclRemarkMessageAction } from '../remark/types';
+import {
+  SubSclRemarkMessage,
+  SubSclRemarkMessageAction
+} from '../remark/types';
 import { CallItem } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 
 export interface CallParsed<
-  A extends SubSclRemarkMessageAction | string = '', V extends boolean = false
+  A extends SubSclRemarkMessageAction | string = '',
+  V extends boolean = true
 > {
-  id: string;
+  remarkCallId: string;
+  batchAllCallId?: string;
   blockNumber: number;
   blockHash: string;
   timestamp: Date;
@@ -14,6 +19,20 @@ export interface CallParsed<
   amount: bigint;
   remark: SubSclRemarkMessage<A, V>;
 }
+
+export type TransferData<C extends CallParsed> = Required<
+  Pick<
+    C,
+    | 'batchAllCallId'
+    | 'blockNumber'
+    | 'blockHash'
+    | 'timestamp'
+    | 'extrinsicHash'
+    | 'from'
+    | 'to'
+    | 'amount'
+  >
+>;
 
 export const requiredPurchaseBatchCalls = new Set([
   'Balances.transfer',
@@ -30,7 +49,7 @@ export type RemarkCallItem = CallItem<
     };
     extrinsic: true;
   }
->
+>;
 
 export type AllCallItem = CallItem<
   '*',
@@ -42,4 +61,4 @@ export type AllCallItem = CallItem<
     };
     extrinsic: true;
   }
->
+>;
