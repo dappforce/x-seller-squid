@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@polkadot/api": "^9.14.2",
+    "@polkadot/util": "^10.4.2",
+    "@polkadot/util-crypto": "^10.4.2",
     "@subsocial/api": "^0.8.1",
     "@subsquid/archive-registry": "2.1.6",
     "@subsquid/graphql-server": "3.3.2",

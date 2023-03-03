@@ -30,7 +30,7 @@ export function parseCalls(ctx: Ctx): CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[] {
           continue;
         }
 
-        switch (remark.message!.action) {
+        switch (remark.message.action) {
           case 'D_REG_PAY': {
             const data = parseDomainRegisterPayCall(
               remark,

@@ -1,4 +1,9 @@
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import {
+  cryptoWaitReady,
+  decodeAddress,
+  encodeAddress
+} from '@polkadot/util-crypto';
+import { u8aToHex } from '@polkadot/util';
 import { Keyring } from '@polkadot/api';
 import { getChain } from '../chains';
 import { WalletClientAccounts } from './types';
@@ -18,6 +23,15 @@ export class WalletClient {
       WalletClient.instance = new WalletClient();
     }
     return WalletClient.instance;
+  }
+
+  public static addressToHex(address: string) {
+    const publicKey = decodeAddress(address);
+    return u8aToHex(publicKey);
+  }
+
+  public static addressFromHex(addressHex: string, prefix?: number) {
+    return encodeAddress(addressHex, prefix);
   }
 
   public clientValid(): boolean {

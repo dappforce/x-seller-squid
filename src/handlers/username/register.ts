@@ -82,7 +82,7 @@ export async function handleUsernameRegisterPayment(
   }
   if (existingDomain.length > 0) {
     const domainsOwnedByRegistrant = existingDomain.find(
-      (d) => d.get('owner').toString() === registrant
+      (d) => WalletClient.addressToHex(d.get('owner').toString()) === registrant
     );
 
     if (domainsOwnedByRegistrant) {
@@ -177,7 +177,7 @@ export async function handleUsernameRegisterPayment(
       callData.remark.content;
 
     const result = await buyerChainClient.registerDomain({
-      registrant: registrant,
+      registrant: WalletClient.addressFromHex(registrant, 28),
       domain: domainName
     });
     console.log('handleUsernameRegisterPayment result >>>');
@@ -189,7 +189,7 @@ export async function handleUsernameRegisterPayment(
       await ctx.store.save(usernameRegistrationEntity);
 
       const compRmrkMsg: SubSclSource<'D_REG_COMP'> = {
-        title: 't2_subscl',
+        title: 't3_subscl',
         action: 'D_REG_COMP',
         version: '0.1',
         content: {

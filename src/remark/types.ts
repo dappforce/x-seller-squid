@@ -33,7 +33,7 @@ export type SubSclRemarkMessageAction =
   | 'EN_GEN_REFUND'
 
   | 'M_G';
-export type SubSclRemarkMessageTitle = 't_subscl' | 't2_subscl' | 'subscl';
+export type SubSclRemarkMessageTitle = 't_subscl' | 't2_subscl'| 't3_subscl' | 'subscl';
 export type SubSclRemarkMessageContent<
   A extends SubSclRemarkMessageAction | string
 > = A extends 'D_REG_PAY'

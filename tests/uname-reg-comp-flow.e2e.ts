@@ -1,7 +1,6 @@
 import { SubSclRemark } from '../src/remark';
 import { SubSclSource } from '../src/remark/types';
 import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
-import { ApiPromise } from '@polkadot/api';
 import { WalletClient } from '../src/walletClient';
 import { BN } from 'bn.js';
 import * as dotenv from 'dotenv';
@@ -12,6 +11,8 @@ jest.useRealTimers();
 
 describe('Register username with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
+  const validDomainPrice = new BN('10000000000'); // 0.01
+  const invalidDomainPrice = new BN('100000000'); // 0.0001
   jest.setTimeout(1000 * 60 * 5);
 
   beforeAll(async () => {
@@ -19,7 +20,7 @@ describe('Register username with completion flow', () => {
     await WalletClient.getInstance().init();
   });
 
-  test('Send purchase batch', async () => {
+  test('Send valid purchase batch', async () => {
     const buyerAccount =
       await WalletClient.getInstance().createKeyringPairFromMnem(
         process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_BUYER || ''
@@ -28,16 +29,18 @@ describe('Register username with completion flow', () => {
     if (!sellerWsClient) return;
     const transferTx = sellerWsClient.api.tx.balances.transfer(
       WalletClient.getInstance().account.sellerTreasury.address,
-      new BN('10000000000')
+      validDomainPrice
     );
 
     const regRmrkMsg: SubSclSource<'D_REG_PAY'> = {
-      title: 't2_subscl',
+      title: 't3_subscl',
       action: 'D_REG_PAY',
       version: '0.1',
       content: {
-        domainName: 'tdotdomain300.sub',
-        registrant: '3q5gLiDzdPZpuYL6LMXevC9W22rDTfSDMZemZstHrd7UgcJp',
+        domainName: `t3dotdomain${Date.now()}.sub`,
+        registrant: WalletClient.addressToHex(
+          process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
+        ),
         currency: 'DOT',
         attemptId: transferTx.hash.toHex()
       }
