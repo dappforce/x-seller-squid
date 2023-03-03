@@ -20,6 +20,15 @@ export interface CallParsed<
   remark: SubSclRemarkMessage<A, V>;
 }
 
+export type ParsedCallsDataList = CallParsed<
+  | 'D_REG_PAY'
+  | 'D_REG_COMP'
+  | 'D_REG_REFUND'
+  | 'EN_GEN_PAY'
+  | 'EN_GEN_COMP'
+  | 'EN_GEN_REFUND'
+>[];
+
 export type TransferData<C extends CallParsed> = Required<
   Pick<
     C,

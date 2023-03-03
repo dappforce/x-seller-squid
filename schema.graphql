@@ -23,6 +23,8 @@ type UsernameRegistrationOrder @entity {
   blockHashUnameHostChain: String
   confirmedBlockHashSellerChain: String
   confirmedRemarkCallId: String
+  refundBlockHashSellerChain: String
+  refundRemarkCallId: String
   registrant: Account!
   username: Username!
   price: BigInt!
@@ -35,7 +37,8 @@ type UsernameRegistrationOrder @entity {
   purchaseRmrk: JSON
   confirmationRmrk: JSON
   refundRmrk: JSON
-  error: UsernameRegistrationOrderError
+  errorRegistration: UsernameRegistrationOrderError
+  errorRefund: UsernameRegistrationOrderError
 }
 
 type EnergyBox @entity {

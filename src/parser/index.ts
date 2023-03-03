@@ -1,14 +1,16 @@
 import { SystemRemarkCall } from '../types/generated/calls';
 import { SubSclRemark } from '../remark';
-import { CallParsed } from './types';
+import { CallParsed, ParsedCallsDataList } from './types';
 import { Ctx } from '../processor';
 import {
   parseDomainRegisterPayCall,
-  parseDomainRegisterCompletedCall
+  parseDomainRegisterCompletedCall,
+  parseDomainRegisterRefundCall
 } from './utils';
 
-export function parseCalls(ctx: Ctx): CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[] {
-  let callsParsed: CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[] = [];
+
+export function parseCalls(ctx: Ctx): ParsedCallsDataList {
+  let callsParsed: ParsedCallsDataList = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
@@ -43,6 +45,16 @@ export function parseCalls(ctx: Ctx): CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[] {
           }
           case 'D_REG_COMP': {
             const data = parseDomainRegisterCompletedCall(
+              remark,
+              item,
+              block.header,
+              ctx
+            );
+            if (data) callsParsed.push(data);
+            break;
+          }
+          case 'D_REG_REFUND': {
+            const data = parseDomainRegisterRefundCall(
               remark,
               item,
               block.header,

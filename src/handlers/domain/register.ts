@@ -12,8 +12,11 @@ import {
 } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { createAndGetTransfer } from '../../entities/transfer';
+import { getChain } from '../../chains';
+import { refundDomainRegistrationPayment } from './refund';
+const { config } = getChain();
 
-export async function handleUsernameRegisterPayment(
+export async function handleDomainRegisterPayment(
   callData: CallParsed<'D_REG_PAY', true>,
   ctx: Ctx
 ) {
@@ -54,9 +57,8 @@ export async function handleUsernameRegisterPayment(
   ): Promise<void> => {
     usernameRegistrationEntity.status = RegistrationStatus.Failed;
     usernameRegistrationEntity.refundStatus = RefundStatus.Waiting;
-    usernameRegistrationEntity.error = new UsernameRegistrationOrderError(
-      errorData
-    );
+    usernameRegistrationEntity.errorRegistration =
+      new UsernameRegistrationOrderError(errorData);
 
     await ctx.store.save(usernameRegistrationEntity);
   };
@@ -77,7 +79,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    // TODO run refund if head of archive
+    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
     return;
   }
   if (existingDomain.length > 0) {
@@ -95,7 +97,8 @@ export async function handleUsernameRegisterPayment(
        * In this case status marked as Processing and squid will check next
        * blocks for "D_REG_COMP" remark which will confirm that username is
        * registered and registration order can be completed. Usually such case
-       * can be occurred if squid is reindexing the chain from the start.
+       * can be occurred if squid is reindexing the chain from the start. We
+       * don's need initiate refund in this case.
        */
     } else {
       ctx.log.error({
@@ -111,7 +114,7 @@ export async function handleUsernameRegisterPayment(
        * refund action will be delayed till the head. If it's head, refund
        * should be initiated immediately.
        */
-      // TODO if it's head of archive we need initiate refund action right here.
+      if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
     }
     await ctx.store.save(usernameRegistrationEntity);
     return;
@@ -122,7 +125,8 @@ export async function handleUsernameRegisterPayment(
    */
 
   // TODO get supported tlds from blockchain "domains.supportedTlds"
-  if (!domainName.endsWith('sub')) {
+  const domainNameChunked = domainName.split('.');
+  if (domainNameChunked.length < 2 || domainNameChunked[1] !== 'sub') {
     const eData = {
       success: false,
       ...buyerChainClient.clientError.getError(20200),
@@ -130,7 +134,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    // TODO run refund if head of archive
+    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
     return;
   }
 
@@ -151,7 +155,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    // TODO run refund if head of archive
+    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
     return;
   }
 
@@ -164,7 +168,7 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    // TODO run refund if head of archive
+    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
     return;
   }
 
@@ -180,7 +184,7 @@ export async function handleUsernameRegisterPayment(
       registrant: WalletClient.addressFromHex(registrant, 28),
       domain: domainName
     });
-    console.log('handleUsernameRegisterPayment result >>>');
+    console.log('handleDomainRegisterPayment result >>>');
     console.dir(result, { depth: null });
 
     if (result.success && result.status === 201) {
@@ -189,9 +193,9 @@ export async function handleUsernameRegisterPayment(
       await ctx.store.save(usernameRegistrationEntity);
 
       const compRmrkMsg: SubSclSource<'D_REG_COMP'> = {
-        title: 't3_subscl',
+        title: config.sellerChain.remark.title,
+        version: config.sellerChain.remark.version,
         action: 'D_REG_COMP',
-        version: '0.1',
         content: {
           domainName: domainName,
           registrant: registrant,
@@ -210,15 +214,16 @@ export async function handleUsernameRegisterPayment(
     } else {
       const eData = {
         success: false,
-        ...buyerChainClient.clientError.getError(20300),
+        reason: 'Error has been occurred',
+        ...buyerChainClient.clientError.getError(10100),
         ...(await buyerChainClient.getBlockMeta())
       };
       ctx.log.error(eData);
       await saveUnameRegEntityOnFail(eData);
-      // TODO run refund process
+      if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
     }
   } catch (rejected) {
-    console.log('handleUsernameRegisterPayment result >>>');
+    console.log('handleDomainRegisterPayment result >>>');
     console.dir(rejected, { depth: null });
     const eData = {
       success: false,
@@ -230,5 +235,6 @@ export async function handleUsernameRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
+    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
   }
 }

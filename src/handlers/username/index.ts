@@ -1,1 +1,0 @@
-export { handleUsernameRegisterPayment } from './register';

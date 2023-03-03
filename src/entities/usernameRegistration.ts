@@ -30,3 +30,30 @@ export async function ensureUsernameRegistrationEntity(
     purchaseRmrk: remark
   });
 }
+
+export async function updateDomainRegistrationOrderRefundStatus(
+  id: string,
+  newStatus: RefundStatus,
+  ctx: Ctx
+) {
+  const existingRegistrationOrder = await ctx.store.findOne(
+    UsernameRegistrationOrder,
+    {
+      where: {
+        id
+      },
+      relations: {
+        username: true,
+        registrant: true
+      }
+    }
+  );
+
+  if (!existingRegistrationOrder)
+    throw new Error(
+      `UsernameRegistrationOrder with ID #${id} cannot be found.`
+    );
+
+  existingRegistrationOrder.refundStatus = newStatus;
+  await ctx.store.save(existingRegistrationOrder);
+}

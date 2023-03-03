@@ -1,11 +1,12 @@
-import { CallParsed } from '../parser/types';
+import { CallParsed, ParsedCallsDataList } from '../parser/types';
 import { SubSclRemarkMessageAction } from '../remark/types';
-import { handleUsernameRegisterPayment } from './username';
+import { handleDomainRegisterPayment } from './domain';
 import { Ctx } from '../processor';
-import { handleUsernameRegistrationCompleted } from './username/registrationCompleted';
+import { handleUsernameRegistrationCompleted } from './domain/registrationCompleted';
+import { handleDomainRegistrationRefundCompleted } from './domain/refundCompleted';
 
 export async function handleSellerActions(
-  parsedActions: CallParsed<'D_REG_PAY' | 'D_REG_COMP'>[],
+  parsedActions: ParsedCallsDataList,
   ctx: Ctx
 ) {
   for (const actionsData of parsedActions) {
@@ -13,18 +14,24 @@ export async function handleSellerActions(
 
     switch (actionsData.remark.action as SubSclRemarkMessageAction) {
       case 'D_REG_PAY': {
-        // TODO fix types
-        // @ts-ignore
-        await handleUsernameRegisterPayment(actionsData, ctx);
+        await handleDomainRegisterPayment(
+          actionsData as CallParsed<'D_REG_PAY'>,
+          ctx
+        );
         break;
       }
       case 'D_REG_COMP': {
-        // TODO fix types
-        // @ts-ignore
-        await handleUsernameRegistrationCompleted(actionsData, ctx);
+        await handleUsernameRegistrationCompleted(
+          actionsData as CallParsed<'D_REG_COMP'>,
+          ctx
+        );
         break;
       }
       case 'D_REG_REFUND': {
+        await handleDomainRegistrationRefundCompleted(
+          actionsData as CallParsed<'D_REG_REFUND'>,
+          ctx
+        );
         break;
       }
       case 'EN_GEN_PAY': {

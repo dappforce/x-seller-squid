@@ -1,11 +1,11 @@
-module.exports = class Data1677842603911 {
-    name = 'Data1677842603911'
+module.exports = class Data1677853634608 {
+    name = 'Data1677853634608'
 
     async up(db) {
         await db.query(`CREATE TABLE "transfer" ("id" character varying NOT NULL, "block_height" integer NOT NULL, "block_hash" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "amount" numeric NOT NULL, "currency" text, "address_chain_prefix" text NOT NULL, "from_id" character varying, "to_id" character varying, CONSTRAINT "PK_fd9ddbdd49a17afcbe014401295" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_76bdfed1a7eb27c6d8ecbb7349" ON "transfer" ("from_id") `)
         await db.query(`CREATE INDEX "IDX_0751309c66e97eac9ef1149362" ON "transfer" ("to_id") `)
-        await db.query(`CREATE TABLE "username_registration_order" ("id" character varying NOT NULL, "block_hash_seller_chain" text, "block_hash_uname_host_chain" text, "confirmed_block_hash_seller_chain" text, "confirmed_remark_call_id" text, "price" numeric NOT NULL, "currency" text NOT NULL, "status" character varying(10), "refund_status" character varying(9), "purchase_rmrk" jsonb, "confirmation_rmrk" jsonb, "refund_rmrk" jsonb, "error" jsonb, "registrant_id" character varying, "username_id" character varying, "purchase_tx_id" character varying, "refund_tx_id" character varying, CONSTRAINT "PK_0ab950366809b89de20111ae473" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "username_registration_order" ("id" character varying NOT NULL, "block_hash_seller_chain" text, "block_hash_uname_host_chain" text, "confirmed_block_hash_seller_chain" text, "confirmed_remark_call_id" text, "refund_block_hash_seller_chain" text, "refund_remark_call_id" text, "price" numeric NOT NULL, "currency" text NOT NULL, "status" character varying(10), "refund_status" character varying(9), "purchase_rmrk" jsonb, "confirmation_rmrk" jsonb, "refund_rmrk" jsonb, "error_registration" jsonb, "error_refund" jsonb, "registrant_id" character varying, "username_id" character varying, "purchase_tx_id" character varying, "refund_tx_id" character varying, CONSTRAINT "PK_0ab950366809b89de20111ae473" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_aa459a63c7c63567d5141dd77f" ON "username_registration_order" ("registrant_id") `)
         await db.query(`CREATE INDEX "IDX_4204a84aeabe6afbc6ac3d0625" ON "username_registration_order" ("username_id") `)
         await db.query(`CREATE INDEX "IDX_e14d4ea1cfec6dcdf317098e35" ON "username_registration_order" ("purchase_tx_id") `)

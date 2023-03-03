@@ -14,6 +14,10 @@ export const config: ProcessorConfig = {
       sellerTreasury: {
         mnemonic: process.env.ROCOCO_ACC_MNEM_SELLER_TREASURY || ''
       }
+    },
+    remark: {
+      title: 't3_subscl',
+      version: '0.1'
     }
   },
   buyerChain: {

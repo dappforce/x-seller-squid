@@ -1,5 +1,4 @@
 import { CallParsed } from '../../parser/types';
-import { BuyerChainClient } from '../../wsClient';
 import { Ctx } from '../../processor';
 import { RegistrationStatus, UsernameRegistrationOrder } from '../../model';
 

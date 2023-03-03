@@ -31,6 +31,12 @@ export class UsernameRegistrationOrder {
     @Column_("text", {nullable: true})
     confirmedRemarkCallId!: string | undefined | null
 
+    @Column_("text", {nullable: true})
+    refundBlockHashSellerChain!: string | undefined | null
+
+    @Column_("text", {nullable: true})
+    refundRemarkCallId!: string | undefined | null
+
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
     registrant!: Account
@@ -72,5 +78,8 @@ export class UsernameRegistrationOrder {
     refundRmrk!: unknown | undefined | null
 
     @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new UsernameRegistrationOrderError(undefined, obj)}, nullable: true})
-    error!: UsernameRegistrationOrderError | undefined | null
+    errorRegistration!: UsernameRegistrationOrderError | undefined | null
+
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new UsernameRegistrationOrderError(undefined, obj)}, nullable: true})
+    errorRefund!: UsernameRegistrationOrderError | undefined | null
 }

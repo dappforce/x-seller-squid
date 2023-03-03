@@ -4,6 +4,8 @@ import { ChainClientError } from './chainClientError';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { ExtrinsicStatus } from '@polkadot/types/interfaces/author/types';
 import { DispatchError } from '@polkadot/types/interfaces/system/types';
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import type { ISubmittableResult } from '@polkadot/types/types';
 
 type ClientArgs = {
   apiUrl: string;
@@ -171,6 +173,42 @@ export class BaseChainClient extends WsClient {
     return new Promise(async (resolve, reject) => {
       const unsub = await this.api.tx.system
         .remark(msg)
+        .signAndSend(sender, async (resp) => {
+          const { status, txHash, txIndex, dispatchError } = resp;
+
+          if (dispatchError) {
+            reject({
+              success: false,
+              status: 10100,
+              reason: this.getTxSubDispatchErrorMessage(dispatchError),
+              blockHash: this.getTxSubDispatchErrorBlockHash(status)
+            });
+            unsub();
+            return;
+          }
+
+          if (status.isInBlock) {
+            resolve({
+              success: true,
+              blockHash: status.asInBlock.toHex(),
+              status: 201
+            });
+            unsub();
+            return;
+          } else {
+            console.log(`Status of sending: ${status.type}`);
+          }
+        });
+    });
+  }
+
+  async sendBatchAll(
+    sender: KeyringPair,
+    transactions: Array<unknown> // TODO fix types
+  ): Promise<ChainActionResult> {
+    return new Promise(async (resolve, reject) => {
+      const unsub = await this.api.tx.utility
+        .batchAll(transactions)
         .signAndSend(sender, async (resp) => {
           const { status, txHash, txIndex, dispatchError } = resp;
 

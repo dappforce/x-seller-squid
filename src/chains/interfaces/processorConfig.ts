@@ -1,4 +1,5 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor';
+import { SubSclRemarkMessageTitle, SubSclRemarkMessageVersion } from '../../remark/types';
 
 export type ProcessorConfig = {
   sellerChain: {
@@ -9,6 +10,10 @@ export type ProcessorConfig = {
     accounts: {
       sellerTreasury: { mnemonic: string };
     };
+    remark: {
+      title: SubSclRemarkMessageTitle;
+      version: SubSclRemarkMessageVersion;
+    }
   };
   buyerChain: {
     chainName: string;
