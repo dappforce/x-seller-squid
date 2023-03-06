@@ -1,15 +1,15 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import * as marshal from "./marshal"
 import {Account} from "./account.model"
-import {Username} from "./username.model"
+import {Domain} from "./domain.model"
 import {Transfer} from "./transfer.model"
-import {RegistrationStatus} from "./_registrationStatus"
-import {RefundStatus} from "./_refundStatus"
-import {UsernameRegistrationOrderError} from "./_usernameRegistrationOrderError"
+import {OrderRequestStatus} from "./_orderRequestStatus"
+import {OrderRefundStatus} from "./_orderRefundStatus"
+import {OrderError} from "./_orderError"
 
 @Entity_()
-export class UsernameRegistrationOrder {
-    constructor(props?: Partial<UsernameRegistrationOrder>) {
+export class DomainRegistrationOrder {
+    constructor(props?: Partial<DomainRegistrationOrder>) {
         Object.assign(this, props)
     }
 
@@ -39,11 +39,11 @@ export class UsernameRegistrationOrder {
 
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
-    registrant!: Account
+    target!: Account
 
     @Index_()
-    @ManyToOne_(() => Username, {nullable: true})
-    username!: Username
+    @ManyToOne_(() => Domain, {nullable: true})
+    domain!: Domain
 
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     price!: bigint
@@ -52,7 +52,7 @@ export class UsernameRegistrationOrder {
      * TODO should be reviewed
      */
     @Column_("text", {nullable: false})
-    currency!: string
+    token!: string
 
     @Index_()
     @ManyToOne_(() => Transfer, {nullable: true})
@@ -63,10 +63,10 @@ export class UsernameRegistrationOrder {
     refundTx!: Transfer | undefined | null
 
     @Column_("varchar", {length: 10, nullable: true})
-    status!: RegistrationStatus | undefined | null
+    status!: OrderRequestStatus | undefined | null
 
     @Column_("varchar", {length: 9, nullable: true})
-    refundStatus!: RefundStatus | undefined | null
+    refundStatus!: OrderRefundStatus | undefined | null
 
     @Column_("jsonb", {nullable: true})
     purchaseRmrk!: unknown | undefined | null
@@ -77,9 +77,9 @@ export class UsernameRegistrationOrder {
     @Column_("jsonb", {nullable: true})
     refundRmrk!: unknown | undefined | null
 
-    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new UsernameRegistrationOrderError(undefined, obj)}, nullable: true})
-    errorRegistration!: UsernameRegistrationOrderError | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OrderError(undefined, obj)}, nullable: true})
+    errorRegistration!: OrderError | undefined | null
 
-    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new UsernameRegistrationOrderError(undefined, obj)}, nullable: true})
-    errorRefund!: UsernameRegistrationOrderError | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OrderError(undefined, obj)}, nullable: true})
+    errorRefund!: OrderError | undefined | null
 }

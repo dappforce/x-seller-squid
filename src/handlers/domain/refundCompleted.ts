@@ -1,35 +1,35 @@
 import { CallParsed } from '../../parser/types';
 import { Ctx } from '../../processor';
-import { RefundStatus, UsernameRegistrationOrder } from '../../model';
+import { OrderRefundStatus, DomainRegistrationOrder } from '../../model';
 
 export async function handleDomainRegistrationRefundCompleted(
-  callData: CallParsed<'D_REG_REFUND', true>,
+  callData: CallParsed<'DMN_REG_REFUND', true>,
   ctx: Ctx
 ) {
   const { remark } = callData;
 
   const existingRegistrationEntity = await ctx.store.findOne(
-    UsernameRegistrationOrder,
+    DomainRegistrationOrder,
     {
       where: {
-        id: remark.content.attemptId
+        id: remark.content.opId
       },
       relations: {
-        username: true,
-        registrant: true
+        domain: true,
+        target: true
       }
     }
   );
 
   if (!existingRegistrationEntity) {
     ctx.log.error(
-      `Username Registration Order for attempt ${remark.content.attemptId} can not be found.`
+      `Username Registration Order for attempt ${remark.content.opId} can not be found.`
     );
     // TODO handle this case
     return;
   }
 
-  existingRegistrationEntity.refundStatus = RefundStatus.Fulfilled;
+  existingRegistrationEntity.refundStatus = OrderRefundStatus.Fulfilled;
   existingRegistrationEntity.refundRmrk = remark;
   existingRegistrationEntity.refundBlockHashSellerChain = callData.blockHash;
   existingRegistrationEntity.refundRemarkCallId = callData.remarkCallId;

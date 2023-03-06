@@ -1,58 +1,56 @@
 import {
-  RefundStatus,
-  RegistrationStatus,
+  OrderRefundStatus,
+  OrderRequestStatus,
   Transfer,
-  UsernameRegistrationOrder
+  DomainRegistrationOrder
 } from '../model';
 import { Ctx } from '../processor';
 import { CallParsed } from '../parser/types';
 import { getOrCreateAccount } from './account';
-import { getOrCreateUsername } from './username';
+import { getOrCreateDomain } from './domain';
 import { BuyerChainClient } from '../wsClient';
 
 export async function ensureUsernameRegistrationEntity(
-  callData: CallParsed<'D_REG_PAY'>,
+  callData: CallParsed<'DMN_REG'>,
   ctx: Ctx,
   purchaseTx?: Transfer
-): Promise<UsernameRegistrationOrder> {
+): Promise<DomainRegistrationOrder> {
   const { remark } = callData;
 
-  return new UsernameRegistrationOrder({
-    id: remark.content.attemptId,
+  return new DomainRegistrationOrder({
+    id: remark.content.opId,
     blockHashSellerChain: callData.blockHash,
-    registrant: await getOrCreateAccount(remark.content.registrant, ctx),
-    username: await getOrCreateUsername(remark.content.domainName, ctx),
+    target: await getOrCreateAccount(remark.content.target, ctx),
+    domain: await getOrCreateDomain(remark.content.domainName, ctx),
     price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(),
-    currency: 'DOT', // TODO should be reviewed
+    token: 'DOT', // TODO should be reviewed
     purchaseTx: purchaseTx ?? null,
-    status: RegistrationStatus.Processing,
-    refundStatus: RefundStatus.None,
+    status: OrderRequestStatus.Processing,
+    refundStatus: OrderRefundStatus.None,
     purchaseRmrk: remark
   });
 }
 
 export async function updateDomainRegistrationOrderRefundStatus(
   id: string,
-  newStatus: RefundStatus,
+  newStatus: OrderRefundStatus,
   ctx: Ctx
 ) {
   const existingRegistrationOrder = await ctx.store.findOne(
-    UsernameRegistrationOrder,
+    DomainRegistrationOrder,
     {
       where: {
         id
       },
       relations: {
-        username: true,
-        registrant: true
+        domain: true,
+        target: true
       }
     }
   );
 
   if (!existingRegistrationOrder)
-    throw new Error(
-      `UsernameRegistrationOrder with ID #${id} cannot be found.`
-    );
+    throw new Error(`DomainRegistrationOrder with ID #${id} cannot be found.`);
 
   existingRegistrationOrder.refundStatus = newStatus;
   await ctx.store.save(existingRegistrationOrder);

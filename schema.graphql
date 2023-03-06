@@ -1,22 +1,22 @@
-type Username @entity {
+type Domain @entity {
   id: ID!
   owner: Account
-  unameRegistrationOrders: [UsernameRegistrationOrder!]
-    @derivedFrom(field: "username")
+  domainRegistrationOrders: [DomainRegistrationOrder!]
+    @derivedFrom(field: "domain")
   createdAt: DateTime
   createdAtBlock: Int
 }
 
 type Account @entity {
   id: ID!
-  usernames: [Username!] @derivedFrom(field: "owner")
-  unameRegistrationOrders: [UsernameRegistrationOrder!]
-    @derivedFrom(field: "registrant")
+  domains: [Domain!] @derivedFrom(field: "owner")
+  domainRegistrationOrders: [DomainRegistrationOrder!]
+    @derivedFrom(field: "target")
 
   energyBoxes: [EnergyBox!] @derivedFrom(field: "owner")
 }
 
-type UsernameRegistrationOrder @entity {
+type DomainRegistrationOrder @entity {
   "Attempt ID from remark and it's the same value for all purchase, confirmation and refund(if it's existing) remarks"
   id: ID!
   blockHashSellerChain: String
@@ -25,20 +25,20 @@ type UsernameRegistrationOrder @entity {
   confirmedRemarkCallId: String
   refundBlockHashSellerChain: String
   refundRemarkCallId: String
-  registrant: Account!
-  username: Username!
+  target: Account!
+  domain: Domain!
   price: BigInt!
   "TODO should be reviewed"
-  currency: String!
+  token: String!
   purchaseTx: Transfer
   refundTx: Transfer
-  status: RegistrationStatus
-  refundStatus: RefundStatus
+  status: OrderRequestStatus
+  refundStatus: OrderRefundStatus
   purchaseRmrk: JSON
   confirmationRmrk: JSON
   refundRmrk: JSON
-  errorRegistration: UsernameRegistrationOrderError
-  errorRefund: UsernameRegistrationOrderError
+  errorRegistration: OrderError
+  errorRefund: OrderError
 }
 
 type EnergyBox @entity {
@@ -49,15 +49,17 @@ type EnergyBox @entity {
   energyAmount: BigInt!
   boxPrice: BigInt!
   "TODO should be reviewed"
-  currency: String!
+  token: String!
   owner: Account
   purchaseTx: Transfer
   refundTx: Transfer
-  status: RegistrationStatus
-  refundStatus: RefundStatus
+  status: OrderRequestStatus
+  refundStatus: OrderRefundStatus
   generationRmrk: JSON
   confirmationRmrk: JSON
   refundRmrk: JSON
+  errorGeneration: OrderError
+  errorRefund: OrderError
 }
 
 type Transfer @entity {
@@ -66,26 +68,25 @@ type Transfer @entity {
   blockHash: String!
   timestamp: DateTime!
   amount: BigInt!
-  "TODO should be reviewed"
-  currency: String
+  token: String
   from: Account!
   to: Account!
-  addressChainPrefix: String!
+  addressChainPrefix: String
 }
 
-enum RegistrationStatus {
+enum OrderRequestStatus {
   Processing
   Successful
   Failed
 }
-enum RefundStatus {
+enum OrderRefundStatus {
   None
   Waiting
   Fulfilled
   Failed
 }
 
-type UsernameRegistrationOrderError {
+type OrderError {
   status: Int
   reason: String
 }

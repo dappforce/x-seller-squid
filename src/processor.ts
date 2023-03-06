@@ -41,7 +41,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await WalletClient.getInstance().init();
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
-  SubSclRemark.setConfig({ titles: [config.sellerChain.remark.title] });
+  SubSclRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
 
   let callsData = parseCalls(ctx);
 

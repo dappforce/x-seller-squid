@@ -1,19 +1,20 @@
 import { SubSclRemark } from '../src/remark';
-import { SubSclRemarkMessageTitle, SubSclSource } from '../src/remark/types';
+import { SubSclRemarkMessageProtocolName, SubSclSource } from '../src/remark/types';
 import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
 import { WalletClient } from '../src/walletClient';
 import { BN } from 'bn.js';
 import * as dotenv from 'dotenv';
+import { randomAsNumber } from '@polkadot/util-crypto';
 
 dotenv.config({ path: `${__dirname}/../.env.local` });
 
 jest.useRealTimers();
 
-describe('Register username with completion flow', () => {
+describe('Register domain with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
   const validDomainPrice = new BN('10000000000'); // 0.01
   const invalidDomainPrice = new BN('100000000'); // 0.0001
-  const testRemarkTitle: SubSclRemarkMessageTitle = 't3_subscl';
+  const testRemarkTitle: SubSclRemarkMessageProtocolName = 't4_subscl';
 
   jest.setTimeout(1000 * 60 * 5);
 
@@ -34,17 +35,17 @@ describe('Register username with completion flow', () => {
       validDomainPrice
     );
 
-    const regRmrkMsg: SubSclSource<'D_REG_PAY'> = {
-      title: testRemarkTitle,
-      action: 'D_REG_PAY',
+    const regRmrkMsg: SubSclSource<'DMN_REG'> = {
+      protName: testRemarkTitle,
+      action: 'DMN_REG',
       version: '0.1',
       content: {
-        domainName: `t3dotdomain${Date.now()}.sub`,
-        registrant: WalletClient.addressToHex(
+        domainName: `t4dotdomain${randomAsNumber()}.sub`,
+        target: WalletClient.addressToHex(
           process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
-        currency: 'DOT',
-        attemptId: transferTx.hash.toHex()
+        token: 'DOT',
+        opId: `${transferTx.hash.toHex()}-${Date.now()}-${randomAsNumber()}`
       }
     };
 
@@ -87,7 +88,7 @@ describe('Register username with completion flow', () => {
 
           if (status.isInBlock) {
             console.log(
-              `Successful registration of domain ${regRmrkMsg.content.domainName} for address ${regRmrkMsg.content.registrant}`
+              `Successful registration of domain ${regRmrkMsg.content.domainName} for address ${regRmrkMsg.content.target}`
             );
             console.log(
               'status.asInBlock.toHex() - ',

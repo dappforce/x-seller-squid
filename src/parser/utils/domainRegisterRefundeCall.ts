@@ -17,7 +17,7 @@ export function parseDomainRegisterRefundCall(
   callItem: RemarkCallItem,
   blockHeader: Block['header'],
   ctx: Ctx
-): CallParsed<'D_REG_REFUND'> | null {
+): CallParsed<'DMN_REG_REFUND'> | null {
   // @ts-ignore
   if (callItem.call.parent.name !== 'Utility.batch_all') return;
   let signerEncoded: string | null = null;

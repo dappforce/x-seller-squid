@@ -17,7 +17,7 @@ export function parseDomainRegisterPayCall(
   callItem: RemarkCallItem,
   blockHeader: Block['header'],
   ctx: Ctx
-): CallParsed<'D_REG_PAY'> | null {
+): CallParsed<'DMN_REG'> | null {
   // @ts-ignore
   if (callItem.call.parent.name !== 'Utility.batch_all') return;
   let signerEncoded: string | null = null;

@@ -1,4 +1,4 @@
-export enum RegistrationStatus {
+export enum OrderRequestStatus {
     Processing = "Processing",
     Successful = "Successful",
     Failed = "Failed",

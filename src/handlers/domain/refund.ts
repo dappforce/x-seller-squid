@@ -5,32 +5,32 @@ import { SellerChainClient } from '../../wsClient';
 import { SubSclSource } from '../../remark/types';
 import { SubSclRemark } from '../../remark';
 import { getChain } from '../../chains';
-import { updateDomainRegistrationOrderRefundStatus } from '../../entities/usernameRegistration';
+import { updateDomainRegistrationOrderRefundStatus } from '../../entities';
 import {
-  RefundStatus,
-  RegistrationStatus,
-  UsernameRegistrationOrder,
-  UsernameRegistrationOrderError
+  OrderRefundStatus,
+  OrderRequestStatus,
+  DomainRegistrationOrder,
+  OrderError
 } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 const { config } = getChain();
 
 export async function refundDomainRegistrationPayment(
-  callData: CallParsed<'D_REG_PAY', true>,
+  callData: CallParsed<'DMN_REG', true>,
   ctx: Ctx
 ) {
   ctx.log.info(
-    `Refund for domain registration order ID [${callData.remark.content.attemptId}] has been started.`
+    `Refund for domain registration order ID [${callData.remark.content.opId}] has been started.`
   );
   let recipient: string | null = callData.from ?? null;
 
   const registrationOrder = await ctx.store.get(
-    UsernameRegistrationOrder,
-    callData.remark.content.attemptId
+    DomainRegistrationOrder,
+    callData.remark.content.opId
   );
   if (!registrationOrder) {
     ctx.log.error(
-      `UsernameRegistrationOrder with id -${callData.remark.content.attemptId} cannot be found`
+      `DomainRegistrationOrder with id -${callData.remark.content.opId} cannot be found`
     );
     return;
   }
@@ -38,9 +38,9 @@ export async function refundDomainRegistrationPayment(
   const saveDomainRegEntityOnFail = async (
     errorData: ChainActionResult
   ): Promise<void> => {
-    registrationOrder.status = RegistrationStatus.Failed;
-    registrationOrder.refundStatus = RefundStatus.Waiting;
-    registrationOrder.errorRegistration = new UsernameRegistrationOrderError(
+    registrationOrder.status = OrderRequestStatus.Failed;
+    registrationOrder.refundStatus = OrderRefundStatus.Waiting;
+    registrationOrder.errorRegistration = new OrderError(
       errorData
     );
 
@@ -63,15 +63,15 @@ export async function refundDomainRegistrationPayment(
     callData.amount
   );
 
-  const refundRmrkMsg: SubSclSource<'D_REG_REFUND'> = {
-    title: config.sellerChain.remark.title,
+  const refundRmrkMsg: SubSclSource<'DMN_REG_REFUND'> = {
+    protName: config.sellerChain.remark.protName,
     version: config.sellerChain.remark.version,
-    action: 'D_REG_REFUND',
+    action: 'DMN_REG_REFUND',
     content: {
       domainName: callData.remark.content.domainName,
-      registrant: callData.remark.content.registrant,
-      currency: callData.remark.content.currency,
-      attemptId: callData.remark.content.attemptId
+      target: callData.remark.content.target,
+      token: callData.remark.content.token,
+      opId: callData.remark.content.opId
     }
   };
 
@@ -90,7 +90,7 @@ export async function refundDomainRegistrationPayment(
     console.dir(result, { depth: null });
 
     if (result.success && result.status === 201) {
-      registrationOrder.refundStatus = RefundStatus.Fulfilled;
+      registrationOrder.refundStatus = OrderRefundStatus.Fulfilled;
 
       await ctx.store.save(registrationOrder);
     } else {

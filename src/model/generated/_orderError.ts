@@ -1,11 +1,11 @@
 import assert from "assert"
 import * as marshal from "./marshal"
 
-export class UsernameRegistrationOrderError {
+export class OrderError {
     private _status!: number | undefined | null
     private _reason!: string | undefined | null
 
-    constructor(props?: Partial<Omit<UsernameRegistrationOrderError, 'toJSON'>>, json?: any) {
+    constructor(props?: Partial<Omit<OrderError, 'toJSON'>>, json?: any) {
         Object.assign(this, props)
         if (json != null) {
             this._status = json.status == null ? undefined : marshal.int.fromJSON(json.status)

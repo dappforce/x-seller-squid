@@ -1,10 +1,10 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
 import {Account} from "./account.model"
-import {UsernameRegistrationOrder} from "./usernameRegistrationOrder.model"
+import {DomainRegistrationOrder} from "./domainRegistrationOrder.model"
 
 @Entity_()
-export class Username {
-    constructor(props?: Partial<Username>) {
+export class Domain {
+    constructor(props?: Partial<Domain>) {
         Object.assign(this, props)
     }
 
@@ -15,8 +15,8 @@ export class Username {
     @ManyToOne_(() => Account, {nullable: true})
     owner!: Account | undefined | null
 
-    @OneToMany_(() => UsernameRegistrationOrder, e => e.username)
-    unameRegistrationOrders!: UsernameRegistrationOrder[]
+    @OneToMany_(() => DomainRegistrationOrder, e => e.domain)
+    domainRegistrationOrders!: DomainRegistrationOrder[]
 
     @Column_("timestamp with time zone", {nullable: true})
     createdAt!: Date | undefined | null

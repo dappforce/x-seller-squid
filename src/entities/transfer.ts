@@ -7,7 +7,7 @@ import { getOrCreateAccount } from './account';
 const { config } = getChain();
 
 export async function createAndGetTransfer(
-  callData: CallParsed<'D_REG_PAY' | 'EN_GEN_PAY'>,
+  callData: CallParsed<'DMN_REG' | 'NRG_GEN'>,
   ctx: Ctx
 ): Promise<Transfer> {
   const {

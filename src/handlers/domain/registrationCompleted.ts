@@ -1,45 +1,45 @@
 import { CallParsed } from '../../parser/types';
 import { Ctx } from '../../processor';
-import { RegistrationStatus, UsernameRegistrationOrder } from '../../model';
+import { OrderRequestStatus, DomainRegistrationOrder } from '../../model';
 
 export async function handleUsernameRegistrationCompleted(
-  callData: CallParsed<'D_REG_COMP', true>,
+  callData: CallParsed<'DMN_REG_OK', true>,
   ctx: Ctx
 ) {
   const { remark } = callData;
 
   const existingRegistrationEntity = await ctx.store.findOne(
-    UsernameRegistrationOrder,
+    DomainRegistrationOrder,
     {
       where: {
-        id: remark.content.attemptId
+        id: remark.content.opId
       },
       relations: {
-        username: true,
-        registrant: true
+        domain: true,
+        target: true
       }
     }
   );
 
   if (!existingRegistrationEntity) {
     ctx.log.error(
-      `Username Registration Order for attempt ${remark.content.attemptId} can not be found.`
+      `Username Registration Order for attempt ${remark.content.opId} can not be found.`
     );
     // TODO handle this case
     return;
   }
 
-  existingRegistrationEntity.status = RegistrationStatus.Successful;
+  existingRegistrationEntity.status = OrderRequestStatus.Successful;
   existingRegistrationEntity.confirmationRmrk = remark;
   existingRegistrationEntity.confirmedBlockHashSellerChain = callData.blockHash;
   existingRegistrationEntity.confirmedRemarkCallId = callData.remarkCallId;
 
-  const uName = existingRegistrationEntity.username;
+  const domain = existingRegistrationEntity.domain;
 
-  uName.createdAt = callData.timestamp;
-  uName.createdAtBlock = callData.blockNumber;
-  uName.owner = existingRegistrationEntity.registrant;
+  domain.createdAt = callData.timestamp;
+  domain.createdAtBlock = callData.blockNumber;
+  domain.owner = existingRegistrationEntity.target;
 
-  await ctx.store.save(uName);
+  await ctx.store.save(domain);
   await ctx.store.save(existingRegistrationEntity);
 }

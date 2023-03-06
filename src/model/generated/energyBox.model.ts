@@ -2,8 +2,9 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, M
 import * as marshal from "./marshal"
 import {Account} from "./account.model"
 import {Transfer} from "./transfer.model"
-import {RegistrationStatus} from "./_registrationStatus"
-import {RefundStatus} from "./_refundStatus"
+import {OrderRequestStatus} from "./_orderRequestStatus"
+import {OrderRefundStatus} from "./_orderRefundStatus"
+import {OrderError} from "./_orderError"
 
 @Entity_()
 export class EnergyBox {
@@ -33,7 +34,7 @@ export class EnergyBox {
      * TODO should be reviewed
      */
     @Column_("text", {nullable: false})
-    currency!: string
+    token!: string
 
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
@@ -48,10 +49,10 @@ export class EnergyBox {
     refundTx!: Transfer | undefined | null
 
     @Column_("varchar", {length: 10, nullable: true})
-    status!: RegistrationStatus | undefined | null
+    status!: OrderRequestStatus | undefined | null
 
     @Column_("varchar", {length: 9, nullable: true})
-    refundStatus!: RefundStatus | undefined | null
+    refundStatus!: OrderRefundStatus | undefined | null
 
     @Column_("jsonb", {nullable: true})
     generationRmrk!: unknown | undefined | null
@@ -61,4 +62,10 @@ export class EnergyBox {
 
     @Column_("jsonb", {nullable: true})
     refundRmrk!: unknown | undefined | null
+
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OrderError(undefined, obj)}, nullable: true})
+    errorGeneration!: OrderError | undefined | null
+
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OrderError(undefined, obj)}, nullable: true})
+    errorRefund!: OrderError | undefined | null
 }

@@ -41,16 +41,16 @@ export class BuyerChainClient extends BaseChainClient {
   }
 
   async registerDomain({
-    registrant,
+    target,
     domain
   }: {
-    registrant: string;
+    target: string;
     domain: string;
   }): Promise<ChainActionResult> {
     return new Promise(async (resolve, reject) => {
       try {
         const domainRegistrationTx = this.api.tx.domains.forceRegisterDomain(
-          registrant,
+          target,
           domain,
           IpfsContent(),
           BLOCKS_IN_YEAR
@@ -95,7 +95,7 @@ export class BuyerChainClient extends BaseChainClient {
 
               if (status.isInBlock) {
                 console.log(
-                  `Successful registration of domain ${domain} for address ${registrant}`
+                  `Successful registration of domain ${domain} for address ${target}`
                 );
                 console.log(
                   'status.asInBlock.toHex() - ',

@@ -31,7 +31,7 @@ export class ChainClientError {
       20101,
       {
         status: 20101,
-        reason: 'Domain is already owned by registrant.'
+        reason: 'Domain is already owned by target.'
       }
     ],
     [

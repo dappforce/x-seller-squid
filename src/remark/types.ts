@@ -1,67 +1,61 @@
 export type DomainRegisterPayContent = {
   domainName: string;
-  registrant: string;
-  currency: string;
-  attemptId: string;
+  target: string;
+  token: string;
+  opId: string;
 };
 export type DomainRegisterCompletedContent = {
   domainName: string;
-  registrant: string;
-  currency: string;
-  attemptId: string;
+  target: string;
+  token: string;
+  opId: string;
 };
 
 export type DomainRegisterRefundContent = {
   domainName: string;
-  registrant: string;
-  currency: string;
-  attemptId: string;
-};
-
-export type MessageCommonContent = {
-  message: string;
+  target: string;
+  token: string;
+  opId: string;
 };
 
 export type SubSclRemarkMessageVersion = '0.1';
 export type SubSclRemarkMessageAction =
-  | 'D_REG_PAY'
-  | 'D_REG_COMP'
-  | 'D_REG_REFUND'
-  | 'EN_GEN_PAY'
-  | 'EN_GEN_COMP'
-  | 'EN_GEN_REFUND'
-  | 'M_G';
+  | 'DMN_REG'
+  | 'DMN_REG_OK'
+  | 'DMN_REG_REFUND'
+  | 'NRG_GEN'
+  | 'NRG_GEN_OK'
+  | 'NRG_GEN_REFUND';
 
-export type SubSclRemarkMessageTitle =
+export type SubSclRemarkMessageProtocolName =
   | 'test_remark_title'
   | 't_subscl'
   | 't2_subscl'
   | 't3_subscl'
-  | 'subscl';
+  | 't4_subscl'
+  | 'social';
 
 export type SubSclRemarkMessageContent<
   A extends SubSclRemarkMessageAction | string
-> = A extends 'D_REG_PAY'
+> = A extends 'DMN_REG'
   ? DomainRegisterPayContent
-  : A extends 'D_REG_COMP'
+  : A extends 'DMN_REG_OK'
   ? DomainRegisterCompletedContent
-  : A extends 'D_REG_REFUND'
+  : A extends 'DMN_REG_REFUND'
   ? DomainRegisterRefundContent
-  : A extends 'EN_GEN_PAY'
+  : A extends 'NRG_GEN'
   ? DomainRegisterRefundContent // TODO must be implemented
-  : A extends 'EN_GEN_COMP'
+  : A extends 'NRG_GEN_OK'
   ? DomainRegisterRefundContent // TODO must be implemented
-  : A extends 'EN_GEN_REFUND'
+  : A extends 'NRG_GEN_REFUND'
   ? DomainRegisterRefundContent // TODO must be implemented
-  : A extends 'M_G'
-  ? MessageCommonContent
   : never;
 
 export type SubSclRemarkMessage<
   A extends SubSclRemarkMessageAction | string = '',
   V extends true | false = false
 > = {
-  title: SubSclRemarkMessageTitle;
+  protName: SubSclRemarkMessageProtocolName;
   version: SubSclRemarkMessageVersion;
   action: A;
   valid: V; // TODO make this prop optional
@@ -74,35 +68,32 @@ export type SubSclSource<A extends SubSclRemarkMessageAction | string = ''> =
 //TODO add type for variable
 export const REMARK_CONTENT_VERSION_ACTION_MAP = {
   '0.1': {
-    D_REG_PAY: {
-      domainName: 3,
-      registrant: 4,
-      currency: 5,
-      attemptId: 6
+    DMN_REG: {
+      opId: 3,
+      target: 4,
+      domainName: 5,
+      token: 6,
     },
-    D_REG_COMP: {
-      domainName: 3,
-      registrant: 4,
-      currency: 5,
-      attemptId: 6
+    DMN_REG_OK: {
+      opId: 3,
+      target: 4,
+      domainName: 5,
+      token: 6,
     },
-    D_REG_REFUND: {
-      domainName: 3,
-      registrant: 4,
-      currency: 5,
-      attemptId: 6
+    DMN_REG_REFUND: {
+      opId: 3,
+      target: 4,
+      domainName: 5,
+      token: 6,
     },
-    EN_GEN_PAY: {
+    NRG_GEN: {
       // TODO must be implemented
     },
-    EN_GEN_COMP: {
+    NRG_GEN_OK: {
       // TODO must be implemented
     },
-    EN_GEN_REFUND: {
+    NRG_GEN_REFUND: {
       // TODO must be implemented
     },
-    M_G: {
-      message: 3
-    }
   }
 };

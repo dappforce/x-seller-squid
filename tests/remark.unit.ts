@@ -1,25 +1,25 @@
 import { SubSclRemark } from '../src/remark';
-import { SubSclRemarkMessageTitle, SubSclSource } from '../src/remark/types';
+import { SubSclRemarkMessageProtocolName, SubSclSource } from '../src/remark/types';
 
 describe('Remark Unit', () => {
-  const testRemarkTitle: SubSclRemarkMessageTitle = 'test_remark_title';
+  const testRemarkTitle: SubSclRemarkMessageProtocolName = 'test_remark_title';
   const subsclRemarkMessageDomainRegPay = `${testRemarkTitle}::D_REG_PAY::0.1::testDomain.sub::0xde9f30be09a7cc7f0014261362069b66ce798d7a990def1b7deaa8b4b2a57668::DOT::0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000`;
-  const subsclRemarkSourceDomainRegPay: SubSclSource<'D_REG_PAY'> = {
-    title: testRemarkTitle,
+  const subsclRemarkSourceDomainRegPay: SubSclSource<'DMN_REG'> = {
+    protName: testRemarkTitle,
     version: '0.1',
-    action: 'D_REG_PAY',
+    action: 'DMN_REG',
     content: {
       domainName: 'testDomain.sub',
-      registrant:
+      target:
         '0xde9f30be09a7cc7f0014261362069b66ce798d7a990def1b7deaa8b4b2a57668',
-      currency: 'DOT',
-      attemptId:
+      token: 'DOT',
+      opId:
         '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
     }
   };
 
   beforeAll(() => {
-    SubSclRemark.setConfig({ titles: [testRemarkTitle] });
+    SubSclRemark.setConfig({ protNames: [testRemarkTitle] });
   });
 
   test('SubSclRemark from Source to Message', () => {

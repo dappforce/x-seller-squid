@@ -33,7 +33,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
         }
 
         switch (remark.message.action) {
-          case 'D_REG_PAY': {
+          case 'DMN_REG': {
             const data = parseDomainRegisterPayCall(
               remark,
               item,
@@ -43,7 +43,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
             if (data) callsParsed.push(data);
             break;
           }
-          case 'D_REG_COMP': {
+          case 'DMN_REG_OK': {
             const data = parseDomainRegisterCompletedCall(
               remark,
               item,
@@ -53,7 +53,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
             if (data) callsParsed.push(data);
             break;
           }
-          case 'D_REG_REFUND': {
+          case 'DMN_REG_REFUND': {
             const data = parseDomainRegisterRefundCall(
               remark,
               item,

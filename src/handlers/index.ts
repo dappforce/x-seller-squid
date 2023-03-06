@@ -13,40 +13,36 @@ export async function handleSellerActions(
     if (!actionsData.remark.valid) continue; // TODO add handling for such case
 
     switch (actionsData.remark.action as SubSclRemarkMessageAction) {
-      case 'D_REG_PAY': {
+      case 'DMN_REG': {
         await handleDomainRegisterPayment(
-          actionsData as CallParsed<'D_REG_PAY'>,
+          actionsData as CallParsed<'DMN_REG'>,
           ctx
         );
         break;
       }
-      case 'D_REG_COMP': {
+      case 'DMN_REG_OK': {
         await handleUsernameRegistrationCompleted(
-          actionsData as CallParsed<'D_REG_COMP'>,
+          actionsData as CallParsed<'DMN_REG_OK'>,
           ctx
         );
         break;
       }
-      case 'D_REG_REFUND': {
+      case 'DMN_REG_REFUND': {
         await handleDomainRegistrationRefundCompleted(
-          actionsData as CallParsed<'D_REG_REFUND'>,
+          actionsData as CallParsed<'DMN_REG_REFUND'>,
           ctx
         );
         break;
       }
-      case 'EN_GEN_PAY': {
+      case 'NRG_GEN': {
         // TODO add handling for such case
         break;
       }
-      case 'EN_GEN_REFUND': {
+      case 'NRG_GEN_REFUND': {
         // TODO add handling for such case
         break;
       }
-      case 'EN_GEN_COMP': {
-        // TODO add handling for such case
-        break;
-      }
-      case 'M_G': {
+      case 'NRG_GEN_OK': {
         // TODO add handling for such case
         break;
       }

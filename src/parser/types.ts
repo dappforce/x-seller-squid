@@ -21,12 +21,12 @@ export interface CallParsed<
 }
 
 export type ParsedCallsDataList = CallParsed<
-  | 'D_REG_PAY'
-  | 'D_REG_COMP'
-  | 'D_REG_REFUND'
-  | 'EN_GEN_PAY'
-  | 'EN_GEN_COMP'
-  | 'EN_GEN_REFUND'
+  | 'DMN_REG'
+  | 'DMN_REG_OK'
+  | 'DMN_REG_REFUND'
+  | 'NRG_GEN'
+  | 'NRG_GEN_OK'
+  | 'NRG_GEN_REFUND'
 >[];
 
 export type TransferData<C extends CallParsed> = Required<

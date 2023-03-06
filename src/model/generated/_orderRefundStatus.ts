@@ -1,4 +1,4 @@
-export enum RefundStatus {
+export enum OrderRefundStatus {
     None = "None",
     Waiting = "Waiting",
     Fulfilled = "Fulfilled",

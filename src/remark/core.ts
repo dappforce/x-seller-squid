@@ -3,58 +3,12 @@ import {
   REMARK_CONTENT_VERSION_ACTION_MAP,
   SubSclRemarkMessage,
   SubSclRemarkMessageAction,
-  SubSclRemarkMessageTitle,
+  SubSclRemarkMessageProtocolName,
   SubSclRemarkMessageVersion,
   SubSclSource
 } from './types';
+import { SubSclRemarkConfig, SubSclRemarkConfigData } from './config';
 
-type SubSclRemarkConfigData = {
-  titles?: SubSclRemarkMessageTitle[];
-  actions?: SubSclRemarkMessageAction[];
-  versions?: SubSclRemarkMessageVersion[];
-};
-
-class SubSclRemarkConfig {
-  private static instance: SubSclRemarkConfig;
-
-  private conf: Required<SubSclRemarkConfigData> = {
-    titles: [
-      'test_remark_title',
-      't_subscl',
-      't2_subscl',
-      't3_subscl',
-      'subscl'
-    ],
-    actions: [
-      'D_REG_PAY',
-      'D_REG_COMP',
-      'D_REG_REFUND',
-      'EN_GEN_PAY',
-      'EN_GEN_COMP',
-      'EN_GEN_REFUND',
-      'M_G'
-    ],
-    versions: ['0.1']
-  };
-
-  static getInstance(): SubSclRemarkConfig {
-    if (!SubSclRemarkConfig.instance) {
-      SubSclRemarkConfig.instance = new SubSclRemarkConfig();
-    }
-    return SubSclRemarkConfig.instance;
-  }
-
-  public get config() {
-    return this.conf;
-  }
-
-  public setConfig(data: SubSclRemarkConfigData) {
-    this.conf = {
-      ...this.conf,
-      ...data
-    };
-  }
-}
 
 export class SubSclRemark {
   private maybeRemarkMsg: unknown;
@@ -68,8 +22,8 @@ export class SubSclRemark {
     boolean
   > | null = null;
 
-  private titles: Set<SubSclRemarkMessageTitle> = new Set(
-    SubSclRemarkConfig.getInstance().config.titles
+  private protNames: Set<SubSclRemarkMessageProtocolName> = new Set(
+    SubSclRemarkConfig.getInstance().config.protNames
   );
 
   private versions: Set<SubSclRemarkMessageVersion> = new Set(
@@ -122,7 +76,7 @@ export class SubSclRemark {
 
     if (
       !rmrkSrc ||
-      !this.isValidTitle(rmrkSrc.title) ||
+      !this.isValidProtName(rmrkSrc.protName) ||
       !this.isValidVersion(rmrkSrc.version) ||
       !this.isValidAction(rmrkSrc.action)
     )
@@ -143,9 +97,9 @@ export class SubSclRemark {
       throw new Error('Remark is not valid for build message.');
 
     const msg: string[] = [];
-    msg.push(this.message.title);
-    msg.push(this.message.action);
+    msg.push(this.message.protName);
     msg.push(this.message.version);
+    msg.push(this.message.action);
 
     try {
       const contentPropsMap =
@@ -183,16 +137,16 @@ export class SubSclRemark {
     if (
       !chunkedMsg ||
       chunkedMsg.length === 0 ||
-      !this.isValidTitle(chunkedMsg[0]) ||
-      !this.isValidVersion(chunkedMsg[2]) ||
-      !this.isValidAction(chunkedMsg[1])
+      !this.isValidProtName(chunkedMsg[0]) ||
+      !this.isValidVersion(chunkedMsg[1]) ||
+      !this.isValidAction(chunkedMsg[2])
     )
       return;
 
     this.msgParsed = {
-      title: chunkedMsg[0] as SubSclRemarkMessageTitle,
-      version: chunkedMsg[2] as SubSclRemarkMessageVersion,
-      action: chunkedMsg[1] as SubSclRemarkMessageAction,
+      protName: chunkedMsg[0] as SubSclRemarkMessageProtocolName,
+      version: chunkedMsg[1] as SubSclRemarkMessageVersion,
+      action: chunkedMsg[2] as SubSclRemarkMessageAction,
       valid: false,
       content: null
     };
@@ -217,9 +171,9 @@ export class SubSclRemark {
     }
   }
 
-  private isValidTitle(src: string): boolean {
+  private isValidProtName(src: string): boolean {
     // TODO remove type casting
-    return !!(src && this.titles.has(src as SubSclRemarkMessageTitle));
+    return !!(src && this.protNames.has(src as SubSclRemarkMessageProtocolName));
   }
   private isValidVersion(src: string): boolean {
     // TODO remove type casting

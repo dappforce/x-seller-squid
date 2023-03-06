@@ -23,11 +23,8 @@ export class Transfer {
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     amount!: bigint
 
-    /**
-     * TODO should be reviewed
-     */
     @Column_("text", {nullable: true})
-    currency!: string | undefined | null
+    token!: string | undefined | null
 
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
@@ -37,6 +34,6 @@ export class Transfer {
     @ManyToOne_(() => Account, {nullable: true})
     to!: Account
 
-    @Column_("text", {nullable: false})
-    addressChainPrefix!: string
+    @Column_("text", {nullable: true})
+    addressChainPrefix!: string | undefined | null
 }

@@ -4,26 +4,24 @@ import { Ctx } from '../../processor';
 import { SubSclRemark } from '../../remark';
 import { SubSclSource } from '../../remark/types';
 import { WalletClient } from '../../walletClient';
-import { ensureUsernameRegistrationEntity } from '../../entities/usernameRegistration';
 import {
-  RefundStatus,
-  RegistrationStatus,
-  UsernameRegistrationOrderError
-} from '../../model';
+  ensureUsernameRegistrationEntity,
+  createAndGetTransfer
+} from '../../entities';
+import { OrderRefundStatus, OrderRequestStatus, OrderError } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
-import { createAndGetTransfer } from '../../entities/transfer';
 import { getChain } from '../../chains';
 import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
 export async function handleDomainRegisterPayment(
-  callData: CallParsed<'D_REG_PAY', true>,
+  callData: CallParsed<'DMN_REG', true>,
   ctx: Ctx
 ) {
   const {
     amount,
     remark: {
-      content: { domainName, registrant }
+      content: { domainName, target }
     }
   } = callData;
   const buyerChainClient = BuyerChainClient.getInstance();
@@ -55,16 +53,15 @@ export async function handleDomainRegisterPayment(
   const saveUnameRegEntityOnFail = async (
     errorData: ChainActionResult
   ): Promise<void> => {
-    usernameRegistrationEntity.status = RegistrationStatus.Failed;
-    usernameRegistrationEntity.refundStatus = RefundStatus.Waiting;
-    usernameRegistrationEntity.errorRegistration =
-      new UsernameRegistrationOrderError(errorData);
+    usernameRegistrationEntity.status = OrderRequestStatus.Failed;
+    usernameRegistrationEntity.refundStatus = OrderRefundStatus.Waiting;
+    usernameRegistrationEntity.errorRegistration = new OrderError(errorData);
 
     await ctx.store.save(usernameRegistrationEntity);
   };
 
   /**
-   * Check is username available for registration
+   * Check is domain available for registration
    */
   const existingDomain = await buyerChainClient.getRegisteredDomains([
     domainName
@@ -84,18 +81,18 @@ export async function handleDomainRegisterPayment(
   }
   if (existingDomain.length > 0) {
     const domainsOwnedByRegistrant = existingDomain.find(
-      (d) => WalletClient.addressToHex(d.get('owner').toString()) === registrant
+      (d) => WalletClient.addressToHex(d.get('owner').toString()) === target
     );
 
     if (domainsOwnedByRegistrant) {
       ctx.log.info({
         success: true,
-        status: 'Domain is already owned by registrant'
+        status: 'Domain is already owned by target'
       });
-      usernameRegistrationEntity.status = RegistrationStatus.Processing;
+      usernameRegistrationEntity.status = OrderRequestStatus.Processing;
       /**
        * In this case status marked as Processing and squid will check next
-       * blocks for "D_REG_COMP" remark which will confirm that username is
+       * blocks for "DMN_REG_OK" remark which will confirm that domain is
        * registered and registration order can be completed. Usually such case
        * can be occurred if squid is reindexing the chain from the start. We
        * don's need initiate refund in this case.
@@ -106,8 +103,8 @@ export async function handleDomainRegisterPayment(
         ...buyerChainClient.clientError.getError(20100),
         ...(await buyerChainClient.getBlockMeta())
       });
-      usernameRegistrationEntity.status = RegistrationStatus.Failed;
-      usernameRegistrationEntity.refundStatus = RefundStatus.Waiting;
+      usernameRegistrationEntity.status = OrderRequestStatus.Failed;
+      usernameRegistrationEntity.refundStatus = OrderRefundStatus.Waiting;
       /**
        * This situation be occurred in both cases reindexing squid from the
        * start and normal work. If it's reindexing (not head of archive),
@@ -121,7 +118,7 @@ export async function handleDomainRegisterPayment(
   }
 
   /**
-   * Check username ending
+   * Check domain ending
    */
 
   // TODO get supported tlds from blockchain "domains.supportedTlds"
@@ -139,7 +136,7 @@ export async function handleDomainRegisterPayment(
   }
 
   /**
-   * Check username length
+   * Check domain length
    */
 
   // TODO use toNumber instead of toHuman, add wrapper
@@ -177,30 +174,29 @@ export async function handleDomainRegisterPayment(
    */
 
   try {
-    const { domainName, registrant, currency, attemptId } =
-      callData.remark.content;
+    const { domainName, target, token, opId } = callData.remark.content;
 
     const result = await buyerChainClient.registerDomain({
-      registrant: WalletClient.addressFromHex(registrant, 28),
+      target: WalletClient.addressFromHex(target, 28),
       domain: domainName
     });
     console.log('handleDomainRegisterPayment result >>>');
     console.dir(result, { depth: null });
 
     if (result.success && result.status === 201) {
-      usernameRegistrationEntity.status = RegistrationStatus.Processing;
+      usernameRegistrationEntity.status = OrderRequestStatus.Processing;
 
       await ctx.store.save(usernameRegistrationEntity);
 
-      const compRmrkMsg: SubSclSource<'D_REG_COMP'> = {
-        title: config.sellerChain.remark.title,
+      const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
+        protName: config.sellerChain.remark.protName,
         version: config.sellerChain.remark.version,
-        action: 'D_REG_COMP',
+        action: 'DMN_REG_OK',
         content: {
           domainName: domainName,
-          registrant: registrant,
-          currency: currency,
-          attemptId: attemptId
+          target: target,
+          token: token,
+          opId: opId
         }
       };
 

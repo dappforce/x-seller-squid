@@ -1,6 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
-import {Username} from "./username.model"
-import {UsernameRegistrationOrder} from "./usernameRegistrationOrder.model"
+import {Domain} from "./domain.model"
+import {DomainRegistrationOrder} from "./domainRegistrationOrder.model"
 import {EnergyBox} from "./energyBox.model"
 
 @Entity_()
@@ -12,11 +12,11 @@ export class Account {
     @PrimaryColumn_()
     id!: string
 
-    @OneToMany_(() => Username, e => e.owner)
-    usernames!: Username[]
+    @OneToMany_(() => Domain, e => e.owner)
+    domains!: Domain[]
 
-    @OneToMany_(() => UsernameRegistrationOrder, e => e.registrant)
-    unameRegistrationOrders!: UsernameRegistrationOrder[]
+    @OneToMany_(() => DomainRegistrationOrder, e => e.target)
+    domainRegistrationOrders!: DomainRegistrationOrder[]
 
     @OneToMany_(() => EnergyBox, e => e.owner)
     energyBoxes!: EnergyBox[]
