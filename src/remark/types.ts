@@ -18,6 +18,34 @@ export type DomainRegisterRefundContent = {
   opId: string;
 };
 
+export type EnergyGeneratePayContent = {
+  energyAmount: string;
+  target: string;
+  token: string;
+  opId: string;
+};
+export type EnergyGenerateCompletedContent = {
+  energyAmount: string;
+  target: string;
+  token: string;
+  opId: string;
+};
+
+export type EnergyGenerateRefundContent = {
+  energyAmount: string;
+  target: string;
+  token: string;
+  opId: string;
+};
+
+export type RemarkContentProps =
+  | keyof DomainRegisterPayContent
+  | keyof DomainRegisterCompletedContent
+  | keyof DomainRegisterRefundContent
+  | keyof EnergyGeneratePayContent
+  | keyof EnergyGenerateCompletedContent
+  | keyof EnergyGenerateRefundContent;
+
 export type SubSclRemarkMessageVersion = '0.1';
 export type SubSclRemarkMessageAction =
   | 'DMN_REG'
@@ -44,11 +72,11 @@ export type SubSclRemarkMessageContent<
   : A extends 'DMN_REG_REFUND'
   ? DomainRegisterRefundContent
   : A extends 'NRG_GEN'
-  ? DomainRegisterRefundContent // TODO must be implemented
+  ? EnergyGeneratePayContent
   : A extends 'NRG_GEN_OK'
-  ? DomainRegisterRefundContent // TODO must be implemented
+  ? EnergyGenerateCompletedContent
   : A extends 'NRG_GEN_REFUND'
-  ? DomainRegisterRefundContent // TODO must be implemented
+  ? EnergyGenerateRefundContent
   : never;
 
 export type SubSclRemarkMessage<
@@ -65,35 +93,53 @@ export type SubSclRemarkMessage<
 export type SubSclSource<A extends SubSclRemarkMessageAction | string = ''> =
   Omit<SubSclRemarkMessage<A, true>, 'valid'>;
 
-//TODO add type for variable
-export const REMARK_CONTENT_VERSION_ACTION_MAP = {
+type VersionActionPropsMap = Record<
+  SubSclRemarkMessageVersion,
+  | Record<'DMN_REG', Record<keyof DomainRegisterPayContent, number>>
+  | Record<'DMN_REG_OK', Record<keyof DomainRegisterCompletedContent, number>>
+  | Record<'DMN_REG_REFUND', Record<keyof DomainRegisterRefundContent, number>>
+  | Record<'NRG_GEN', Record<keyof EnergyGeneratePayContent, number>>
+  | Record<'NRG_GEN_OK', Record<keyof EnergyGenerateCompletedContent, number>>
+  | Record<'NRG_GEN_REFUND', Record<keyof EnergyGenerateRefundContent, number>>
+>;
+
+export const REMARK_CONTENT_VERSION_ACTION_MAP: VersionActionPropsMap = {
   '0.1': {
     DMN_REG: {
       opId: 3,
       target: 4,
       domainName: 5,
-      token: 6,
+      token: 6
     },
     DMN_REG_OK: {
       opId: 3,
       target: 4,
       domainName: 5,
-      token: 6,
+      token: 6
     },
     DMN_REG_REFUND: {
       opId: 3,
       target: 4,
       domainName: 5,
-      token: 6,
+      token: 6
     },
     NRG_GEN: {
-      // TODO must be implemented
+      opId: 3,
+      target: 4,
+      energyAmount: 5,
+      token: 6
     },
     NRG_GEN_OK: {
-      // TODO must be implemented
+      opId: 3,
+      target: 4,
+      energyAmount: 5,
+      token: 6
     },
     NRG_GEN_REFUND: {
-      // TODO must be implemented
-    },
+      opId: 3,
+      target: 4,
+      energyAmount: 5,
+      token: 6
+    }
   }
 };

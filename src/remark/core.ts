@@ -1,6 +1,13 @@
 import assert from 'assert';
 import {
+  DomainRegisterCompletedContent,
+  DomainRegisterPayContent,
+  DomainRegisterRefundContent,
+  EnergyGenerateCompletedContent,
+  EnergyGeneratePayContent,
+  EnergyGenerateRefundContent,
   REMARK_CONTENT_VERSION_ACTION_MAP,
+  RemarkContentProps,
   SubSclRemarkMessage,
   SubSclRemarkMessageAction,
   SubSclRemarkMessageProtocolName,
@@ -8,7 +15,7 @@ import {
   SubSclSource
 } from './types';
 import { SubSclRemarkConfig, SubSclRemarkConfigData } from './config';
-
+import { decorateRemarkContentValue } from './decorators';
 
 export class SubSclRemark {
   private maybeRemarkMsg: unknown;
@@ -103,14 +110,18 @@ export class SubSclRemark {
 
     try {
       const contentPropsMap =
+        // @ts-ignore
         REMARK_CONTENT_VERSION_ACTION_MAP[this.message.version][
           this.message.action
         ];
       for (const contentPropName in contentPropsMap) {
         // @ts-ignore
-        msg[contentPropsMap[contentPropName]] =
+        msg[contentPropsMap[contentPropName]] = decorateRemarkContentValue(
+          this.message.action,
+          contentPropName as RemarkContentProps,
           // @ts-ignore
-          this.message.content[contentPropName];
+          this.message.content[contentPropName]
+        );
       }
     } catch (e) {
       console.log(e);
@@ -152,17 +163,22 @@ export class SubSclRemark {
     };
 
     try {
-      const contentPropsMap =
+      const contentPropsMap: Record<RemarkContentProps, number> =
+        // @ts-ignore
         REMARK_CONTENT_VERSION_ACTION_MAP[this.msgParsed.version][
           this.msgParsed.action
         ];
+
       for (const contentPropName in contentPropsMap) {
         // @ts-ignore
         if (!this.msgParsed.content) this.msgParsed.content = {};
         // @ts-ignore
-        this.msgParsed.content[contentPropName] =
+        this.msgParsed.content[contentPropName] = decorateRemarkContentValue(
+          this.msgParsed.action,
+          contentPropName as RemarkContentProps,
           // @ts-ignore
-          chunkedMsg[contentPropsMap[contentPropName]];
+          chunkedMsg[contentPropsMap[contentPropName]]
+        );
       }
 
       this.msgParsed.valid = true;
@@ -173,7 +189,9 @@ export class SubSclRemark {
 
   private isValidProtName(src: string): boolean {
     // TODO remove type casting
-    return !!(src && this.protNames.has(src as SubSclRemarkMessageProtocolName));
+    return !!(
+      src && this.protNames.has(src as SubSclRemarkMessageProtocolName)
+    );
   }
   private isValidVersion(src: string): boolean {
     // TODO remove type casting

@@ -1,20 +1,45 @@
 import { SubSclRemark } from '../src/remark';
-import { SubSclRemarkMessageProtocolName, SubSclSource } from '../src/remark/types';
+import {
+  SubSclRemarkMessageProtocolName,
+  SubSclSource
+} from '../src/remark/types';
+
+function getRemarkMessage(
+  testRemarkProtName: string,
+  protocolVersion: string,
+  action: string,
+  target: string
+) {
+  return `${testRemarkProtName}::${protocolVersion}::${action}::0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000::${target}::testDomain.sub::DOT`;
+}
 
 describe('Remark Unit', () => {
   const testRemarkTitle: SubSclRemarkMessageProtocolName = 'test_remark_title';
-  const subsclRemarkMessageDomainRegPay = `${testRemarkTitle}::D_REG_PAY::0.1::testDomain.sub::0xde9f30be09a7cc7f0014261362069b66ce798d7a990def1b7deaa8b4b2a57668::DOT::0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000`;
+  const protocolVersion = '0.1';
+
+  const testPublicKey = '5H6bn23yFMF2P32AVaqgWoQemLtpGqLZWTMaVsYGZLo8A1bo';
+  const testAddressSubsocial =
+    '3t5NA8UKsGzrCDMfp8XMEBghiYthWGXGsHbjtJY45NUJDY5P';
+  const testAddressPolkadot =
+    '162tvMK378WVpa2gTDtgexEocxtTy8thax64fAXd7RpeLXCL';
+  const testAddressHex =
+    '0xde9f30be09a7cc7f0014261362069b66ce798d7a990def1b7deaa8b4b2a57668';
+
+  const subsclRemarkMessageDomainRegPay = getRemarkMessage(
+    testRemarkTitle,
+    protocolVersion,
+    'DMN_REG',
+    testAddressSubsocial
+  );
   const subsclRemarkSourceDomainRegPay: SubSclSource<'DMN_REG'> = {
     protName: testRemarkTitle,
-    version: '0.1',
+    version: protocolVersion,
     action: 'DMN_REG',
     content: {
       domainName: 'testDomain.sub',
-      target:
-        '0xde9f30be09a7cc7f0014261362069b66ce798d7a990def1b7deaa8b4b2a57668',
+      target: testAddressSubsocial,
       token: 'DOT',
-      opId:
-        '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
+      opId: '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
     }
   };
 
@@ -35,8 +60,58 @@ describe('Remark Unit', () => {
       subsclRemarkMessageDomainRegPay
     ).message;
 
+    expect(remarkSource.valid).toEqual(true);
+
     expect({ ...subsclRemarkSourceDomainRegPay, valid: true }).toMatchObject(
       remarkSource
     );
+  });
+
+  test('SubSclRemark from Message to Source with invalid protocol version', () => {
+    const isValid = new SubSclRemark().fromMessage(
+      getRemarkMessage(testRemarkTitle, '0.2', 'DMN_REG', testAddressSubsocial)
+    ).isValidMessage;
+
+    expect(isValid).toEqual(false);
+  });
+
+  test('SubSclRemark from Message with target as public key to Source with target as Subsocial', () => {
+    const source = new SubSclRemark().fromMessage(
+      getRemarkMessage(testRemarkTitle, '0.1', 'DMN_REG', testPublicKey)
+    ).message;
+
+    console.log(source);
+
+    expect(source).toMatchObject({
+      protName: testRemarkTitle,
+      version: protocolVersion,
+      action: 'DMN_REG',
+      content: {
+        domainName: 'testDomain.sub',
+        target: testAddressSubsocial,
+        token: 'DOT',
+        opId: '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
+      }
+    });
+  });
+
+  test('SubSclRemark from Source with target as public key to Message with target as Subsocial', () => {
+    const message = new SubSclRemark().fromSource(
+      {
+        protName: testRemarkTitle,
+        version: protocolVersion,
+        action: 'DMN_REG',
+        content: {
+          domainName: 'testDomain.sub',
+          target: testPublicKey,
+          token: 'DOT',
+          opId: '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
+        }
+      }
+    ).toMessage();
+
+    console.log(message);
+
+    expect(message).toEqual(getRemarkMessage(testRemarkTitle, '0.1', 'DMN_REG', testAddressSubsocial));
   });
 });

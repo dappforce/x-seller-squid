@@ -81,7 +81,11 @@ export async function handleDomainRegisterPayment(
   }
   if (existingDomain.length > 0) {
     const domainsOwnedByRegistrant = existingDomain.find(
-      (d) => WalletClient.addressToHex(d.get('owner').toString()) === target
+      (d) =>
+        WalletClient.addressFromAnyToFormatted(
+          d.get('owner').toString(),
+          28
+        ) === target
     );
 
     if (domainsOwnedByRegistrant) {

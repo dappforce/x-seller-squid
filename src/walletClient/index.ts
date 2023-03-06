@@ -34,6 +34,11 @@ export class WalletClient {
     return encodeAddress(addressHex, prefix);
   }
 
+  public static addressFromAnyToFormatted(addressAny: string, prefix: number) {
+    const publicKey = decodeAddress(addressAny);
+    return encodeAddress(publicKey, prefix);
+  }
+
   public clientValid(): boolean {
     return !!(
       this.accs.sellerTreasury &&
