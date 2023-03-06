@@ -1,5 +1,5 @@
 import { CallParsed, ParsedCallsDataList } from '../parser/types';
-import { SubSclRemarkMessageAction } from '../remark/types';
+import { SocialRemarkMessageAction } from '../remark/types';
 import { handleDomainRegisterPayment } from './domain';
 import { Ctx } from '../processor';
 import { handleUsernameRegistrationCompleted } from './domain/registrationCompleted';
@@ -12,7 +12,7 @@ export async function handleSellerActions(
   for (const actionsData of parsedActions) {
     if (!actionsData.remark.valid) continue; // TODO add handling for such case
 
-    switch (actionsData.remark.action as SubSclRemarkMessageAction) {
+    switch (actionsData.remark.action as SocialRemarkMessageAction) {
       case 'DMN_REG': {
         await handleDomainRegisterPayment(
           actionsData as CallParsed<'DMN_REG'>,

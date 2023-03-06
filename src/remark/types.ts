@@ -46,8 +46,8 @@ export type RemarkContentProps =
   | keyof EnergyGenerateCompletedContent
   | keyof EnergyGenerateRefundContent;
 
-export type SubSclRemarkMessageVersion = '0.1';
-export type SubSclRemarkMessageAction =
+export type SocialRemarkMessageVersion = '0.1';
+export type SocialRemarkMessageAction =
   | 'DMN_REG'
   | 'DMN_REG_OK'
   | 'DMN_REG_REFUND'
@@ -55,7 +55,7 @@ export type SubSclRemarkMessageAction =
   | 'NRG_GEN_OK'
   | 'NRG_GEN_REFUND';
 
-export type SubSclRemarkMessageProtocolName =
+export type SocialRemarkMessageProtocolName =
   | 'test_remark_title'
   | 't_subscl'
   | 't2_subscl'
@@ -63,8 +63,8 @@ export type SubSclRemarkMessageProtocolName =
   | 't4_subscl'
   | 'social';
 
-export type SubSclRemarkMessageContent<
-  A extends SubSclRemarkMessageAction | string
+export type SocialRemarkMessageContent<
+  A extends SocialRemarkMessageAction | string
 > = A extends 'DMN_REG'
   ? DomainRegisterPayContent
   : A extends 'DMN_REG_OK'
@@ -79,22 +79,22 @@ export type SubSclRemarkMessageContent<
   ? EnergyGenerateRefundContent
   : never;
 
-export type SubSclRemarkMessage<
-  A extends SubSclRemarkMessageAction | string = '',
+export type SocialRemarkMessage<
+  A extends SocialRemarkMessageAction | string = '',
   V extends true | false = false
 > = {
-  protName: SubSclRemarkMessageProtocolName;
-  version: SubSclRemarkMessageVersion;
+  protName: SocialRemarkMessageProtocolName;
+  version: SocialRemarkMessageVersion;
   action: A;
   valid: V; // TODO make this prop optional
-  content: V extends true ? SubSclRemarkMessageContent<A> : null;
+  content: V extends true ? SocialRemarkMessageContent<A> : null;
 };
 
-export type SubSclSource<A extends SubSclRemarkMessageAction | string = ''> =
-  Omit<SubSclRemarkMessage<A, true>, 'valid'>;
+export type SubSclSource<A extends SocialRemarkMessageAction | string = ''> =
+  Omit<SocialRemarkMessage<A, true>, 'valid'>;
 
 type VersionActionPropsMap = Record<
-  SubSclRemarkMessageVersion,
+  SocialRemarkMessageVersion,
   | Record<'DMN_REG', Record<keyof DomainRegisterPayContent, number>>
   | Record<'DMN_REG_OK', Record<keyof DomainRegisterCompletedContent, number>>
   | Record<'DMN_REG_REFUND', Record<keyof DomainRegisterRefundContent, number>>

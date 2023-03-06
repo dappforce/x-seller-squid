@@ -1,11 +1,11 @@
 import {
-  SubSclRemarkMessage,
-  SubSclRemarkMessageAction
+  SocialRemarkMessage,
+  SocialRemarkMessageAction
 } from '../remark/types';
 import { CallItem } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 
 export interface CallParsed<
-  A extends SubSclRemarkMessageAction | string = '',
+  A extends SocialRemarkMessageAction | string = '',
   V extends boolean = true
 > {
   remarkCallId: string;
@@ -17,7 +17,7 @@ export interface CallParsed<
   from?: string;
   to?: string;
   amount: bigint;
-  remark: SubSclRemarkMessage<A, V>;
+  remark: SocialRemarkMessage<A, V>;
 }
 
 export type ParsedCallsDataList = CallParsed<

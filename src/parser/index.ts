@@ -1,5 +1,5 @@
 import { SystemRemarkCall } from '../types/generated/calls';
-import { SubSclRemark } from '../remark';
+import { SocialRemark } from '../remark';
 import { CallParsed, ParsedCallsDataList } from './types';
 import { Ctx } from '../processor';
 import {
@@ -19,12 +19,12 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
         if (!item.call.success || !item.call.origin) continue;
 
         let call = new SystemRemarkCall(ctx, item.call);
-        let remark: SubSclRemark | null = null;
+        let remark: SocialRemark | null = null;
 
         if (call.isV9190) {
           let data = call.asV9190;
-          remark = new SubSclRemark().fromMessage(
-            SubSclRemark.bytesToString(data.remark)
+          remark = new SocialRemark().fromMessage(
+            SocialRemark.bytesToString(data.remark)
           );
         }
 

@@ -1,8 +1,8 @@
-import { RemarkContentProps, SubSclRemarkMessageAction } from './types';
+import { RemarkContentProps, SocialRemarkMessageAction } from './types';
 import { addressFromAnyToFormatted } from './utils';
 
 export function decorateRemarkContentValue(
-  action: SubSclRemarkMessageAction,
+  action: SocialRemarkMessageAction,
   propName: RemarkContentProps,
   value: string
 ) {

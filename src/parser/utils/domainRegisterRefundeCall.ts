@@ -1,4 +1,4 @@
-import { SubSclRemark } from '../../remark';
+import { SocialRemark } from '../../remark';
 import { Block, Ctx } from '../../processor';
 import {
   AllCallItem,
@@ -13,7 +13,7 @@ import { getChain } from '../../chains';
 const { config } = getChain();
 
 export function parseDomainRegisterRefundCall(
-  remark: SubSclRemark,
+  remark: SocialRemark,
   callItem: RemarkCallItem,
   blockHeader: Block['header'],
   ctx: Ctx

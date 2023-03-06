@@ -1,7 +1,7 @@
 import { CallParsed } from '../../parser/types';
 import { BuyerChainClient, SellerChainClient } from '../../wsClient';
 import { Ctx } from '../../processor';
-import { SubSclRemark } from '../../remark';
+import { SocialRemark } from '../../remark';
 import { SubSclSource } from '../../remark/types';
 import { WalletClient } from '../../walletClient';
 import {
@@ -206,7 +206,7 @@ export async function handleDomainRegisterPayment(
 
       const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
         WalletClient.getInstance().account.sellerTreasury,
-        new SubSclRemark().fromSource(compRmrkMsg).toMessage()
+        new SocialRemark().fromSource(compRmrkMsg).toMessage()
       );
 
       console.log('compRemarkResult >>> ');

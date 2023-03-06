@@ -1,9 +1,9 @@
-import { SubSclRemark } from '../../remark';
+import { SocialRemark } from '../../remark';
 import { CallParsed, RemarkCallItem } from '../types';
 import { Block, Ctx } from '../../processor';
 
 export function parseDomainRegisterCompletedCall(
-  remark: SubSclRemark,
+  remark: SocialRemark,
   callItem: RemarkCallItem,
   blockHeader: Block['header'],
   ctx: Ctx

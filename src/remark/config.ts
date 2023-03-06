@@ -1,15 +1,15 @@
-import { SubSclRemarkMessageAction, SubSclRemarkMessageProtocolName, SubSclRemarkMessageVersion } from './types';
+import { SocialRemarkMessageAction, SocialRemarkMessageProtocolName, SocialRemarkMessageVersion } from './types';
 
-export type SubSclRemarkConfigData = {
-  protNames?: SubSclRemarkMessageProtocolName[];
-  actions?: SubSclRemarkMessageAction[];
-  versions?: SubSclRemarkMessageVersion[];
+export type SocialRemarkConfigData = {
+  protNames?: SocialRemarkMessageProtocolName[];
+  actions?: SocialRemarkMessageAction[];
+  versions?: SocialRemarkMessageVersion[];
 };
 
-export class SubSclRemarkConfig {
-  private static instance: SubSclRemarkConfig;
+export class SocialRemarkConfig {
+  private static instance: SocialRemarkConfig;
 
-  private conf: Required<SubSclRemarkConfigData> = {
+  private conf: Required<SocialRemarkConfigData> = {
     protNames: [
       'test_remark_title',
       't_subscl',
@@ -29,18 +29,18 @@ export class SubSclRemarkConfig {
     versions: ['0.1']
   };
 
-  static getInstance(): SubSclRemarkConfig {
-    if (!SubSclRemarkConfig.instance) {
-      SubSclRemarkConfig.instance = new SubSclRemarkConfig();
+  static getInstance(): SocialRemarkConfig {
+    if (!SocialRemarkConfig.instance) {
+      SocialRemarkConfig.instance = new SocialRemarkConfig();
     }
-    return SubSclRemarkConfig.instance;
+    return SocialRemarkConfig.instance;
   }
 
   public get config() {
     return this.conf;
   }
 
-  public setConfig(data: SubSclRemarkConfigData) {
+  public setConfig(data: SocialRemarkConfigData) {
     this.conf = {
       ...this.conf,
       ...data

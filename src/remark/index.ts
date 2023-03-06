@@ -1,2 +1,2 @@
-export { SubSclRemark } from './core';
-export { SubSclRemarkMessage } from './types';
+export { SocialRemark } from './core';
+export { SocialRemarkMessage } from './types';

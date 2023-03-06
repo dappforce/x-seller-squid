@@ -1,4 +1,4 @@
-import { SubSclRemark } from '../src/remark';
+import { SocialRemark } from '../src/remark';
 import { SubSclSource } from '../src/remark/types';
 import { WalletClient } from '../src/walletClient';
 

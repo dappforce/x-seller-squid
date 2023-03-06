@@ -1,5 +1,5 @@
-import { SubSclRemark } from '../src/remark';
-import { SubSclRemarkMessageProtocolName, SubSclSource } from '../src/remark/types';
+import { SocialRemark } from '../src/remark';
+import { SocialRemarkMessageProtocolName, SubSclSource } from '../src/remark/types';
 import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
 import { WalletClient } from '../src/walletClient';
 import { BN } from 'bn.js';
@@ -14,7 +14,7 @@ describe('Register domain with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
   const validDomainPrice = new BN('10000000000'); // 0.01
   const invalidDomainPrice = new BN('100000000'); // 0.0001
-  const testRemarkTitle: SubSclRemarkMessageProtocolName = 't4_subscl';
+  const testRemarkTitle: SocialRemarkMessageProtocolName = 't4_subscl';
 
   jest.setTimeout(1000 * 60 * 5);
 
@@ -49,10 +49,10 @@ describe('Register domain with completion flow', () => {
       }
     };
 
-    console.log(new SubSclRemark().fromSource(regRmrkMsg).toMessage());
+    console.log(new SocialRemark().fromSource(regRmrkMsg).toMessage());
 
     const remarkTx = sellerWsClient.api.tx.system.remark(
-      new SubSclRemark().fromSource(regRmrkMsg).toMessage()
+      new SocialRemark().fromSource(regRmrkMsg).toMessage()
     );
 
     await new Promise<void>(async (resolve, reject) => {

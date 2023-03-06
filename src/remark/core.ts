@@ -8,45 +8,45 @@ import {
   EnergyGenerateRefundContent,
   REMARK_CONTENT_VERSION_ACTION_MAP,
   RemarkContentProps,
-  SubSclRemarkMessage,
-  SubSclRemarkMessageAction,
-  SubSclRemarkMessageProtocolName,
-  SubSclRemarkMessageVersion,
+  SocialRemarkMessage,
+  SocialRemarkMessageAction,
+  SocialRemarkMessageContent,
+  SocialRemarkMessageProtocolName,
+  SocialRemarkMessageVersion,
   SubSclSource
 } from './types';
-import { SubSclRemarkConfig, SubSclRemarkConfigData } from './config';
+import { SocialRemarkConfig, SocialRemarkConfigData } from './config';
 import { decorateRemarkContentValue } from './decorators';
 
-export class SubSclRemark {
+export class SocialRemark {
   private maybeRemarkMsg: unknown;
 
-  static setConfig(data: SubSclRemarkConfigData) {
-    SubSclRemarkConfig.getInstance().setConfig(data);
+  static setConfig(data: SocialRemarkConfigData) {
+    SocialRemarkConfig.getInstance().setConfig(data);
   }
 
-  private msgParsed: SubSclRemarkMessage<
-    SubSclRemarkMessageAction,
+  private msgParsed: SocialRemarkMessage<
+    SocialRemarkMessageAction,
     boolean
   > | null = null;
 
-  private protNames: Set<SubSclRemarkMessageProtocolName> = new Set(
-    SubSclRemarkConfig.getInstance().config.protNames
+  private protNames: Set<SocialRemarkMessageProtocolName> = new Set(
+    SocialRemarkConfig.getInstance().config.protNames
   );
 
-  private versions: Set<SubSclRemarkMessageVersion> = new Set(
-    SubSclRemarkConfig.getInstance().config.versions
+  private versions: Set<SocialRemarkMessageVersion> = new Set(
+    SocialRemarkConfig.getInstance().config.versions
   );
 
-  private actions: Set<SubSclRemarkMessageAction> = new Set(
-    SubSclRemarkConfig.getInstance().config.actions
+  private actions: Set<SocialRemarkMessageAction> = new Set(
+    SocialRemarkConfig.getInstance().config.actions
   );
 
   private msgDelimiter: string = '::';
 
-  public get message(): SubSclRemarkMessage<
-    SubSclRemarkMessageAction,
-    boolean
-  > {
+  public get message():
+    | SocialRemarkMessage<SocialRemarkMessageAction, boolean>
+    | never {
     if (!this.msgParsed) throw new Error('Message is not available.');
     return this.msgParsed!;
   }
@@ -70,15 +70,15 @@ export class SubSclRemark {
     return Buffer.from(src).toString('utf-8');
   }
 
-  public fromMessage(maybeRemarkMsg: unknown): SubSclRemark {
+  public fromMessage(maybeRemarkMsg: unknown): SocialRemark {
     this.maybeRemarkMsg = maybeRemarkMsg;
     this.parseMsg(maybeRemarkMsg);
     return this;
   }
 
   public fromSource(
-    rmrkSrc: SubSclSource<SubSclRemarkMessageAction>
-  ): SubSclRemark {
+    rmrkSrc: SubSclSource<SocialRemarkMessageAction>
+  ): SocialRemark {
     let isSrcValid = true;
 
     if (
@@ -92,10 +92,30 @@ export class SubSclRemark {
     // TODO add content validation
 
     if (!isSrcValid) throw new Error('Remark source is invalid');
-    this.msgParsed = {
-      ...rmrkSrc,
-      valid: true
-    };
+
+    try {
+      this.msgParsed = {
+        ...rmrkSrc,
+        valid: true
+      };
+      const contentPropsMap =
+        // @ts-ignore
+        REMARK_CONTENT_VERSION_ACTION_MAP[rmrkSrc.version][rmrkSrc.action];
+      for (const contentPropName in contentPropsMap) {
+        // @ts-ignore
+        this.msgParsed.content[contentPropName] = decorateRemarkContentValue(
+          this.msgParsed.action,
+          contentPropName as RemarkContentProps,
+          // @ts-ignore
+          rmrkSrc.content[contentPropName]
+        );
+      }
+    } catch (e) {
+      console.log(e);
+      throw new Error(
+        'Error has been occurred during remark message creation.'
+      );
+    }
     return this;
   }
 
@@ -142,7 +162,7 @@ export class SubSclRemark {
     if (!srcMsg || typeof srcMsg !== 'string') return;
 
     const chunkedMsg = (
-      Buffer.isBuffer(srcMsg) ? SubSclRemark.bytesToString(srcMsg) : srcMsg
+      Buffer.isBuffer(srcMsg) ? SocialRemark.bytesToString(srcMsg) : srcMsg
     ).split(this.msgDelimiter);
 
     if (
@@ -155,9 +175,9 @@ export class SubSclRemark {
       return;
 
     this.msgParsed = {
-      protName: chunkedMsg[0] as SubSclRemarkMessageProtocolName,
-      version: chunkedMsg[1] as SubSclRemarkMessageVersion,
-      action: chunkedMsg[2] as SubSclRemarkMessageAction,
+      protName: chunkedMsg[0] as SocialRemarkMessageProtocolName,
+      version: chunkedMsg[1] as SocialRemarkMessageVersion,
+      action: chunkedMsg[2] as SocialRemarkMessageAction,
       valid: false,
       content: null
     };
@@ -190,15 +210,15 @@ export class SubSclRemark {
   private isValidProtName(src: string): boolean {
     // TODO remove type casting
     return !!(
-      src && this.protNames.has(src as SubSclRemarkMessageProtocolName)
+      src && this.protNames.has(src as SocialRemarkMessageProtocolName)
     );
   }
   private isValidVersion(src: string): boolean {
     // TODO remove type casting
-    return !!(src && this.versions.has(src as SubSclRemarkMessageVersion));
+    return !!(src && this.versions.has(src as SocialRemarkMessageVersion));
   }
   private isValidAction(src: string): boolean {
     // TODO remove type casting
-    return !!(src && this.actions.has(src as SubSclRemarkMessageAction));
+    return !!(src && this.actions.has(src as SocialRemarkMessageAction));
   }
 }

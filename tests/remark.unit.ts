@@ -1,6 +1,6 @@
-import { SubSclRemark } from '../src/remark';
+import { SocialRemark } from '../src/remark';
 import {
-  SubSclRemarkMessageProtocolName,
+  SocialRemarkMessageProtocolName,
   SubSclSource
 } from '../src/remark/types';
 
@@ -14,7 +14,7 @@ function getRemarkMessage(
 }
 
 describe('Remark Unit', () => {
-  const testRemarkTitle: SubSclRemarkMessageProtocolName = 'test_remark_title';
+  const testRemarkTitle: SocialRemarkMessageProtocolName = 'test_remark_title';
   const protocolVersion = '0.1';
 
   const testPublicKey = '5H6bn23yFMF2P32AVaqgWoQemLtpGqLZWTMaVsYGZLo8A1bo';
@@ -44,19 +44,19 @@ describe('Remark Unit', () => {
   };
 
   beforeAll(() => {
-    SubSclRemark.setConfig({ protNames: [testRemarkTitle] });
+    SocialRemark.setConfig({ protNames: [testRemarkTitle] });
   });
 
-  test('SubSclRemark from Source to Message', () => {
-    const remarkMessage = new SubSclRemark()
+  test('SocialRemark from Source to Message', () => {
+    const remarkMessage = new SocialRemark()
       .fromSource(subsclRemarkSourceDomainRegPay)
       .toMessage();
 
     expect(remarkMessage).toEqual(subsclRemarkMessageDomainRegPay);
   });
 
-  test('SubSclRemark from Message to Source', () => {
-    const remarkSource = new SubSclRemark().fromMessage(
+  test('SocialRemark from Message to Source', () => {
+    const remarkSource = new SocialRemark().fromMessage(
       subsclRemarkMessageDomainRegPay
     ).message;
 
@@ -67,20 +67,18 @@ describe('Remark Unit', () => {
     );
   });
 
-  test('SubSclRemark from Message to Source with invalid protocol version', () => {
-    const isValid = new SubSclRemark().fromMessage(
+  test('SocialRemark from Message to Source with invalid protocol version', () => {
+    const isValid = new SocialRemark().fromMessage(
       getRemarkMessage(testRemarkTitle, '0.2', 'DMN_REG', testAddressSubsocial)
     ).isValidMessage;
 
     expect(isValid).toEqual(false);
   });
 
-  test('SubSclRemark from Message with target as public key to Source with target as Subsocial', () => {
-    const source = new SubSclRemark().fromMessage(
+  test('SocialRemark from Message with target as public key to Source with target as Subsocial', () => {
+    const source = new SocialRemark().fromMessage(
       getRemarkMessage(testRemarkTitle, '0.1', 'DMN_REG', testPublicKey)
     ).message;
-
-    console.log(source);
 
     expect(source).toMatchObject({
       protName: testRemarkTitle,
@@ -95,9 +93,9 @@ describe('Remark Unit', () => {
     });
   });
 
-  test('SubSclRemark from Source with target as public key to Message with target as Subsocial', () => {
-    const message = new SubSclRemark().fromSource(
-      {
+  test('SocialRemark from Source with target as public key to Message with target as Subsocial', () => {
+    const message = new SocialRemark()
+      .fromSource({
         protName: testRemarkTitle,
         version: protocolVersion,
         action: 'DMN_REG',
@@ -107,11 +105,28 @@ describe('Remark Unit', () => {
           token: 'DOT',
           opId: '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
         }
+      })
+      .toMessage();
+
+    expect(message).toEqual(
+      getRemarkMessage(testRemarkTitle, '0.1', 'DMN_REG', testAddressSubsocial)
+    );
+  });
+
+  test('SocialRemark from Source with target as public key to SocialRemark instance with target as Subsocial', () => {
+    const remarkInst = new SocialRemark().fromSource({
+      protName: testRemarkTitle,
+      version: protocolVersion,
+      action: 'DMN_REG',
+      content: {
+        domainName: 'testDomain.sub',
+        target: testPublicKey,
+        token: 'DOT',
+        opId: '0xa6a548df942e68a32fab3d325a25d8b5306a938aafc6bf205c2edc516cb92000'
       }
-    ).toMessage();
+    });
 
-    console.log(message);
-
-    expect(message).toEqual(getRemarkMessage(testRemarkTitle, '0.1', 'DMN_REG', testAddressSubsocial));
+    expect(remarkInst.isValidMessage).toEqual(true);
+    expect(testAddressSubsocial).toEqual(remarkInst.message.content!.target);
   });
 });

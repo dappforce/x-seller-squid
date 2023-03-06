@@ -1,5 +1,5 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor';
-import { SubSclRemarkMessageProtocolName, SubSclRemarkMessageVersion } from '../../remark/types';
+import { SocialRemarkMessageProtocolName, SocialRemarkMessageVersion } from '../../remark/types';
 
 export type ProcessorConfig = {
   sellerChain: {
@@ -11,8 +11,8 @@ export type ProcessorConfig = {
       sellerTreasury: { mnemonic: string };
     };
     remark: {
-      protName: SubSclRemarkMessageProtocolName;
-      version: SubSclRemarkMessageVersion;
+      protName: SocialRemarkMessageProtocolName;
+      version: SocialRemarkMessageVersion;
     }
   };
   buyerChain: {

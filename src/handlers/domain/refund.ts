@@ -3,7 +3,7 @@ import { Ctx } from '../../processor';
 import { WalletClient } from '../../walletClient';
 import { SellerChainClient } from '../../wsClient';
 import { SubSclSource } from '../../remark/types';
-import { SubSclRemark } from '../../remark';
+import { SocialRemark } from '../../remark';
 import { getChain } from '../../chains';
 import { updateDomainRegistrationOrderRefundStatus } from '../../entities';
 import {
@@ -75,10 +75,10 @@ export async function refundDomainRegistrationPayment(
     }
   };
 
-  console.log(new SubSclRemark().fromSource(refundRmrkMsg).toMessage());
+  console.log(new SocialRemark().fromSource(refundRmrkMsg).toMessage());
 
   const remarkTx = sellerWsClient.api.tx.system.remark(
-    new SubSclRemark().fromSource(refundRmrkMsg).toMessage()
+    new SocialRemark().fromSource(refundRmrkMsg).toMessage()
   );
 
   try {

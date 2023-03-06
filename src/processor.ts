@@ -11,7 +11,7 @@ import { SellerChainClient, BuyerChainClient } from './wsClient';
 import { WalletClient } from './walletClient';
 import { handleSellerActions } from './handlers';
 import { parseCalls } from './parser';
-import { SubSclRemark } from './remark';
+import { SocialRemark } from './remark';
 import { getChain } from './chains';
 
 const { config } = getChain();
@@ -41,7 +41,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await WalletClient.getInstance().init();
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
-  SubSclRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
+  SocialRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
 
   let callsData = parseCalls(ctx);
 
