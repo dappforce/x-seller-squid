@@ -5,23 +5,24 @@ import { SocialRemark } from '../../remark';
 import { SubSclSource } from '../../remark/types';
 import { WalletClient } from '../../walletClient';
 import {
-  ensureUsernameRegistrationEntity,
+  ensureDomainRegistrationOrder,
   createAndGetTransfer
 } from '../../entities';
 import { OrderRefundStatus, OrderRequestStatus, OrderError } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { getChain } from '../../chains';
-import { refundDomainRegistrationPayment } from './refund';
+// import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
 export async function handleDomainRegisterPayment(
   callData: CallParsed<'DMN_REG', true>,
+  isHeadOfEventsPool: boolean,
   ctx: Ctx
-) {
+): Promise<string | null> {
   const {
     amount,
     remark: {
-      content: { domainName, target }
+      content: { domainName, target, opId, token }
     }
   } = callData;
   const buyerChainClient = BuyerChainClient.getInstance();
@@ -37,7 +38,7 @@ export async function handleDomainRegisterPayment(
     ctx.log.error(
       `Paid amount is not enough for registrations. Required ${registrationPrice.toString()} but transferred ${amount.toString()}`
     );
-    return;
+    return null;
   }
 
   /**
@@ -45,19 +46,30 @@ export async function handleDomainRegisterPayment(
    * where process can be terminated. So we don't need wast time for redundant
    * async functionality.
    */
-  const usernameRegistrationEntity = await ensureUsernameRegistrationEntity(
+  const domainRegistrationOrder = await ensureDomainRegistrationOrder(
     callData,
     ctx,
-    await createAndGetTransfer(callData, ctx)
+    await createAndGetTransfer(
+      {
+        blockHash: callData.blockHash,
+        txIndex: callData.transferEventIndexInBlock,
+        extrinsicHash: callData.extrinsicHash,
+        from: callData.from,
+        to: callData.to,
+        amount: callData.amount,
+        token
+      },
+      ctx
+    )
   );
   const saveUnameRegEntityOnFail = async (
     errorData: ChainActionResult
   ): Promise<void> => {
-    usernameRegistrationEntity.status = OrderRequestStatus.Failed;
-    usernameRegistrationEntity.refundStatus = OrderRefundStatus.Waiting;
-    usernameRegistrationEntity.errorRegistration = new OrderError(errorData);
+    domainRegistrationOrder.status = OrderRequestStatus.Failed;
+    domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
+    domainRegistrationOrder.errorRegistration = new OrderError(errorData);
 
-    await ctx.store.save(usernameRegistrationEntity);
+    await ctx.store.save(domainRegistrationOrder);
   };
 
   /**
@@ -76,9 +88,11 @@ export async function handleDomainRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
-    return;
+    // if (ctx.isHead && isHeadOfEventsPool)
+    //   await refundDomainRegistrationPayment(callData, ctx);
+    return opId;
   }
+
   if (existingDomain.length > 0) {
     const domainsOwnedByRegistrant = existingDomain.find(
       (d) =>
@@ -93,7 +107,7 @@ export async function handleDomainRegisterPayment(
         success: true,
         status: 'Domain is already owned by target'
       });
-      usernameRegistrationEntity.status = OrderRequestStatus.Processing;
+      domainRegistrationOrder.status = OrderRequestStatus.Processing;
       /**
        * In this case status marked as Processing and squid will check next
        * blocks for "DMN_REG_OK" remark which will confirm that domain is
@@ -101,24 +115,28 @@ export async function handleDomainRegisterPayment(
        * can be occurred if squid is reindexing the chain from the start. We
        * don's need initiate refund in this case.
        */
+      await ctx.store.save(domainRegistrationOrder);
+      return null;
     } else {
       ctx.log.error({
         success: false,
         ...buyerChainClient.clientError.getError(20100),
         ...(await buyerChainClient.getBlockMeta())
       });
-      usernameRegistrationEntity.status = OrderRequestStatus.Failed;
-      usernameRegistrationEntity.refundStatus = OrderRefundStatus.Waiting;
+      domainRegistrationOrder.status = OrderRequestStatus.Failed;
+      domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
       /**
        * This situation be occurred in both cases reindexing squid from the
        * start and normal work. If it's reindexing (not head of archive),
        * refund action will be delayed till the head. If it's head, refund
        * should be initiated immediately.
        */
-      if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
+      // if (ctx.isHead && isHeadOfEventsPool)
+      //   await refundDomainRegistrationPayment(callData, ctx);
+
+      await ctx.store.save(domainRegistrationOrder);
+      return opId;
     }
-    await ctx.store.save(usernameRegistrationEntity);
-    return;
   }
 
   /**
@@ -135,8 +153,9 @@ export async function handleDomainRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
-    return;
+    // if (ctx.isHead && isHeadOfEventsPool)
+    //   await refundDomainRegistrationPayment(callData, ctx);
+    return opId;
   }
 
   /**
@@ -156,8 +175,9 @@ export async function handleDomainRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
-    return;
+    // if (ctx.isHead && isHeadOfEventsPool)
+    //   await refundDomainRegistrationPayment(callData, ctx);
+    return opId;
   }
 
   // TODO review is required
@@ -169,8 +189,9 @@ export async function handleDomainRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
-    return;
+    // if (ctx.isHead && isHeadOfEventsPool)
+    //   await refundDomainRegistrationPayment(callData, ctx);
+    return opId;
   }
 
   /**
@@ -188,9 +209,9 @@ export async function handleDomainRegisterPayment(
     console.dir(result, { depth: null });
 
     if (result.success && result.status === 201) {
-      usernameRegistrationEntity.status = OrderRequestStatus.Processing;
+      domainRegistrationOrder.status = OrderRequestStatus.Processing;
 
-      await ctx.store.save(usernameRegistrationEntity);
+      await ctx.store.save(domainRegistrationOrder);
 
       const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
         protName: config.sellerChain.remark.protName,
@@ -211,6 +232,7 @@ export async function handleDomainRegisterPayment(
 
       console.log('compRemarkResult >>> ');
       console.dir(compRemarkResult, { depth: null });
+      return null;
     } else {
       const eData = {
         success: false,
@@ -220,7 +242,9 @@ export async function handleDomainRegisterPayment(
       };
       ctx.log.error(eData);
       await saveUnameRegEntityOnFail(eData);
-      if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
+      // if (ctx.isHead && isHeadOfEventsPool)
+      //   await refundDomainRegistrationPayment(callData, ctx);
+      return opId;
     }
   } catch (rejected) {
     console.log('handleDomainRegisterPayment result >>>');
@@ -235,6 +259,8 @@ export async function handleDomainRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    if (ctx.isHead) await refundDomainRegistrationPayment(callData, ctx);
+    // if (ctx.isHead && isHeadOfEventsPool)
+    //   await refundDomainRegistrationPayment(callData, ctx);
+    return opId;
   }
 }

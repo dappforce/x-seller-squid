@@ -4,6 +4,7 @@ import {Account} from "./account.model"
 import {Transfer} from "./transfer.model"
 import {OrderRequestStatus} from "./_orderRequestStatus"
 import {OrderRefundStatus} from "./_orderRefundStatus"
+import {NrgRemark} from "./_nrgRemark"
 import {OrderError} from "./_orderError"
 
 @Entity_()
@@ -54,14 +55,14 @@ export class EnergyBox {
     @Column_("varchar", {length: 9, nullable: true})
     refundStatus!: OrderRefundStatus | undefined | null
 
-    @Column_("jsonb", {nullable: true})
-    generationRmrk!: unknown | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new NrgRemark(undefined, obj)}, nullable: true})
+    generationRmrk!: NrgRemark | undefined | null
 
-    @Column_("jsonb", {nullable: true})
-    confirmationRmrk!: unknown | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new NrgRemark(undefined, obj)}, nullable: true})
+    confirmationRmrk!: NrgRemark | undefined | null
 
-    @Column_("jsonb", {nullable: true})
-    refundRmrk!: unknown | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new NrgRemark(undefined, obj)}, nullable: true})
+    refundRmrk!: NrgRemark | undefined | null
 
     @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OrderError(undefined, obj)}, nullable: true})
     errorGeneration!: OrderError | undefined | null

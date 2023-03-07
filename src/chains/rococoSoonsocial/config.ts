@@ -16,7 +16,7 @@ export const config: ProcessorConfig = {
       }
     },
     remark: {
-      protName: 't4_subscl',
+      protName: 't10_subscl',
       version: '0.1'
     }
   },

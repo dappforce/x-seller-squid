@@ -4,18 +4,29 @@ import { handleDomainRegisterPayment } from './domain';
 import { Ctx } from '../processor';
 import { handleUsernameRegistrationCompleted } from './domain/registrationCompleted';
 import { handleDomainRegistrationRefundCompleted } from './domain/refundCompleted';
+import {
+  handleRefundActionOnWaitingAll,
+  handleRefundActionOnWaitingFromList
+} from './domain/refund';
+import { getOrCreateProcessingState } from '../entities/procesingState';
+import { getLastBatchBlockHeight } from '../utils';
 
 export async function handleSellerActions(
   parsedActions: ParsedCallsDataList,
   ctx: Ctx
 ) {
-  for (const actionsData of parsedActions) {
+  const currentBatchDmnRegRefundActions: string[] = [];
+
+  for (const [itemIndex, actionsData] of parsedActions.entries()) {
     if (!actionsData.remark.valid) continue; // TODO add handling for such case
+    const isHeadOfEventsPool = itemIndex < parsedActions.length - 1;
+    let refundAction: string | null = null;
 
     switch (actionsData.remark.action as SocialRemarkMessageAction) {
       case 'DMN_REG': {
-        await handleDomainRegisterPayment(
+        refundAction = await handleDomainRegisterPayment(
           actionsData as CallParsed<'DMN_REG'>,
+          isHeadOfEventsPool,
           ctx
         );
         break;
@@ -23,6 +34,7 @@ export async function handleSellerActions(
       case 'DMN_REG_OK': {
         await handleUsernameRegistrationCompleted(
           actionsData as CallParsed<'DMN_REG_OK'>,
+          isHeadOfEventsPool,
           ctx
         );
         break;
@@ -30,6 +42,7 @@ export async function handleSellerActions(
       case 'DMN_REG_REFUND': {
         await handleDomainRegistrationRefundCompleted(
           actionsData as CallParsed<'DMN_REG_REFUND'>,
+          isHeadOfEventsPool,
           ctx
         );
         break;
@@ -48,5 +61,30 @@ export async function handleSellerActions(
       }
       default:
     }
+
+    if (refundAction) currentBatchDmnRegRefundActions.push(refundAction);
+  }
+
+  const processingState = await getOrCreateProcessingState(ctx);
+
+  if (
+    ctx.isHead &&
+    processingState.domainRegRefundFullProcessingAtBlock + 1000 <
+      getLastBatchBlockHeight(ctx)
+  ) {
+    /**
+     * Check each 1000 blocks === about 3 hours
+     */
+
+    await handleRefundActionOnWaitingAll(ctx);
+
+    processingState.domainRegRefundFullProcessingAtBlock =
+      getLastBatchBlockHeight(ctx);
+    await ctx.store.save(processingState);
+  } else if (ctx.isHead && currentBatchDmnRegRefundActions.length > 0) {
+    await handleRefundActionOnWaitingFromList(
+      currentBatchDmnRegRefundActions,
+      ctx
+    );
   }
 }

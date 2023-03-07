@@ -10,6 +10,7 @@ export type ApiClientListeners = {
 export type ChainActionResult = {
   success: boolean;
   txHash?: string;
+  txIndex?: number;
   blockHeight?: number;
   blockHash?: string;
   reason?: string;

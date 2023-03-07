@@ -1,7 +1,7 @@
 import assert from 'assert';
 import * as ss58 from '@subsquid/ss58';
 import { decodeHex, toHex } from '@subsquid/util-internal-hex';
-
+import { Ctx } from '../processor';
 
 export function encodeAccount(
   id: Uint8Array | string | null,
@@ -18,4 +18,8 @@ export function encodeAccount(
     return ss58.codec(prefix).encode(id);
   }
   return id.toString();
+}
+
+export function getLastBatchBlockHeight(ctx: Ctx) {
+  return ctx.blocks[ctx.blocks.length - 1].header.height;
 }

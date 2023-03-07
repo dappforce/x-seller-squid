@@ -5,6 +5,7 @@ import {Domain} from "./domain.model"
 import {Transfer} from "./transfer.model"
 import {OrderRequestStatus} from "./_orderRequestStatus"
 import {OrderRefundStatus} from "./_orderRefundStatus"
+import {DmnRegRemark} from "./_dmnRegRemark"
 import {OrderError} from "./_orderError"
 
 @Entity_()
@@ -68,14 +69,14 @@ export class DomainRegistrationOrder {
     @Column_("varchar", {length: 9, nullable: true})
     refundStatus!: OrderRefundStatus | undefined | null
 
-    @Column_("jsonb", {nullable: true})
-    purchaseRmrk!: unknown | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new DmnRegRemark(undefined, obj)}, nullable: true})
+    purchaseRmrk!: DmnRegRemark | undefined | null
 
-    @Column_("jsonb", {nullable: true})
-    confirmationRmrk!: unknown | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new DmnRegRemark(undefined, obj)}, nullable: true})
+    confirmationRmrk!: DmnRegRemark | undefined | null
 
-    @Column_("jsonb", {nullable: true})
-    refundRmrk!: unknown | undefined | null
+    @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new DmnRegRemark(undefined, obj)}, nullable: true})
+    refundRmrk!: DmnRegRemark | undefined | null
 
     @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.toJSON(), from: obj => obj == null ? undefined : new OrderError(undefined, obj)}, nullable: true})
     errorRegistration!: OrderError | undefined | null

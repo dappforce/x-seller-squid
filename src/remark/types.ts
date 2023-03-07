@@ -57,10 +57,7 @@ export type SocialRemarkMessageAction =
 
 export type SocialRemarkMessageProtocolName =
   | 'test_remark_title'
-  | 't_subscl'
-  | 't2_subscl'
-  | 't3_subscl'
-  | 't4_subscl'
+  | 't10_subscl'
   | 'social';
 
 export type SocialRemarkMessageContent<

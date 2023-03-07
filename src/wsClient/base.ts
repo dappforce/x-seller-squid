@@ -191,6 +191,8 @@ export class BaseChainClient extends WsClient {
             resolve({
               success: true,
               blockHash: status.asInBlock.toHex(),
+              txHash: txHash.toHex(),
+              txIndex,
               status: 201
             });
             unsub();
@@ -227,7 +229,9 @@ export class BaseChainClient extends WsClient {
             resolve({
               success: true,
               blockHash: status.asInBlock.toHex(),
-              status: 201
+              txHash: txHash.toHex(),
+              status: 201,
+              txIndex
             });
             unsub();
             return;

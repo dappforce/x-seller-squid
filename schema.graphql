@@ -34,9 +34,9 @@ type DomainRegistrationOrder @entity {
   refundTx: Transfer
   status: OrderRequestStatus
   refundStatus: OrderRefundStatus
-  purchaseRmrk: JSON
-  confirmationRmrk: JSON
-  refundRmrk: JSON
+  purchaseRmrk: DmnRegRemark
+  confirmationRmrk: DmnRegRemark
+  refundRmrk: DmnRegRemark
   errorRegistration: OrderError
   errorRefund: OrderError
 }
@@ -55,23 +55,49 @@ type EnergyBox @entity {
   refundTx: Transfer
   status: OrderRequestStatus
   refundStatus: OrderRefundStatus
-  generationRmrk: JSON
-  confirmationRmrk: JSON
-  refundRmrk: JSON
+  generationRmrk: NrgRemark
+  confirmationRmrk: NrgRemark
+  refundRmrk: NrgRemark
   errorGeneration: OrderError
   errorRefund: OrderError
 }
 
 type Transfer @entity {
   id: ID!
-  blockHeight: Int!
   blockHash: String!
-  timestamp: DateTime!
+  extrinsicHash: String!
   amount: BigInt!
   token: String
   from: Account!
   to: Account!
   addressChainPrefix: String
+}
+
+type DmnRegRemark {
+  protName: String!
+  version: String!
+  action: String!
+  content: DmnRegRemarkContent!
+}
+
+type DmnRegRemarkContent {
+  opId: String!
+  target: String!
+  domainName: String!
+  token: String!
+}
+
+type NrgRemark {
+  protName: String!
+  version: String!
+  action: String!
+  content: NrgRemarkContent!
+}
+type NrgRemarkContent {
+  opId: String!
+  target: String!
+  energyAmount: String!
+  token: String!
 }
 
 enum OrderRequestStatus {
@@ -89,4 +115,9 @@ enum OrderRefundStatus {
 type OrderError {
   status: Int
   reason: String
+}
+
+type ProcessingState @entity {
+  id: ID!
+  domainRegRefundFullProcessingAtBlock: Int!
 }

@@ -11,14 +11,11 @@ export class Transfer {
     @PrimaryColumn_()
     id!: string
 
-    @Column_("int4", {nullable: false})
-    blockHeight!: number
-
     @Column_("text", {nullable: false})
     blockHash!: string
 
-    @Column_("timestamp with time zone", {nullable: false})
-    timestamp!: Date
+    @Column_("text", {nullable: false})
+    extrinsicHash!: string
 
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     amount!: bigint

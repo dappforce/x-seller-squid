@@ -2,6 +2,6 @@ export { getOrCreateAccount } from './account';
 export { getOrCreateDomain } from './domain';
 export { createAndGetTransfer } from './transfer';
 export {
-  ensureUsernameRegistrationEntity,
+  ensureDomainRegistrationOrder,
   updateDomainRegistrationOrderRefundStatus
 } from './domainRegistration';

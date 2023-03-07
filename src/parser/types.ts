@@ -2,20 +2,26 @@ import {
   SocialRemarkMessage,
   SocialRemarkMessageAction
 } from '../remark/types';
-import { CallItem } from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
+import {
+  CallItem,
+  EventItem
+} from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
 
 export interface CallParsed<
   A extends SocialRemarkMessageAction | string = '',
   V extends boolean = true
 > {
   remarkCallId: string;
-  batchAllCallId?: string;
+  batchAllCallId: string;
+  transferEventIndexInBlock: number;
   blockNumber: number;
   blockHash: string;
+  txHash: string;
+  txIndex: string;
   timestamp: Date;
-  extrinsicHash?: string;
-  from?: string;
-  to?: string;
+  extrinsicHash: string;
+  from: string;
+  to: string;
   amount: bigint;
   remark: SocialRemarkMessage<A, V>;
 }
@@ -29,19 +35,17 @@ export type ParsedCallsDataList = CallParsed<
   | 'NRG_GEN_REFUND'
 >[];
 
-export type TransferData<C extends CallParsed> = Required<
-  Pick<
-    C,
-    | 'batchAllCallId'
-    | 'blockNumber'
-    | 'blockHash'
-    | 'timestamp'
-    | 'extrinsicHash'
-    | 'from'
-    | 'to'
-    | 'amount'
-  >
->;
+export type BalanceTransferData = {
+  // blockNumber: number;
+  extrinsicHash: string;
+  txIndex: number;
+  blockHash: string;
+  // timestamp: Date;
+  from: string;
+  to: string;
+  amount: bigint;
+  token: string;
+};
 
 export const requiredPurchaseBatchCalls = new Set([
   'Balances.transfer',
@@ -69,5 +73,22 @@ export type AllCallItem = CallItem<
       parent: true;
     };
     extrinsic: true;
+  }
+>;
+
+export type BalanceTransferEventItem = EventItem<
+  'Balances.Transfer',
+  {
+    event: {
+      args: true;
+      call: {
+        args: true;
+        origin: true;
+        parent: {
+          id: string;
+          name: string;
+        };
+      };
+    };
   }
 >;

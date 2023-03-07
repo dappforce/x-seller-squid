@@ -1,9 +1,11 @@
 import { CallParsed } from '../../parser/types';
 import { Ctx } from '../../processor';
 import { OrderRequestStatus, DomainRegistrationOrder } from '../../model';
+import { ensureDomainRegRemark } from '../../entities/remark';
 
 export async function handleUsernameRegistrationCompleted(
   callData: CallParsed<'DMN_REG_OK', true>,
+  isHeadOfEventsPool: boolean,
   ctx: Ctx
 ) {
   const { remark } = callData;
@@ -30,7 +32,7 @@ export async function handleUsernameRegistrationCompleted(
   }
 
   existingRegistrationEntity.status = OrderRequestStatus.Successful;
-  existingRegistrationEntity.confirmationRmrk = remark;
+  existingRegistrationEntity.confirmationRmrk = ensureDomainRegRemark(remark);
   existingRegistrationEntity.confirmedBlockHashSellerChain = callData.blockHash;
   existingRegistrationEntity.confirmedRemarkCallId = callData.remarkCallId;
 

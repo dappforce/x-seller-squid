@@ -8,13 +8,12 @@ import {
   parseDomainRegisterRefundCall
 } from './utils';
 
-
 export function parseCalls(ctx: Ctx): ParsedCallsDataList {
   let callsParsed: ParsedCallsDataList = [];
 
   for (let block of ctx.blocks) {
     for (let item of block.items) {
-      if (item.name == 'System.remark') {
+      if (item.kind === 'call' && item.name == 'System.remark') {
         // TODO need check this check
         if (!item.call.success || !item.call.origin) continue;
 
@@ -37,7 +36,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
             const data = parseDomainRegisterPayCall(
               remark,
               item,
-              block.header,
+              block,
               ctx
             );
             if (data) callsParsed.push(data);
@@ -47,7 +46,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
             const data = parseDomainRegisterCompletedCall(
               remark,
               item,
-              block.header,
+              block,
               ctx
             );
             if (data) callsParsed.push(data);
@@ -57,7 +56,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
             const data = parseDomainRegisterRefundCall(
               remark,
               item,
-              block.header,
+              block,
               ctx
             );
             if (data) callsParsed.push(data);

@@ -2,15 +2,18 @@ import {
   OrderRefundStatus,
   OrderRequestStatus,
   Transfer,
-  DomainRegistrationOrder
+  DomainRegistrationOrder,
+  DmnRegRemark,
+  DmnRegRemarkContent
 } from '../model';
 import { Ctx } from '../processor';
 import { CallParsed } from '../parser/types';
 import { getOrCreateAccount } from './account';
 import { getOrCreateDomain } from './domain';
 import { BuyerChainClient } from '../wsClient';
+import { ensureDomainRegRemark } from './remark';
 
-export async function ensureUsernameRegistrationEntity(
+export async function ensureDomainRegistrationOrder(
   callData: CallParsed<'DMN_REG'>,
   ctx: Ctx,
   purchaseTx?: Transfer
@@ -27,7 +30,7 @@ export async function ensureUsernameRegistrationEntity(
     purchaseTx: purchaseTx ?? null,
     status: OrderRequestStatus.Processing,
     refundStatus: OrderRefundStatus.None,
-    purchaseRmrk: remark
+    purchaseRmrk: ensureDomainRegRemark(remark)
   });
 }
 
