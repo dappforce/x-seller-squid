@@ -74,7 +74,8 @@ export class BuyerChainClient extends BaseChainClient {
           .signAndSend(
             WalletClient.getInstance().account.domainRegistrar,
             async (resp) => {
-              const { status, txHash, txIndex, dispatchError } = resp;
+              const { status, txHash, txIndex, dispatchError, isCompleted } =
+                resp;
 
               console.log('txHash >>>');
               console.dir(txHash.toHex(), { depth: null });
@@ -110,6 +111,10 @@ export class BuyerChainClient extends BaseChainClient {
                 return;
               } else {
                 console.log(`Status of registration: ${status.type}`);
+              }
+
+              if (isCompleted) {
+                unsub();
               }
             }
           );

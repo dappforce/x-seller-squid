@@ -12,6 +12,8 @@ import { getOrCreateAccount } from './account';
 import { getOrCreateDomain } from './domain';
 import { BuyerChainClient } from '../wsClient';
 import { ensureDomainRegRemark } from './remark';
+import { getChain } from '../chains';
+const { config } = getChain();
 
 export async function ensureDomainRegistrationOrder(
   callData: CallParsed<'DMN_REG'>,
@@ -22,11 +24,13 @@ export async function ensureDomainRegistrationOrder(
 
   return new DomainRegistrationOrder({
     id: remark.content.opId,
+    createdAtBlock: callData.blockNumber,
+    createdAtTime: callData.timestamp,
     blockHashSellerChain: callData.blockHash,
     target: await getOrCreateAccount(remark.content.target, ctx),
     domain: await getOrCreateDomain(remark.content.domainName, ctx),
     price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(),
-    token: 'DOT', // TODO should be reviewed
+    token: config.sellerChain.token, // TODO should be reviewed
     purchaseTx: purchaseTx ?? null,
     status: OrderRequestStatus.Processing,
     refundStatus: OrderRefundStatus.None,

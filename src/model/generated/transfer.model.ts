@@ -17,6 +17,9 @@ export class Transfer {
     @Column_("text", {nullable: false})
     extrinsicHash!: string
 
+    @Column_("int4", {nullable: false})
+    eventIndex!: number
+
     @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
     amount!: bigint
 

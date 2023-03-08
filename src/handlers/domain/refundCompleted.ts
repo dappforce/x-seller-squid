@@ -33,6 +33,8 @@ export async function handleDomainRegistrationRefundCompleted(
     return;
   }
 
+  existingRegistrationEntity.updatedAtBlock = callData.blockNumber;
+  existingRegistrationEntity.updatedAtTime = callData.timestamp;
   existingRegistrationEntity.refundStatus = OrderRefundStatus.Fulfilled;
   existingRegistrationEntity.refundRmrk = ensureDomainRegRemark(remark);
   existingRegistrationEntity.refundBlockHashSellerChain = callData.blockHash;

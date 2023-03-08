@@ -10,13 +10,15 @@ export async function createAndGetTransfer(
   transferData: BalanceTransferData,
   ctx: Ctx
 ): Promise<Transfer> {
-  const { blockHash, extrinsicHash, txIndex, from, to, amount, token } = transferData; // TODO types should be reviewed
+  const { blockHash, extrinsicHash, txIndex, from, to, amount, token } =
+    transferData; // TODO types should be reviewed
 
   const transfer = new Transfer({
     id: `${blockHash}-${txIndex}`,
     addressChainPrefix: config.sellerChain.prefix.toString(),
     from: await getOrCreateAccount(from, ctx),
     to: await getOrCreateAccount(to, ctx),
+    eventIndex: txIndex,
     amount,
     blockHash,
     extrinsicHash,

@@ -19,6 +19,10 @@ type Account @entity {
 type DomainRegistrationOrder @entity {
   "Attempt ID from remark and it's the same value for all purchase, confirmation and refund(if it's existing) remarks"
   id: ID!
+  createdAtBlock: Int!
+  createdAtTime: DateTime!
+  updatedAtBlock: Int
+  updatedAtTime: DateTime
   blockHashSellerChain: String
   blockHashUnameHostChain: String
   confirmedBlockHashSellerChain: String
@@ -66,6 +70,7 @@ type Transfer @entity {
   id: ID!
   blockHash: String!
   extrinsicHash: String!
+  eventIndex: Int!
   amount: BigInt!
   token: String
   from: Account!

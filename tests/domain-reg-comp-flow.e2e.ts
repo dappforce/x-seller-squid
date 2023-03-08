@@ -34,7 +34,6 @@ describe('Register domain with completion flow', () => {
     if (!buyerAccount) return;
     if (!sellerWsClient) return;
 
-
     /**
      * Create Balances.Transfer transaction
      */
@@ -52,7 +51,7 @@ describe('Register domain with completion flow', () => {
       version: '0.1',
       content: {
         opId: `${transferTx.hash.toHex()}-${randomAsNumber()}`,
-        domainName: `tdotdomain${randomAsNumber()}.sub2`,
+        domainName: `tdotdomain${randomAsNumber()}.sub`,
         target: WalletClient.addressToHex(
           process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
@@ -86,7 +85,7 @@ describe('Register domain with completion flow', () => {
         return;
       }
       const unsub = await batchTx.signAndSend(buyerAccount, (resp) => {
-        const { status, txHash, txIndex, dispatchError } = resp;
+        const { status, txHash, txIndex, dispatchError, isCompleted } = resp;
 
         if (dispatchError) {
           console.log(
@@ -122,6 +121,10 @@ describe('Register domain with completion flow', () => {
           return;
         } else {
           console.log(`Status of registration: ${status.type}`);
+        }
+
+        if (isCompleted) {
+          unsub();
         }
       });
     });

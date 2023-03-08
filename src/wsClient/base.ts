@@ -174,7 +174,7 @@ export class BaseChainClient extends WsClient {
       const unsub = await this.api.tx.system
         .remark(msg)
         .signAndSend(sender, async (resp) => {
-          const { status, txHash, txIndex, dispatchError } = resp;
+          const { status, txHash, txIndex, dispatchError, isCompleted } = resp;
 
           if (dispatchError) {
             reject({
@@ -200,6 +200,10 @@ export class BaseChainClient extends WsClient {
           } else {
             console.log(`Status of sending: ${status.type}`);
           }
+
+          if (isCompleted) {
+            unsub();
+          }
         });
     });
   }
@@ -212,7 +216,7 @@ export class BaseChainClient extends WsClient {
       const unsub = await this.api.tx.utility
         .batchAll(transactions)
         .signAndSend(sender, async (resp) => {
-          const { status, txHash, txIndex, dispatchError } = resp;
+          const { status, txHash, txIndex, dispatchError, isCompleted } = resp;
 
           if (dispatchError) {
             reject({
@@ -237,6 +241,10 @@ export class BaseChainClient extends WsClient {
             return;
           } else {
             console.log(`Status of sending: ${status.type}`);
+          }
+
+          if (isCompleted) {
+            unsub();
           }
         });
     });

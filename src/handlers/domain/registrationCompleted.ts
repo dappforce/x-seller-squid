@@ -31,6 +31,8 @@ export async function handleUsernameRegistrationCompleted(
     return;
   }
 
+  existingRegistrationEntity.updatedAtBlock = callData.blockNumber;
+  existingRegistrationEntity.updatedAtTime = callData.timestamp;
   existingRegistrationEntity.status = OrderRequestStatus.Successful;
   existingRegistrationEntity.confirmationRmrk = ensureDomainRegRemark(remark);
   existingRegistrationEntity.confirmedBlockHashSellerChain = callData.blockHash;

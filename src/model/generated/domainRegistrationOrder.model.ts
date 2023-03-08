@@ -20,6 +20,18 @@ export class DomainRegistrationOrder {
     @PrimaryColumn_()
     id!: string
 
+    @Column_("int4", {nullable: false})
+    createdAtBlock!: number
+
+    @Column_("timestamp with time zone", {nullable: false})
+    createdAtTime!: Date
+
+    @Column_("int4", {nullable: true})
+    updatedAtBlock!: number | undefined | null
+
+    @Column_("timestamp with time zone", {nullable: true})
+    updatedAtTime!: Date | undefined | null
+
     @Column_("text", {nullable: true})
     blockHashSellerChain!: string | undefined | null
 
