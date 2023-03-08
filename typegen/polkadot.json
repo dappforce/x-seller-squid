@@ -1,0 +1,7 @@
+{
+  "outDir": "../src/chains/polkadotSubsocial/types",
+  "specVersions": "https://polkadot.archive.subsquid.io/graphql",
+  "events": ["Balances.Transfer"],
+  "calls": ["System.remark"],
+  "storage": []
+}

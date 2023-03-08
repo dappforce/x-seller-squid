@@ -1,15 +1,10 @@
 import { SocialRemark } from '../../remark';
 import { Block, Ctx } from '../../processor';
-import {
-  AllCallItem,
-  CallParsed,
-  RemarkCallItem,
-  requiredPurchaseBatchCalls
-} from '../types';
+import { CallParsed, requiredPurchaseBatchCalls } from '../types';
+import { AllCallItem, RemarkCallItem } from '../../types/common';
 import { encodeAccount } from '../../utils';
-import { UtilityBatchAllCall } from '../../types/generated/calls';
 import { getChain } from '../../chains';
-import { getBalancesTransferEventData } from './getBalancesTransferEventData';
+import { getTransferData } from './getTransferData';
 
 const { config } = getChain();
 
@@ -53,7 +48,7 @@ export function parseDomainRegisterRefundCall(
 
   const batchAllCallId = callItem.call.parent!.id;
 
-  const transferData = getBalancesTransferEventData(block, batchAllCallId, ctx);
+  const transferData = getTransferData(block, batchAllCallId, ctx);
 
   if (!transferData) return null;
 

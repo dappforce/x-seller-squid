@@ -1,11 +1,16 @@
 import { ProcessorConfig } from '../interfaces/processorConfig';
 import * as dotenv from 'dotenv';
+import {
+  SocialRemarkMessageProtocolName,
+  SocialRemarkMessageVersion
+} from '../../remark/types';
 dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
   sellerChain: {
     chainName: 'polkadot',
-    prefix: 'polkadot',
+    prefix: 0,
+    token: 'DOT',
     dataSource: {
       archive: 'https://polkadot.archive.subsquid.io/graphql',
       chain: 'wss://rpc.polkadot.io'
@@ -16,13 +21,18 @@ export const config: ProcessorConfig = {
       }
     },
     remark: {
-      protName: 't10_subscl',
-      version: '0.1'
+      protName:
+        (process.env
+          .POLKADOT_REMARK_PROT_NAME as SocialRemarkMessageProtocolName) ||
+        'social_t_0',
+      version:
+        (process.env
+          .POLKADOT_REMARK_PROT_VERSION as SocialRemarkMessageVersion) || '0.1'
     }
   },
   buyerChain: {
     chainName: 'subsocial',
-    prefix: 'subsocial',
+    prefix: 28,
     dataSource: {
       chain: 'wss://para.f3joule.space'
     },

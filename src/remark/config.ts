@@ -14,7 +14,7 @@ export class SocialRemarkConfig {
   private static instance: SocialRemarkConfig;
 
   private conf: Required<SocialRemarkConfigData> = {
-    protNames: ['test_remark_title', 't10_subscl', 'social'],
+    protNames: ['social_t_0', 'social_t_1', 'social_t_2', 'social'],
     actions: [
       'DMN_REG',
       'DMN_REG_OK',

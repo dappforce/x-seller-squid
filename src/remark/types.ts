@@ -56,8 +56,9 @@ export type SocialRemarkMessageAction =
   | 'NRG_GEN_REFUND';
 
 export type SocialRemarkMessageProtocolName =
-  | 'test_remark_title'
-  | 't10_subscl'
+  | 'social_t_0'
+  | 'social_t_1'
+  | 'social_t_2'
   | 'social';
 
 export type SocialRemarkMessageContent<

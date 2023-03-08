@@ -1,6 +1,7 @@
 import { SocialRemark } from '../../remark';
-import { CallParsed, RemarkCallItem } from '../types';
+import { RemarkCallItem } from '../../types/common';
 import { Block, Ctx } from '../../processor';
+import { CallParsed } from '../types';
 
 export function parseDomainRegisterCompletedCall(
   remark: SocialRemark,

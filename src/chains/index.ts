@@ -1,15 +1,25 @@
 import { ProcessorConfig } from './interfaces/processorConfig';
+import { ChainApi } from './interfaces/chainApi';
 
-function withDecorator({ config }: { config: ProcessorConfig }): {
+function withDecorator({
+  config,
+  api
+}: {
   config: ProcessorConfig;
+  api: ChainApi;
+}): {
+  config: ProcessorConfig;
+  api: ChainApi;
 } {
   return {
-    config
+    config,
+    api
   };
 }
 
 export function getChain(): {
   config: ProcessorConfig;
+  api: ChainApi;
 } {
   switch (process.env.CHAIN) {
     case 'rococoSoonsocial':

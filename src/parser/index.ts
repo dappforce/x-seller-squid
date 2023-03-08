@@ -1,12 +1,13 @@
-import { SystemRemarkCall } from '../types/generated/calls';
 import { SocialRemark } from '../remark';
-import { CallParsed, ParsedCallsDataList } from './types';
+import { ParsedCallsDataList } from './types';
 import { Ctx } from '../processor';
 import {
   parseDomainRegisterPayCall,
   parseDomainRegisterCompletedCall,
   parseDomainRegisterRefundCall
 } from './utils';
+import { getChain } from '../chains';
+const { api } = getChain();
 
 export function parseCalls(ctx: Ctx): ParsedCallsDataList {
   let callsParsed: ParsedCallsDataList = [];
@@ -17,15 +18,9 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
         // TODO need check this check
         if (!item.call.success || !item.call.origin) continue;
 
-        let call = new SystemRemarkCall(ctx, item.call);
-        let remark: SocialRemark | null = null;
-
-        if (call.isV9190) {
-          let data = call.asV9190;
-          remark = new SocialRemark().fromMessage(
-            SocialRemark.bytesToString(data.remark)
-          );
-        }
+        const remark: SocialRemark = new SocialRemark().fromMessage(
+          api.calls.parseSystemRemarkCall(item.call, ctx)
+        );
 
         if (!remark || !remark.isValidMessage) {
           continue;
@@ -33,12 +28,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
 
         switch (remark.message.action) {
           case 'DMN_REG': {
-            const data = parseDomainRegisterPayCall(
-              remark,
-              item,
-              block,
-              ctx
-            );
+            const data = parseDomainRegisterPayCall(remark, item, block, ctx);
             if (data) callsParsed.push(data);
             break;
           }

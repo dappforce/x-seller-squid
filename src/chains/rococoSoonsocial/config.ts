@@ -1,11 +1,16 @@
 import { ProcessorConfig } from '../interfaces/processorConfig';
 import * as dotenv from 'dotenv';
+import {
+  SocialRemarkMessageProtocolName,
+  SocialRemarkMessageVersion
+} from '../../remark/types';
 dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
   sellerChain: {
     chainName: 'rococo',
-    prefix: 'polkadot',
+    prefix: 42,
+    token: 'ROC',
     dataSource: {
       archive: 'https://rococo.archive.subsquid.io/graphql',
       chain: 'wss://rococo-rpc.polkadot.io'
@@ -16,13 +21,18 @@ export const config: ProcessorConfig = {
       }
     },
     remark: {
-      protName: 't10_subscl',
-      version: '0.1'
+      protName:
+        (process.env
+          .ROCOCO_REMARK_PROT_NAME as SocialRemarkMessageProtocolName) ||
+        'social_t_0',
+      version:
+        (process.env
+          .ROCOCO_REMARK_PROT_VERSION as SocialRemarkMessageVersion) || '0.1'
     }
   },
   buyerChain: {
     chainName: 'soonsocial',
-    prefix: 'subsocial',
+    prefix: 28,
     dataSource: {
       chain: 'wss://rco-para.subsocial.network'
     },

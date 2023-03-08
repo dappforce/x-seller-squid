@@ -1,11 +1,17 @@
 import { SubstrateProcessor } from '@subsquid/substrate-processor';
-import { SocialRemarkMessageProtocolName, SocialRemarkMessageVersion } from '../../remark/types';
+import {
+  SocialRemarkMessageProtocolName,
+  SocialRemarkMessageVersion
+} from '../../remark/types';
 
 export type ProcessorConfig = {
   sellerChain: {
     chainName: string;
-    prefix: number | string;
-    dataSource: Required<Parameters<SubstrateProcessor<any>['setDataSource']>[0]>;
+    prefix: number;
+    token: string;
+    dataSource: Required<
+      Parameters<SubstrateProcessor<any>['setDataSource']>[0]
+    >;
     blockRange?: Parameters<SubstrateProcessor<any>['setBlockRange']>[0];
     accounts: {
       sellerTreasury: { mnemonic: string };
@@ -13,11 +19,11 @@ export type ProcessorConfig = {
     remark: {
       protName: SocialRemarkMessageProtocolName;
       version: SocialRemarkMessageVersion;
-    }
+    };
   };
   buyerChain: {
     chainName: string;
-    prefix?: number | string;
+    prefix: number;
     dataSource: { chain: string };
     accounts: {
       domainRegistrar: { mnemonic: string };

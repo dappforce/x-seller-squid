@@ -17,7 +17,7 @@ describe('Register domain with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
   const validDomainPrice = new BN('10000000000'); // 0.01
   const invalidDomainPrice = new BN('100000000'); // 0.0001
-  const testRemarkTitle: SocialRemarkMessageProtocolName = 't10_subscl';
+  const testRemarkTitle: SocialRemarkMessageProtocolName = 'social_t_0';
 
   jest.setTimeout(1000 * 60 * 5);
 
@@ -33,18 +33,26 @@ describe('Register domain with completion flow', () => {
       );
     if (!buyerAccount) return;
     if (!sellerWsClient) return;
+
+
+    /**
+     * Create Balances.Transfer transaction
+     */
     const transferTx = sellerWsClient.api.tx.balances.transfer(
       WalletClient.getInstance().account.sellerTreasury.address,
       validDomainPrice
     );
 
+    /**
+     * Prepare DMN_REG remark message
+     */
     const regRmrkMsg: SubSclSource<'DMN_REG'> = {
       protName: testRemarkTitle,
       action: 'DMN_REG',
       version: '0.1',
       content: {
         opId: `${transferTx.hash.toHex()}-${randomAsNumber()}`,
-        domainName: `tdotdomain${randomAsNumber()}.sub`,
+        domainName: `tdotdomain${randomAsNumber()}.sub2`,
         target: WalletClient.addressToHex(
           process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
@@ -54,15 +62,24 @@ describe('Register domain with completion flow', () => {
 
     console.log(new SocialRemark().fromSource(regRmrkMsg).toMessage());
 
+    /**
+     * Create System.Remark transaction
+     */
     const remarkTx = sellerWsClient.api.tx.system.remark(
       new SocialRemark().fromSource(regRmrkMsg).toMessage()
     );
 
+    /**
+     * Create Utilities.Batch_all transaction
+     */
     const batchTx = sellerWsClient.api.tx.utility.batchAll([
       transferTx,
       remarkTx
     ]);
 
+    /**
+     * Sign and Send Batch_all
+     */
     await new Promise<void>(async (resolve, reject) => {
       if (!sellerWsClient) {
         reject();
@@ -70,15 +87,6 @@ describe('Register domain with completion flow', () => {
       }
       const unsub = await batchTx.signAndSend(buyerAccount, (resp) => {
         const { status, txHash, txIndex, dispatchError } = resp;
-
-        // console.log('txHash >>>');
-        // console.dir(txHash.toHex(), { depth: null });
-        //
-        // console.log('txIndex >>>');
-        // console.dir(txIndex, { depth: null });
-        //
-        // console.log('status >>>');
-        // console.dir(status, { depth: null });
 
         if (dispatchError) {
           console.log(

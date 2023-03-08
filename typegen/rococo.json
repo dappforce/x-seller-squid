@@ -1,0 +1,7 @@
+{
+  "outDir": "../src/chains/rococoSoonsocial/types",
+  "specVersions": "https://rococo.archive.subsquid.io/graphql",
+  "events": ["Balances.Transfer"],
+  "calls": ["System.remark"],
+  "storage": []
+}
