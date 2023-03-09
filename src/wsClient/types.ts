@@ -9,10 +9,12 @@ export type ApiClientListeners = {
 
 export type ChainActionResult = {
   success: boolean;
+  module?: string;
+  reason?: string;
+  status?: string;
   txHash?: string;
   txIndex?: number;
   blockHeight?: number;
   blockHash?: string;
-  reason?: string;
-  status?: number;
+
 };

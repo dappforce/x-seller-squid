@@ -3,8 +3,15 @@ import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
 import { ChainActionResult } from './types';
 import { IpfsContent } from '@subsocial/api/substrate/wrappers';
+import {
+  cryptoWaitReady,
+  decodeAddress,
+  encodeAddress
+} from '@polkadot/util-crypto';
+import { decodeHex, toHex } from '@subsquid/util-internal-hex';
 const { config } = getChain();
 import { BN } from 'bn.js';
+import { StatusesMng } from '../utils/statusesManager';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
@@ -38,6 +45,16 @@ export class BuyerChainClient extends BaseChainClient {
   async getDomainRegistrationPrice(): Promise<bigint> {
     // TODO add implementation
     return BigInt('1000000000');
+  }
+
+  async getDomainsByOwner(account: string): Promise<string[] | null> {
+    try {
+      const resp = await this.api.query.domains.domainsByOwner(account);
+      return ((resp.toHuman() as Array<string>) || []).map((d) => d.toString());
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
   }
 
   async registerDomain({
@@ -85,8 +102,8 @@ export class BuyerChainClient extends BaseChainClient {
 
               if (dispatchError) {
                 reject({
+                  ...StatusesMng.getStatusWithReason('WsClient', 'ErrorCommon'),
                   success: false,
-                  status: 10100,
                   reason: this.getTxSubDispatchErrorMessage(dispatchError),
                   blockHash: this.getTxSubDispatchErrorBlockHash(status)
                 });
@@ -104,8 +121,7 @@ export class BuyerChainClient extends BaseChainClient {
                 );
                 resolve({
                   success: true,
-                  blockHash: status.asInBlock.toHex(),
-                  status: 201
+                  blockHash: status.asInBlock.toHex()
                 });
                 unsub();
                 return;
@@ -121,8 +137,8 @@ export class BuyerChainClient extends BaseChainClient {
       } catch (e: unknown) {
         console.log(e);
         reject({
+          ...StatusesMng.getStatusWithReason('Common', 'ErrorUnknown'),
           success: false,
-          status: 10100,
           reason:
             // @ts-ignore
             e && e.message

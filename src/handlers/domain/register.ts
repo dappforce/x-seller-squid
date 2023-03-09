@@ -11,6 +11,15 @@ import {
 import { OrderRefundStatus, OrderRequestStatus, OrderError } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { getChain } from '../../chains';
+import {
+  validateDomainAvailability,
+  validateDomainMaxLength,
+  validateDomainMinLength,
+  validateDomainTld,
+  validateRegistrationPayment,
+  validateTargetDomainsMaxLimit
+} from './utils/domainValidation';
+import { StatusesMng } from '../../utils/statusesManager';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -30,14 +39,9 @@ export async function handleDomainRegisterPayment(
   /**
    * Check paid amount
    */
+  const transferredAmountValidation = await validateRegistrationPayment(amount);
 
-  const registrationPrice = await buyerChainClient.getDomainRegistrationPrice();
-
-  if (amount < registrationPrice) {
-    // TODO implement handling for this case
-    ctx.log.error(
-      `Paid amount is not enough for registrations. Required ${registrationPrice.toString()} but transferred ${amount.toString()}`
-    );
+  if (!transferredAmountValidation.success) {
     return null;
   }
 
@@ -75,122 +79,73 @@ export async function handleDomainRegisterPayment(
   /**
    * Check is domain available for registration
    */
-  const existingDomain = await buyerChainClient.getRegisteredDomains([
-    domainName
-  ]);
 
-  if (!existingDomain) {
-    const eData = {
-      success: false,
-      status: 10100,
-      reason: `registeredDomains request is failed`,
-      ...(await buyerChainClient.getBlockMeta())
-    };
-    ctx.log.error(eData);
-    await saveUnameRegEntityOnFail(eData);
-    // if (ctx.isHead && isHeadOfEventsPool)
-    //   await refundDomainRegistrationPayment(callData, ctx);
-    return opId;
-  }
+  const dmnAvValidData = await validateDomainAvailability(domainName, target);
 
-  if (existingDomain.length > 0) {
-    const domainsOwnedByRegistrant = existingDomain.find(
-      (d) =>
-        WalletClient.addressFromAnyToFormatted(
-          d.get('owner').toString(),
-          28
-        ) === target
-    );
-
-    if (domainsOwnedByRegistrant) {
-      ctx.log.info({
-        success: true,
-        status: 'Domain is already owned by target'
-      });
-      domainRegistrationOrder.status = OrderRequestStatus.Processing;
-      /**
-       * In this case status marked as Processing and squid will check next
-       * blocks for "DMN_REG_OK" remark which will confirm that domain is
-       * registered and registration order can be completed. Usually such case
-       * can be occurred if squid is reindexing the chain from the start. We
-       * don's need initiate refund in this case.
-       */
-      await ctx.store.save(domainRegistrationOrder);
-      return null;
-    } else {
-      ctx.log.error({
-        success: false,
-        ...buyerChainClient.clientError.getError(20100),
-        ...(await buyerChainClient.getBlockMeta())
-      });
+  if (!dmnAvValidData.success) {
+    if (
+      (dmnAvValidData.module === 'WsClient' &&
+        dmnAvValidData.status === 'ErrorGetRegisteredDomainsFailed') ||
+      (dmnAvValidData.module === 'Domain' &&
+        dmnAvValidData.status === 'ErrorRegUnavailable')
+    ) {
       domainRegistrationOrder.status = OrderRequestStatus.Failed;
       domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
-      /**
-       * This situation be occurred in both cases reindexing squid from the
-       * start and normal work. If it's reindexing (not head of archive),
-       * refund action will be delayed till the head. If it's head, refund
-       * should be initiated immediately.
-       */
-      // if (ctx.isHead && isHeadOfEventsPool)
-      //   await refundDomainRegistrationPayment(callData, ctx);
 
-      await ctx.store.save(domainRegistrationOrder);
+      await saveUnameRegEntityOnFail(dmnAvValidData);
       return opId;
+    }
+
+    if (
+      dmnAvValidData.module === 'Domain' &&
+      dmnAvValidData.status === 'ErrorRegAlreadyOwnedByTarget'
+    ) {
+      domainRegistrationOrder.status = OrderRequestStatus.Processing;
+      await ctx.store.save(domainRegistrationOrder);
+      return null;
     }
   }
 
   /**
    * Check domain ending
    */
-
-  // TODO get supported tlds from blockchain "domains.supportedTlds"
-  const domainNameChunked = domainName.split('.');
-  if (domainNameChunked.length < 2 || domainNameChunked[1] !== 'sub') {
-    const eData = {
-      success: false,
-      ...buyerChainClient.clientError.getError(20200),
-      ...(await buyerChainClient.getBlockMeta())
-    };
-    ctx.log.error(eData);
-    await saveUnameRegEntityOnFail(eData);
-    // if (ctx.isHead && isHeadOfEventsPool)
-    //   await refundDomainRegistrationPayment(callData, ctx);
+  const dmnTldValidData = await validateDomainTld(domainName);
+  if (!dmnTldValidData.success) {
+    await saveUnameRegEntityOnFail(dmnTldValidData);
     return opId;
   }
 
   /**
-   * Check domain length
+   * Check domain MIN length
    */
 
-  // TODO use toNumber instead of toHuman, add wrapper
-  const minDomainLength =
-    buyerChainClient.api.consts.domains.minDomainLength.toString();
+  const dmnMinLengthValidData = await validateDomainMinLength(domainName);
 
-  if (!minDomainLength) {
-    const eData = {
-      success: false,
-      status: 10100,
-      reason: 'minDomainLength request is failed',
-      ...(await buyerChainClient.getBlockMeta())
-    };
-    ctx.log.error(eData);
-    await saveUnameRegEntityOnFail(eData);
-    // if (ctx.isHead && isHeadOfEventsPool)
-    //   await refundDomainRegistrationPayment(callData, ctx);
+  if (!dmnMinLengthValidData.success) {
+    await saveUnameRegEntityOnFail(dmnMinLengthValidData);
     return opId;
   }
 
-  // TODO review is required
-  if (domainName.length < Number.parseInt(minDomainLength)) {
-    const eData = {
-      success: false,
-      ...buyerChainClient.clientError.getError(20300),
-      ...(await buyerChainClient.getBlockMeta())
-    };
-    ctx.log.error(eData);
-    await saveUnameRegEntityOnFail(eData);
-    // if (ctx.isHead && isHeadOfEventsPool)
-    //   await refundDomainRegistrationPayment(callData, ctx);
+  /**
+   * Check domain MAX length
+   */
+
+  const dmnMaxLengthValidData = await validateDomainMaxLength(domainName);
+
+  if (!dmnMaxLengthValidData.success) {
+    await saveUnameRegEntityOnFail(dmnMaxLengthValidData);
+    return opId;
+  }
+
+  /**
+   * Check number of already registered domains by target
+   */
+  const targetMaxRegisteredDmnsValidData = await validateTargetDomainsMaxLimit(
+    target
+  );
+
+  if (!targetMaxRegisteredDmnsValidData.success) {
+    await saveUnameRegEntityOnFail(targetMaxRegisteredDmnsValidData);
     return opId;
   }
 
@@ -205,10 +160,9 @@ export async function handleDomainRegisterPayment(
       target: WalletClient.addressFromHex(target, 28),
       domain: domainName
     });
-    console.log('handleDomainRegisterPayment result >>>');
-    console.dir(result, { depth: null });
+    ctx.log.info(result, 'Domain registration request result');
 
-    if (result.success && result.status === 201) {
+    if (result.success) {
       domainRegistrationOrder.status = OrderRequestStatus.Processing;
 
       await ctx.store.save(domainRegistrationOrder);
@@ -230,28 +184,27 @@ export async function handleDomainRegisterPayment(
         new SocialRemark().fromSource(compRmrkMsg).toMessage()
       );
 
-      console.log('compRemarkResult >>> ');
-      console.dir(compRemarkResult, { depth: null });
+      if (!compRemarkResult.success) {
+        // TODO add handling of such case when domain is registered successfully but DMN_REG_OK remark has not ben sent
+      }
+      ctx.log.info(compRemarkResult, 'DMN_REG_OK remark sending result >>> ');
       return null;
     } else {
       const eData = {
         success: false,
-        reason: 'Error has been occurred',
-        ...buyerChainClient.clientError.getError(10100),
+        ...StatusesMng.getStatusWithReason('Common', 'ErrorUnknown'),
         ...(await buyerChainClient.getBlockMeta())
       };
       ctx.log.error(eData);
       await saveUnameRegEntityOnFail(eData);
-      // if (ctx.isHead && isHeadOfEventsPool)
-      //   await refundDomainRegistrationPayment(callData, ctx);
       return opId;
     }
   } catch (rejected) {
     console.log('handleDomainRegisterPayment result >>>');
     console.dir(rejected, { depth: null });
     const eData = {
+      ...StatusesMng.getStatusWithReason('Common', 'ErrorUnknown'),
       success: false,
-      status: 10100,
       reason: rejected
         ? (rejected as Error).message || (rejected as ChainActionResult).reason
         : 'Unknown error has been occurred.', // TODO Fix types
@@ -259,8 +212,6 @@ export async function handleDomainRegisterPayment(
     };
     ctx.log.error(eData);
     await saveUnameRegEntityOnFail(eData);
-    // if (ctx.isHead && isHeadOfEventsPool)
-    //   await refundDomainRegistrationPayment(callData, ctx);
     return opId;
   }
 }

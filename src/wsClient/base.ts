@@ -6,6 +6,7 @@ import { ExtrinsicStatus } from '@polkadot/types/interfaces/author/types';
 import { DispatchError } from '@polkadot/types/interfaces/system/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import type { ISubmittableResult } from '@polkadot/types/types';
+import { StatusesMng } from '../utils/statusesManager';
 
 type ClientArgs = {
   apiUrl: string;
@@ -178,9 +179,9 @@ export class BaseChainClient extends WsClient {
 
           if (dispatchError) {
             reject({
-              success: false,
-              status: 10100,
+              ...StatusesMng.getStatusWithReason('WsClient', 'ErrorCommon'),
               reason: this.getTxSubDispatchErrorMessage(dispatchError),
+              success: false,
               blockHash: this.getTxSubDispatchErrorBlockHash(status)
             });
             unsub();
@@ -193,7 +194,6 @@ export class BaseChainClient extends WsClient {
               blockHash: status.asInBlock.toHex(),
               txHash: txHash.toHex(),
               txIndex,
-              status: 201
             });
             unsub();
             return;
@@ -220,8 +220,8 @@ export class BaseChainClient extends WsClient {
 
           if (dispatchError) {
             reject({
+              ...StatusesMng.getStatusWithReason('WsClient', 'ErrorCommon'),
               success: false,
-              status: 10100,
               reason: this.getTxSubDispatchErrorMessage(dispatchError),
               blockHash: this.getTxSubDispatchErrorBlockHash(status)
             });
@@ -234,7 +234,6 @@ export class BaseChainClient extends WsClient {
               success: true,
               blockHash: status.asInBlock.toHex(),
               txHash: txHash.toHex(),
-              status: 201,
               txIndex
             });
             unsub();

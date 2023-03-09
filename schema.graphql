@@ -118,7 +118,8 @@ enum OrderRefundStatus {
 }
 
 type OrderError {
-  status: Int
+  module: String
+  status: String
   reason: String
 }
 

@@ -11,6 +11,7 @@ import {
 } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { In } from 'typeorm';
+import { StatusesMng } from '../../utils/statusesManager';
 
 const { config } = getChain();
 
@@ -66,9 +67,6 @@ export async function refundDomainRegistrationPaymentByOrder(
     }
   };
 
-  console.log('REFUND REMARK >>>>>');
-  console.log(new SocialRemark().fromSource(refundRmrkMsg).toMessage());
-
   const remarkTx = sellerWsClient.api.tx.system.remark(
     new SocialRemark().fromSource(refundRmrkMsg).toMessage()
   );
@@ -78,10 +76,13 @@ export async function refundDomainRegistrationPaymentByOrder(
       WalletClient.getInstance().account.sellerTreasury,
       [refundTransfer, remarkTx]
     );
-    console.log('result >>> ');
-    console.dir(result, { depth: null });
+    ctx.log.info(
+      result,
+      'DMN_REG_REFUND remark and refund transfer TS result >>> '
+    );
 
-    if (result.success && result.status === 201) {
+    if (result.success) {
+      // TODO check necessity of line below
       // registrationOrder.refundStatus = OrderRefundStatus.Fulfilled;
 
       await ctx.store.save(registrationOrderEntity);
@@ -89,8 +90,8 @@ export async function refundDomainRegistrationPaymentByOrder(
       ctx.log.info('Refund has been done successfully. Order updated.');
     } else {
       const eData = {
+        ...StatusesMng.getStatusWithReason('Domain', 'ErrorRefundUnknownError'),
         success: false,
-        status: 10100,
         reason: 'Error has been occurred in send refund batchAll call',
         ...(await sellerWsClient.getBlockMeta())
       };
@@ -99,12 +100,11 @@ export async function refundDomainRegistrationPaymentByOrder(
       ctx.log.error('Refund has been finished with error. Order updated.');
     }
   } catch (errorResult) {
-    console.log('refund error');
-    console.dir(errorResult, { depth: null });
+    console.log(errorResult);
 
     const eData = {
+      ...StatusesMng.getStatusWithReason('Domain', 'ErrorRefundUnknownError'),
       success: false,
-      status: 10100,
       reason: errorResult
         ? (errorResult as Error).message ||
           (errorResult as ChainActionResult).reason
