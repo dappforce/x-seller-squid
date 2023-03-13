@@ -92,7 +92,7 @@ export async function refundDomainRegistrationPaymentByOrder(
       const eData = {
         ...StatusesMng.getStatusWithReason('Domain', 'ErrorRefundUnknownError'),
         success: false,
-        reason: 'Error has been occurred in send refund batchAll call',
+        reason: 'Error has been occurred on send refund batchAll call',
         ...(await sellerWsClient.getBlockMeta())
       };
       ctx.log.error(eData);

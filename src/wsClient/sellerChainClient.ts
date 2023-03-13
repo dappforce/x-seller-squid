@@ -1,6 +1,5 @@
 import { BaseChainClient } from './base';
 import { getChain } from '../chains';
-import { WalletClient } from '../walletClient';
 
 const { config } = getChain();
 

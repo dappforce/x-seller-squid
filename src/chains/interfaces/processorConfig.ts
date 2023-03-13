@@ -4,11 +4,17 @@ import {
   SocialRemarkMessageVersion
 } from '../../remark/types';
 
+export type TokenDetails = {
+  name: string;
+  decimal: number;
+  coefficientWithBuyerToken: string;
+};
+
 export type ProcessorConfig = {
   sellerChain: {
     chainName: string;
     prefix: number;
-    token: string;
+    token: TokenDetails;
     dataSource: Required<
       Parameters<SubstrateProcessor<any>['setDataSource']>[0]
     >;

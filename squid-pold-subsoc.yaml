@@ -2,14 +2,14 @@ manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-polkadot-sub
 version: 100
 description: 'X Seller Squid based on Polkadot/Subsocial chains'
-build: 
+build:
 deploy:
   secrets:
     - POLKADOT_ACC_MNEM_SELLER_TREASURY
     - SUBSOCIAL_ACC_MNEM_DOMAIN_REGISTRAR
     - SUBSOCIAL_ACC_MNEM_ENERGY_GENERATOR
   addons:
-    postgres: 
+    postgres:
   processor:
     env:
       CHAIN:
@@ -18,13 +18,16 @@ deploy:
         social_t_0
       POLKADOT_REMARK_PROT_VERSION:
         0.1
+      TOKEN_PRICE_COEFF_ROC_SOON:
+        0.001
+      TOKEN_PRICE_COEFF_DOT_SUB:
+        0.001
     cmd:
       - node
       - lib/processor
   api:
     env:
-      CHAIN:
-        polkadotSubsocial
+      CHAIN: polkadotSubsocial
     cmd:
       - npx
       - squid-graphql-server

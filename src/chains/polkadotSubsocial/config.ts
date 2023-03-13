@@ -10,7 +10,12 @@ export const config: ProcessorConfig = {
   sellerChain: {
     chainName: 'polkadot',
     prefix: 0,
-    token: 'DOT',
+    token: {
+      name: 'DOT',
+      decimal: 10,
+      coefficientWithBuyerToken:
+        process.env.TOKEN_PRICE_COEFF_DOT_SUB || '0.001' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001)
+    },
     dataSource: {
       archive: 'https://polkadot.archive.subsquid.io/graphql',
       chain: 'wss://rpc.polkadot.io'

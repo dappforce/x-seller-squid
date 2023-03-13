@@ -42,6 +42,8 @@ export async function handleDomainRegisterPayment(
   const transferredAmountValidation = await validateRegistrationPayment(amount);
 
   if (!transferredAmountValidation.success) {
+    ctx.log.error(transferredAmountValidation);
+    ctx.log.error('Processing of current registration request is skipped.');
     return null;
   }
 

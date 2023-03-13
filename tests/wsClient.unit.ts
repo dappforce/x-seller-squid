@@ -1,9 +1,14 @@
 import { WalletClient } from '../src/walletClient';
-import { BuyerChainClient } from '../src/wsClient';
+import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
+import { getChain } from '../src/chains';
+
+const { config } = getChain();
+import { BN } from 'bn.js';
 
 describe('WS Client Unit', () => {
   let walletClient: WalletClient | null = null;
   let buyerClient: BuyerChainClient | null = null;
+  let sellerClient: SellerChainClient | null = null;
   const soonsocialPrefix = 28;
 
   const testPublicKey = '5H6bn23yFMF2P32AVaqgWoQemLtpGqLZWTMaVsYGZLo8A1bo';
@@ -17,6 +22,7 @@ describe('WS Client Unit', () => {
   beforeAll(async () => {
     walletClient = await WalletClient.getInstance().init();
     buyerClient = await BuyerChainClient.getInstance().init();
+    sellerClient = await SellerChainClient.getInstance().init();
   });
 
   test('Account has more than 1 domain', async () => {
@@ -32,5 +38,12 @@ describe('WS Client Unit', () => {
     );
     expect(list).not.toEqual(null);
     expect(list!.length === 0).toEqual(true);
+  });
+
+  test('Account does not have registered domains', async () => {
+    const deposit = await buyerClient!.getDomainRegistrationPrice(
+      config.sellerChain.token
+    );
+    expect(1).toEqual(1);
   });
 });

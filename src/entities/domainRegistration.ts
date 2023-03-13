@@ -29,8 +29,10 @@ export async function ensureDomainRegistrationOrder(
     blockHashSellerChain: callData.blockHash,
     target: await getOrCreateAccount(remark.content.target, ctx),
     domain: await getOrCreateDomain(remark.content.domainName, ctx),
-    price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(),
-    token: config.sellerChain.token, // TODO should be reviewed
+    price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(
+      config.sellerChain.token
+    ),
+    token: config.sellerChain.token.name, // TODO should be reviewed
     purchaseTx: purchaseTx ?? null,
     status: OrderRequestStatus.Processing,
     refundStatus: OrderRefundStatus.None,

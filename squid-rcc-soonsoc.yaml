@@ -2,14 +2,14 @@ manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-rococo-soon
 version: 100
 description: 'X Seller Squid based on Rococo/Soonsocial chains'
-build: 
+build:
 deploy:
   secrets:
     - ROCOCO_ACC_MNEM_SELLER_TREASURY
     - SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRAR
     - SOONSOCIAL_ACC_MNEM_ENERGY_GENERATOR
   addons:
-    postgres: 
+    postgres:
   processor:
     env:
       CHAIN:
@@ -18,13 +18,16 @@ deploy:
         social_t_0
       ROCOCO_REMARK_PROT_VERSION:
         0.1
+      TOKEN_PRICE_COEFF_ROC_SOON:
+        0.001
+      TOKEN_PRICE_COEFF_DOT_SUB:
+        0.001
     cmd:
       - node
       - lib/processor
   api:
     env:
-      CHAIN:
-        rococoSoonsocial
+      CHAIN: rococoSoonsocial
     cmd:
       - npx
       - squid-graphql-server

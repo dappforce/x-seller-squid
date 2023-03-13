@@ -3,15 +3,11 @@ import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
 import { ChainActionResult } from './types';
 import { IpfsContent } from '@subsocial/api/substrate/wrappers';
-import {
-  cryptoWaitReady,
-  decodeAddress,
-  encodeAddress
-} from '@polkadot/util-crypto';
-import { decodeHex, toHex } from '@subsquid/util-internal-hex';
 const { config } = getChain();
 import { BN } from 'bn.js';
+import '@polkadot/api-augment';
 import { StatusesMng } from '../utils/statusesManager';
+import { TokenDetails } from '../chains/interfaces/processorConfig';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
@@ -42,9 +38,35 @@ export class BuyerChainClient extends BaseChainClient {
     return structs.filter((x) => x.isSome).map((x) => x.unwrap());
   }
 
-  async getDomainRegistrationPrice(): Promise<bigint> {
-    // TODO add implementation
-    return BigInt('1000000000');
+  /**
+   * Returns domain registration price in seller chain token (DOT || ROC)
+   * @param tokenName
+   */
+  async getDomainRegistrationPrice(
+    tokenData: TokenDetails
+  ): Promise<bigint | null> {
+    const correctorCoeff = 1000;
+
+    try {
+      const depositNativeToken = new BN(
+        this.api.consts.domains.baseDomainDeposit.toString()
+      );
+
+      return BigInt(
+        depositNativeToken
+          .mul(
+            new BN(
+              Number.parseFloat(tokenData.coefficientWithBuyerToken) *
+                correctorCoeff
+            )
+          )
+          .div(new BN(correctorCoeff))
+          .toString()
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    return null;
   }
 
   async getDomainsByOwner(account: string): Promise<string[] | null> {

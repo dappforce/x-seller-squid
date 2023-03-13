@@ -10,7 +10,12 @@ export const config: ProcessorConfig = {
   sellerChain: {
     chainName: 'rococo',
     prefix: 42,
-    token: 'ROC',
+    token: {
+      name: 'ROC',
+      decimal: 10,
+      coefficientWithBuyerToken:
+        process.env.TOKEN_PRICE_COEFF_ROC_SOON || '0.001' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001)
+    },
     dataSource: {
       archive: 'https://rococo.archive.subsquid.io/graphql',
       chain: 'wss://rococo-rpc.polkadot.io'

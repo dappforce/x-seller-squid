@@ -5,6 +5,9 @@ import {
   StatusesMng,
   StatusModule
 } from '../../../utils/statusesManager';
+import { getChain } from '../../../chains';
+
+const { config } = getChain();
 
 type ValidationResult = {
   success: boolean;
@@ -31,15 +34,19 @@ export async function validateRegistrationPayment(
   transferredAmount: bigint
 ): Promise<ValidationResult> {
   const buyerChainClient = BuyerChainClient.getInstance();
-  const registrationPrice = await buyerChainClient.getDomainRegistrationPrice();
+  const registrationPrice = await buyerChainClient.getDomainRegistrationPrice(
+    config.sellerChain.token
+  );
 
-  if (transferredAmount < registrationPrice) {
+  if (registrationPrice === null || transferredAmount < registrationPrice) {
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason(
         'Domain',
         'ErrorRegPaymentAmountInsufficient'
       ),
-      reason: `Paid amount is insufficient for registrations. Required ${registrationPrice.toString()} but transferred ${transferredAmount.toString()}`
+      reason: `Paid amount is insufficient for registrations. Required ${
+        registrationPrice ? registrationPrice.toString() : 'NaN'
+      } but transferred ${transferredAmount.toString()}`
     });
   }
 

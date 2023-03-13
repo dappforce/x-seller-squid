@@ -31,7 +31,7 @@ type DomainRegistrationOrder @entity {
   refundRemarkCallId: String
   target: Account!
   domain: Domain!
-  price: BigInt!
+  price: BigInt
   "TODO should be reviewed"
   token: String!
   purchaseTx: Transfer

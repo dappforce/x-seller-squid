@@ -58,8 +58,8 @@ export class DomainRegistrationOrder {
     @ManyToOne_(() => Domain, {nullable: true})
     domain!: Domain
 
-    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-    price!: bigint
+    @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+    price!: bigint | undefined | null
 
     /**
      * TODO should be reviewed

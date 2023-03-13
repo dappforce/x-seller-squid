@@ -15,8 +15,8 @@ jest.useRealTimers();
 
 describe('Register domain with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
-  const validDomainPrice = new BN('10000000000'); // 0.01
-  const invalidDomainPrice = new BN('100000000'); // 0.0001
+  const validDomainPrice = new BN('100000000'); // 0.01
+  const invalidDomainPrice = new BN('1000000'); // 0.0001
   const testRemarkTitle: SocialRemarkMessageProtocolName = 'social_t_0';
 
   jest.setTimeout(1000 * 60 * 5);
@@ -40,6 +40,7 @@ describe('Register domain with completion flow', () => {
     const transferTx = sellerWsClient.api.tx.balances.transfer(
       WalletClient.getInstance().account.sellerTreasury.address,
       validDomainPrice
+      // invalidDomainPrice
     );
 
     /**
@@ -55,7 +56,7 @@ describe('Register domain with completion flow', () => {
         target: WalletClient.addressToHex(
           process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
-        token: 'DOT'
+        token: 'ROC'
       }
     };
 

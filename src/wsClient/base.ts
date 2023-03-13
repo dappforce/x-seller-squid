@@ -1,12 +1,13 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiClientListeners, ChainActionResult } from './types';
-import { ChainClientError } from './chainClientError';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { ExtrinsicStatus } from '@polkadot/types/interfaces/author/types';
 import { DispatchError } from '@polkadot/types/interfaces/system/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import type { ISubmittableResult } from '@polkadot/types/types';
 import { StatusesMng } from '../utils/statusesManager';
+import { IMethod } from '@polkadot/types/types/interfaces';
+import { AnyTuple } from '@polkadot/types-codec/types/helpers';
 
 type ClientArgs = {
   apiUrl: string;
@@ -20,8 +21,6 @@ class WsClient {
   private maxRetries: number = 20;
 
   private apiUrl: string = 'ws://127.0.0.1:9944';
-
-  public clientError: ChainClientError = new ChainClientError();
 
   private clientListeners: ApiClientListeners = {
     error: (e: Error): void => {},
@@ -193,7 +192,7 @@ export class BaseChainClient extends WsClient {
               success: true,
               blockHash: status.asInBlock.toHex(),
               txHash: txHash.toHex(),
-              txIndex,
+              txIndex
             });
             unsub();
             return;
@@ -210,7 +209,7 @@ export class BaseChainClient extends WsClient {
 
   async sendBatchAll(
     sender: KeyringPair,
-    transactions: Array<unknown> // TODO fix types
+    transactions: IMethod<AnyTuple, any>[] // TODO fix types
   ): Promise<ChainActionResult> {
     return new Promise(async (resolve, reject) => {
       const unsub = await this.api.tx.utility
