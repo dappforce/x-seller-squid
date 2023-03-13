@@ -27,7 +27,16 @@ deploy:
       - lib/processor
   api:
     env:
-      CHAIN: polkadotSubsocial
+      CHAIN:
+        polkadotSubsocial
+      POLKADOT_REMARK_PROT_NAME:
+        social_t_0
+      POLKADOT_REMARK_PROT_VERSION:
+        0.1
+      TOKEN_PRICE_COEFF_ROC_SOON:
+        0.001
+      TOKEN_PRICE_COEFF_DOT_SUB:
+        0.001
     cmd:
       - npx
       - squid-graphql-server
