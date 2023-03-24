@@ -3,7 +3,6 @@ import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
 import { getChain } from '../src/chains';
 
 const { config } = getChain();
-import { BN } from 'bn.js';
 
 describe('WS Client Unit', () => {
   let walletClient: WalletClient | null = null;

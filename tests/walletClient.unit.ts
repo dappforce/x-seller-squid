@@ -1,5 +1,3 @@
-import { SocialRemark } from '../src/remark';
-import { SubSclSource } from '../src/remark/types';
 import { WalletClient } from '../src/walletClient';
 
 describe('Wallet Client Unit', () => {

@@ -1,8 +1,8 @@
-import { SocialRemark } from '../src/remark';
 import {
+  SocialRemark,
   SocialRemarkMessageProtocolName,
   SubSclSource
-} from '../src/remark/types';
+} from '@subsocial/utils';
 import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
 import { WalletClient } from '../src/walletClient';
 import { BN } from 'bn.js';
@@ -18,6 +18,7 @@ describe('Register domain with completion flow', () => {
   const validDomainPrice = new BN('100000000'); // 0.01
   const invalidDomainPrice = new BN('1000000'); // 0.0001
   const testRemarkTitle: SocialRemarkMessageProtocolName = 'social_t_0';
+  SocialRemark.setConfig({ protNames: ['social_t_0'] });
 
   jest.setTimeout(1000 * 60 * 5);
 

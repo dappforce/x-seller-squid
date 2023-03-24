@@ -1,8 +1,8 @@
-import { SocialRemark } from '../src/remark';
 import {
+  SocialRemark,
   SocialRemarkMessageProtocolName,
   SubSclSource
-} from '../src/remark/types';
+} from '@subsocial/utils';
 
 function getRemarkMessage(
   testRemarkProtName: string,
