@@ -2,7 +2,8 @@ import { lookupArchive } from '@subsquid/archive-registry';
 import {
   BatchBlock,
   BatchContext,
-  BatchProcessorCallItem, BatchProcessorEventItem,
+  BatchProcessorCallItem,
+  BatchProcessorEventItem,
   BatchProcessorItem,
   SubstrateBatchProcessor
 } from '@subsquid/substrate-processor';
@@ -11,7 +12,7 @@ import { SellerChainClient, BuyerChainClient } from './wsClient';
 import { WalletClient } from './walletClient';
 import { handleSellerActions } from './handlers';
 import { parseCalls } from './parser';
-import { SocialRemark } from './remark';
+import { SocialRemark } from '@subsocial/utils';
 import { getChain } from './chains';
 
 const { config } = getChain();
@@ -39,9 +40,9 @@ const processor = new SubstrateBatchProcessor()
         call: {
           args: true,
           origin: true,
-          parent: true,
+          parent: true
         }
-      },
+      }
     }
   } as const);
 

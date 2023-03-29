@@ -1,8 +1,7 @@
 import { CallParsed } from '../../parser/types';
 import { BuyerChainClient, SellerChainClient } from '../../wsClient';
 import { Ctx } from '../../processor';
-import { SocialRemark } from '../../remark';
-import { SubSclSource } from '../../remark/types';
+import { SocialRemark, SubSclSource } from '@subsocial/utils';
 import { WalletClient } from '../../walletClient';
 import {
   ensureDomainRegistrationOrder,

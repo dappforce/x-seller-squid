@@ -1,8 +1,7 @@
 import { Ctx } from '../../processor';
 import { WalletClient } from '../../walletClient';
 import { SellerChainClient } from '../../wsClient';
-import { SubSclSource } from '../../remark/types';
-import { SocialRemark } from '../../remark';
+import { SubSclSource, SocialRemark } from '@subsocial/utils';
 import { getChain } from '../../chains';
 import {
   DomainRegistrationOrder,

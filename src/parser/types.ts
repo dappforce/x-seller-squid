@@ -1,11 +1,7 @@
 import {
   SocialRemarkMessage,
   SocialRemarkMessageAction
-} from '../remark/types';
-import {
-  CallItem,
-  EventItem
-} from '@subsquid/substrate-processor/lib/interfaces/dataSelection';
+} from '@subsocial/utils';
 
 export interface CallParsed<
   A extends SocialRemarkMessageAction | string = '',
@@ -51,4 +47,3 @@ export const requiredPurchaseBatchCalls = new Set([
   'Balances.transfer',
   'System.remark'
 ]);
-

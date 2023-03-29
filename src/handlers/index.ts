@@ -1,5 +1,5 @@
 import { CallParsed, ParsedCallsDataList } from '../parser/types';
-import { SocialRemarkMessageAction } from '../remark/types';
+import { SocialRemarkMessageAction } from '@subsocial/utils';
 import { handleDomainRegisterPayment } from './domain';
 import { Ctx } from '../processor';
 import { handleUsernameRegistrationCompleted } from './domain/registrationCompleted';

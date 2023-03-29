@@ -2,7 +2,7 @@ import { SubstrateProcessor } from '@subsquid/substrate-processor';
 import {
   SocialRemarkMessageProtocolName,
   SocialRemarkMessageVersion
-} from '../../remark/types';
+} from '@subsocial/utils';
 
 export type TokenDetails = {
   name: string;

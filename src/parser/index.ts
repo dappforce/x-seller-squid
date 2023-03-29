@@ -1,4 +1,4 @@
-import { SocialRemark } from '../remark';
+import { SocialRemark } from '@subsocial/utils';
 import { ParsedCallsDataList } from './types';
 import { Ctx } from '../processor';
 import {

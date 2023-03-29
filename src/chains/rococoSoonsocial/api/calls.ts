@@ -1,8 +1,8 @@
-import { Call, ChainContext, Event } from '../types/support';
+import { Call } from '../types/support';
 import { Ctx, EventItem } from '../../../processor';
 import { SystemRemarkCall } from '../types/calls';
 import { UnknownVersionError } from '../../utils/errors';
-import { SocialRemark } from '../../../remark';
+import { SocialRemark } from '@subsocial/utils';
 
 export function parseSystemRemarkCall(call: Call, ctx: Ctx): string {
   const callData = new SystemRemarkCall(ctx, call);

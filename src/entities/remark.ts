@@ -1,4 +1,4 @@
-import { SocialRemarkMessage } from '../remark';
+import { SocialRemarkMessage } from '@subsocial/utils';
 import {
   DmnRegRemark,
   DmnRegRemarkContent,

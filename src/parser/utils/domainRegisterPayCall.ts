@@ -1,12 +1,27 @@
-import { SocialRemark } from '../../remark';
+import { SocialRemark } from '@subsocial/utils';
 import { Block, Ctx } from '../../processor';
 import { CallParsed, requiredPurchaseBatchCalls } from '../types';
-import { AllCallItem, RemarkCallItem } from '../../types/common';
+import {
+  AllCallItem,
+  BalancesTransferEventData,
+  RemarkCallItem
+} from '../../types/common';
 import { encodeAccount } from '../../utils';
 import { getChain } from '../../chains';
 import { getTransferData } from './getTransferData';
+import { WalletClient } from '../../walletClient';
 
 const { config } = getChain();
+
+function isTransferDestinationCorrect(destination: string): boolean {
+  return (
+    WalletClient.addressFromAnyToFormatted(destination, 28) ===
+    WalletClient.addressFromAnyToFormatted(
+      WalletClient.getInstance().account.sellerTreasury.address,
+      28
+    )
+  );
+}
 
 export function parseDomainRegisterPayCall(
   remark: SocialRemark,
@@ -50,7 +65,8 @@ export function parseDomainRegisterPayCall(
 
   const transferData = getTransferData(block, batchAllCallId, ctx);
 
-  if (!transferData) return null;
+  if (!transferData || !isTransferDestinationCorrect(transferData.to))
+    return null;
 
   return {
     remarkCallId: callItem.call.id,

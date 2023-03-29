@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 import {
   SocialRemarkMessageProtocolName,
   SocialRemarkMessageVersion
-} from '../../remark/types';
+} from '@subsocial/utils';
 dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {

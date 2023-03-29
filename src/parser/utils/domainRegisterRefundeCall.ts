@@ -1,4 +1,4 @@
-import { SocialRemark } from '../../remark';
+import { SocialRemark } from '@subsocial/utils';
 import { Block, Ctx } from '../../processor';
 import { CallParsed, requiredPurchaseBatchCalls } from '../types';
 import { AllCallItem, RemarkCallItem } from '../../types/common';
