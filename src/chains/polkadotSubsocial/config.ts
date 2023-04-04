@@ -4,9 +4,30 @@ import {
   SocialRemarkMessageProtocolName,
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
+import { WalletClient } from '../../walletClient';
+import { decodeAllowedApiClients } from '../utils/common';
 dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
+  sellerClient: {
+    allowedApiClients: decodeAllowedApiClients(
+      process.env.SUBSOCIAL_ALLOWED_API_CLIENTS || '',
+      WalletClient.addressToHex
+    )
+  },
+  sellerIndexer: {
+    accounts: {
+      tokenManager: {
+        mnemonic: process.env.SUBSOCIAL_API_TOKEN_MANAGER_MNEM ?? '',
+        publicKey: process.env.SUBSOCIAL_API_TOKEN_MANAGER_PUBLIC_KEY ?? ''
+      }
+    },
+    apiAuthTokenExp: !Number.isNaN(
+      Number.parseInt(process.env.SUBSOCIAL_API_TOKEN_EXP_TIME ?? '10000')
+    )
+      ? Number.parseInt(process.env.SUBSOCIAL_API_TOKEN_EXP_TIME ?? '10000')
+      : 10000
+  },
   sellerChain: {
     chainName: 'polkadot',
     prefix: 0,

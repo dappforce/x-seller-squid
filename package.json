@@ -27,8 +27,11 @@
     "@subsquid/substrate-processor": "2.4.0",
     "@subsquid/typeorm-migration": "0.1.6",
     "@subsquid/typeorm-store": "0.2.2",
+    "better-sqlite3": "^8.2.0",
+    "dayjs": "^1.11.7",
     "dotenv": "^16.0.0",
     "pg": "8.9.0",
+    "sqlite3": "^5.1.6",
     "type-graphql": "^1.2.0-rc.1",
     "typeorm": "0.3.11"
   },

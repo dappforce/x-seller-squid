@@ -11,6 +11,18 @@ export type TokenDetails = {
 };
 
 export type ProcessorConfig = {
+  sellerClient: {
+    allowedApiClients: Set<string>;
+  };
+  sellerIndexer: {
+    accounts: {
+      tokenManager: {
+        mnemonic: string;
+        publicKey: string;
+      };
+    };
+    apiAuthTokenExp: number;
+  };
   sellerChain: {
     chainName: string;
     prefix: number;

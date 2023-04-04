@@ -1,18 +1,20 @@
 import {
   cryptoWaitReady,
   decodeAddress,
-  encodeAddress
+  encodeAddress,
+  naclBoxPairFromSecret
 } from '@polkadot/util-crypto';
-import { u8aToHex } from '@polkadot/util';
+import { stringToU8a, u8aToHex } from '@polkadot/util';
 import { Keyring } from '@polkadot/api';
 import { getChain } from '../chains';
-import { WalletClientAccounts } from './types';
+import { KeyringPairWithSecret, WalletClientAccounts } from './types';
 const { config } = getChain();
 
 export class WalletClient {
   private static instance: WalletClient;
 
   private accs: WalletClientAccounts = {
+    sellerIndexerTokenManager: null,
     sellerTreasury: null,
     domainRegistrar: null,
     energyGenerator: null
@@ -39,6 +41,19 @@ export class WalletClient {
     return encodeAddress(publicKey, prefix);
   }
 
+  public static async createKeyringPairFromMnem(mnem: string) {
+    if (!(await cryptoWaitReady())) {
+      throw 'cryptoWaitReady() resolved to false';
+    }
+    if (!mnem) {
+      throw 'suri cannot be undefined';
+    }
+    let keyring = new Keyring({ type: 'sr25519' });
+    return keyring.addFromUri(mnem);
+  }
+
+  public static isSigner(msg: string, maybeSigner: string) {}
+
   public clientValid(): boolean {
     return !!(
       this.accs.sellerTreasury &&
@@ -52,6 +67,7 @@ export class WalletClient {
       throw Error('WalletClient is not initialized yet.');
 
     return {
+      sellerIndexerTokenManager: this.accs.sellerIndexerTokenManager!,
       sellerTreasury: this.accs.sellerTreasury!,
       domainRegistrar: this.accs.domainRegistrar!,
       energyGenerator: this.accs.energyGenerator!
@@ -60,26 +76,26 @@ export class WalletClient {
 
   public async init(): Promise<WalletClient> {
     if (this.clientValid()) return this;
-    this.accs.sellerTreasury = await this.createKeyringPairFromMnem(
+    const tokenMngKeyring = await WalletClient.createKeyringPairFromMnem(
+      config.sellerIndexer.accounts.tokenManager.mnemonic
+    );
+    (tokenMngKeyring as KeyringPairWithSecret).secretKey =
+      naclBoxPairFromSecret(
+        stringToU8a(process.env.SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER || '')
+      ).secretKey;
+
+    this.accs.sellerIndexerTokenManager =
+      tokenMngKeyring as KeyringPairWithSecret;
+
+    this.accs.sellerTreasury = await WalletClient.createKeyringPairFromMnem(
       config.sellerChain.accounts.sellerTreasury.mnemonic
     );
-    this.accs.domainRegistrar = await this.createKeyringPairFromMnem(
+    this.accs.domainRegistrar = await WalletClient.createKeyringPairFromMnem(
       config.buyerChain.accounts.domainRegistrar.mnemonic
     );
-    this.accs.energyGenerator = await this.createKeyringPairFromMnem(
+    this.accs.energyGenerator = await WalletClient.createKeyringPairFromMnem(
       config.buyerChain.accounts.energyGenerator.mnemonic
     );
     return this;
-  }
-
-  public async createKeyringPairFromMnem(mnem: string) {
-    if (!(await cryptoWaitReady())) {
-      throw 'cryptoWaitReady() resolved to false';
-    }
-    if (!mnem) {
-      throw 'suri cannot be undefined';
-    }
-    let keyring = new Keyring({ type: 'sr25519' });
-    return keyring.addFromUri(mnem);
   }
 }

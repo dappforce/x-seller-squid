@@ -18,6 +18,12 @@ export class SellerConfigInfo {
   sellerChainPrefix!: number | null;
 
   @Field(() => String, { nullable: false })
+  sellerTreasuryAccount!: string;
+
+  @Field(() => String, { nullable: false })
+  sellerApiTokenManager!: string;
+
+  @Field(() => String, { nullable: false })
   domainHostChain!: string;
 
   @Field(() => Number, { nullable: true })

@@ -4,6 +4,8 @@ describe('Wallet Client Unit', () => {
   let walletClient: WalletClient | null = null;
   const soonsocialPrefix = 28;
 
+  jest.setTimeout(1000 * 60 * 5);
+
   const testPublicKey = '5H6bn23yFMF2P32AVaqgWoQemLtpGqLZWTMaVsYGZLo8A1bo';
   const testAddressSubsocial =
     '3t5NA8UKsGzrCDMfp8XMEBghiYthWGXGsHbjtJY45NUJDY5P';

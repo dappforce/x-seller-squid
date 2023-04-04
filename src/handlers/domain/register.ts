@@ -7,7 +7,12 @@ import {
   ensureDomainRegistrationOrder,
   createAndGetTransfer
 } from '../../entities';
-import { OrderRefundStatus, OrderRequestStatus, OrderError } from '../../model';
+import {
+  OrderRefundStatus,
+  OrderRequestStatus,
+  OrderError,
+  DomainRegistrationOrder
+} from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { getChain } from '../../chains';
 import {
@@ -19,6 +24,7 @@ import {
   validateTargetDomainsMaxLimit
 } from './utils/domainValidation';
 import { StatusesMng } from '../../utils/statusesManager';
+import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -67,14 +73,22 @@ export async function handleDomainRegisterPayment(
       ctx
     )
   );
-  const saveUnameRegEntityOnFail = async (
+
+  const lsClient = await ServiceLocalStorage.getInstance().init();
+
+  const saveRegOrderEntity = async () => {
+    await lsClient.deleteDraftOrderById(domainRegistrationOrder.domain.id);
+    await ctx.store.save(domainRegistrationOrder);
+  };
+
+  const saveDomainRegOrderOnFail = async (
     errorData: ChainActionResult
   ): Promise<void> => {
     domainRegistrationOrder.status = OrderRequestStatus.Failed;
     domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
     domainRegistrationOrder.errorRegistration = new OrderError(errorData);
 
-    await ctx.store.save(domainRegistrationOrder);
+    await saveRegOrderEntity();
   };
 
   /**
@@ -93,7 +107,7 @@ export async function handleDomainRegisterPayment(
       domainRegistrationOrder.status = OrderRequestStatus.Failed;
       domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
 
-      await saveUnameRegEntityOnFail(dmnAvValidData);
+      await saveDomainRegOrderOnFail(dmnAvValidData);
       return opId;
     }
 
@@ -102,7 +116,7 @@ export async function handleDomainRegisterPayment(
       dmnAvValidData.status === 'ErrorRegAlreadyOwnedByTarget'
     ) {
       domainRegistrationOrder.status = OrderRequestStatus.Processing;
-      await ctx.store.save(domainRegistrationOrder);
+      await saveRegOrderEntity();
       return null;
     }
   }
@@ -112,7 +126,7 @@ export async function handleDomainRegisterPayment(
    */
   const dmnTldValidData = await validateDomainTld(domainName);
   if (!dmnTldValidData.success) {
-    await saveUnameRegEntityOnFail(dmnTldValidData);
+    await saveDomainRegOrderOnFail(dmnTldValidData);
     return opId;
   }
 
@@ -123,7 +137,7 @@ export async function handleDomainRegisterPayment(
   const dmnMinLengthValidData = await validateDomainMinLength(domainName);
 
   if (!dmnMinLengthValidData.success) {
-    await saveUnameRegEntityOnFail(dmnMinLengthValidData);
+    await saveDomainRegOrderOnFail(dmnMinLengthValidData);
     return opId;
   }
 
@@ -134,7 +148,7 @@ export async function handleDomainRegisterPayment(
   const dmnMaxLengthValidData = await validateDomainMaxLength(domainName);
 
   if (!dmnMaxLengthValidData.success) {
-    await saveUnameRegEntityOnFail(dmnMaxLengthValidData);
+    await saveDomainRegOrderOnFail(dmnMaxLengthValidData);
     return opId;
   }
 
@@ -146,7 +160,7 @@ export async function handleDomainRegisterPayment(
   );
 
   if (!targetMaxRegisteredDmnsValidData.success) {
-    await saveUnameRegEntityOnFail(targetMaxRegisteredDmnsValidData);
+    await saveDomainRegOrderOnFail(targetMaxRegisteredDmnsValidData);
     return opId;
   }
 
@@ -166,7 +180,7 @@ export async function handleDomainRegisterPayment(
     if (result.success) {
       domainRegistrationOrder.status = OrderRequestStatus.Processing;
 
-      await ctx.store.save(domainRegistrationOrder);
+      await saveRegOrderEntity();
 
       const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
         protName: config.sellerChain.remark.protName,
@@ -197,7 +211,7 @@ export async function handleDomainRegisterPayment(
         ...(await buyerChainClient.getBlockMeta())
       };
       ctx.log.error(eData);
-      await saveUnameRegEntityOnFail(eData);
+      await saveDomainRegOrderOnFail(eData);
       return opId;
     }
   } catch (rejected) {
@@ -212,7 +226,7 @@ export async function handleDomainRegisterPayment(
       ...(await buyerChainClient.getBlockMeta())
     };
     ctx.log.error(eData);
-    await saveUnameRegEntityOnFail(eData);
+    await saveDomainRegOrderOnFail(eData);
     return opId;
   }
 }

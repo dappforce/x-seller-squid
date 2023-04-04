@@ -1,3 +1,4 @@
 import 'reflect-metadata';
 import { SellerConfigInfoResolver } from './sellerConfigInfo';
-export { SellerConfigInfoResolver };
+import { DraftOrdersResolver } from './draftOrders';
+export { SellerConfigInfoResolver, DraftOrdersResolver };

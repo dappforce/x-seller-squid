@@ -53,7 +53,8 @@ describe('Register domain with completion flow', () => {
       version: '0.1',
       content: {
         opId: `${transferTx.hash.toHex()}-${randomAsNumber()}`,
-        domainName: `tdotdomain${randomAsNumber()}.sub`,
+        // domainName: `tdotdomain${randomAsNumber()}.sub`,
+        domainName: `tdotdomain334433wwww.sub`,
         target: WalletClient.addressToHex(
           process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
