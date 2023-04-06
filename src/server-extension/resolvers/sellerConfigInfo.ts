@@ -30,10 +30,11 @@ export class SellerConfigInfoResolver {
         walletClient.account.sellerTreasury.address,
         28
       ),
-      sellerApiTokenManager: WalletClient.addressFromAnyToFormatted(
-        walletClient.account.sellerIndexerTokenManager.address,
+      sellerApiAuthTokenManager: WalletClient.addressFromAnyToFormatted(
+        walletClient.account.sellerIndexerAuthTokenMngEd25519.publicKey,
         28
       ),
+      dmnRegPendingOrderExpTime: config.sellerIndexer.dmnRegPendingOrderExpTime,
       domainHostChain: config.buyerChain.chainName,
       domainHostChainPrefix: config.buyerChain.prefix,
       sellerToken: {

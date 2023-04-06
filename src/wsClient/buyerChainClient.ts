@@ -3,11 +3,13 @@ import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
 import { ChainActionResult } from './types';
 import { IpfsContent } from '@subsocial/api/substrate/wrappers';
-const { config } = getChain();
 import { BN } from 'bn.js';
 import '@polkadot/api-augment';
 import { StatusesMng } from '../utils/statusesManager';
-import { TokenDetails } from '../chains/interfaces/processorConfig';
+import {
+  ProcessorConfig,
+  TokenDetails
+} from '../chains/interfaces/processorConfig';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
@@ -15,11 +17,13 @@ const BLOCKS_IN_YEAR = new BN((SECS_IN_DAY * 365) / BLOCK_TIME);
 
 export class BuyerChainClient extends BaseChainClient {
   private static instance: BuyerChainClient;
+  private chainConfig: ProcessorConfig;
 
   constructor() {
     super({
-      apiUrl: config.buyerChain.dataSource.chain
+      apiUrl: getChain().config.buyerChain.dataSource.chain
     });
+    this.chainConfig = getChain().config;
   }
 
   static getInstance(): BuyerChainClient {

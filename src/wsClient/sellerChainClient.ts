@@ -1,14 +1,12 @@
 import { BaseChainClient } from './base';
 import { getChain } from '../chains';
 
-const { config } = getChain();
-
 export class SellerChainClient extends BaseChainClient {
   private static instance: SellerChainClient;
 
   constructor() {
     super({
-      apiUrl: config.sellerChain.dataSource.chain
+      apiUrl: getChain().config.sellerChain.dataSource.chain
     });
   }
 

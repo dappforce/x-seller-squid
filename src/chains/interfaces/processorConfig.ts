@@ -18,10 +18,10 @@ export type ProcessorConfig = {
     accounts: {
       tokenManager: {
         mnemonic: string;
-        publicKey: string;
       };
     };
     apiAuthTokenExp: number;
+    dmnRegPendingOrderExpTime: number;
   };
   sellerChain: {
     chainName: string;

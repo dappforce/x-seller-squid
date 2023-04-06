@@ -4,29 +4,33 @@ import {
   SocialRemarkMessageProtocolName,
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
-import { WalletClient } from '../../walletClient';
-import { decodeAllowedApiClients } from '../utils/common';
+import {
+  parseAllowedApiClients,
+  parseApiAuthTokenExpTime,
+  parsePendingOrderExpTime
+} from '../utils/common';
 dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
   sellerClient: {
-    allowedApiClients: decodeAllowedApiClients(
-      process.env.SUBSOCIAL_ALLOWED_API_CLIENTS || '',
-      WalletClient.addressToHex
+    allowedApiClients: parseAllowedApiClients(
+      process.env.SUBSOCIAL_ALLOWED_API_CLIENTS || ''
     )
   },
   sellerIndexer: {
     accounts: {
       tokenManager: {
-        mnemonic: process.env.SUBSOCIAL_API_TOKEN_MANAGER_MNEM ?? '',
-        publicKey: process.env.SUBSOCIAL_API_TOKEN_MANAGER_PUBLIC_KEY ?? ''
+        mnemonic: process.env.SUBSOCIAL_API_TOKEN_MANAGER_MNEM ?? ''
       }
     },
-    apiAuthTokenExp: !Number.isNaN(
-      Number.parseInt(process.env.SUBSOCIAL_API_TOKEN_EXP_TIME ?? '10000')
+    apiAuthTokenExp: parseApiAuthTokenExpTime(
+      process.env.SUBSOCIAL_API_TOKEN_EXP_TIME,
+      10000
+    ),
+    dmnRegPendingOrderExpTime: parsePendingOrderExpTime(
+      process.env.SUBSOCIAL_DMN_REG_PENDING_ORDER_EXP_TIME,
+      7
     )
-      ? Number.parseInt(process.env.SUBSOCIAL_API_TOKEN_EXP_TIME ?? '10000')
-      : 10000
   },
   sellerChain: {
     chainName: 'polkadot',

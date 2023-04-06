@@ -2,19 +2,27 @@ import {
   cryptoWaitReady,
   decodeAddress,
   encodeAddress,
-  naclBoxPairFromSecret
+  mnemonicToMiniSecret,
+  naclBoxPairFromSecret,
+  sr25519PairFromSeed
 } from '@polkadot/util-crypto';
 import { stringToU8a, u8aToHex } from '@polkadot/util';
+import { GenericAccountId } from '@polkadot/types';
 import { Keyring } from '@polkadot/api';
 import { getChain } from '../chains';
 import { KeyringPairWithSecret, WalletClientAccounts } from './types';
-const { config } = getChain();
-
+import { ProcessorConfig } from '../chains/interfaces/processorConfig';
+import registry from '@subsocial/api/utils/registry';
 export class WalletClient {
   private static instance: WalletClient;
+  private chainConfig: ProcessorConfig;
+
+  constructor() {
+    this.chainConfig = getChain().config;
+  }
 
   private accs: WalletClientAccounts = {
-    sellerIndexerTokenManager: null,
+    sellerIndexerAuthTokenMngEd25519: null,
     sellerTreasury: null,
     domainRegistrar: null,
     energyGenerator: null
@@ -36,9 +44,13 @@ export class WalletClient {
     return encodeAddress(addressHex, prefix);
   }
 
-  public static addressFromAnyToFormatted(addressAny: string, prefix: number) {
+  public static addressFromAnyToFormatted(
+    addressAny: string | Uint8Array,
+    prefix: number
+  ) {
     const publicKey = decodeAddress(addressAny);
-    return encodeAddress(publicKey, prefix);
+    const genericAddress = new GenericAccountId(registry, addressAny);
+    return encodeAddress(genericAddress.toString(), prefix);
   }
 
   public static async createKeyringPairFromMnem(mnem: string) {
@@ -67,7 +79,8 @@ export class WalletClient {
       throw Error('WalletClient is not initialized yet.');
 
     return {
-      sellerIndexerTokenManager: this.accs.sellerIndexerTokenManager!,
+      sellerIndexerAuthTokenMngEd25519:
+        this.accs.sellerIndexerAuthTokenMngEd25519!,
       sellerTreasury: this.accs.sellerTreasury!,
       domainRegistrar: this.accs.domainRegistrar!,
       energyGenerator: this.accs.energyGenerator!
@@ -76,25 +89,21 @@ export class WalletClient {
 
   public async init(): Promise<WalletClient> {
     if (this.clientValid()) return this;
-    const tokenMngKeyring = await WalletClient.createKeyringPairFromMnem(
-      config.sellerIndexer.accounts.tokenManager.mnemonic
-    );
-    (tokenMngKeyring as KeyringPairWithSecret).secretKey =
-      naclBoxPairFromSecret(
-        stringToU8a(process.env.SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER || '')
-      ).secretKey;
 
-    this.accs.sellerIndexerTokenManager =
-      tokenMngKeyring as KeyringPairWithSecret;
+    this.accs.sellerIndexerAuthTokenMngEd25519 = naclBoxPairFromSecret(
+      mnemonicToMiniSecret(
+        this.chainConfig.sellerIndexer.accounts.tokenManager.mnemonic
+      )
+    );
 
     this.accs.sellerTreasury = await WalletClient.createKeyringPairFromMnem(
-      config.sellerChain.accounts.sellerTreasury.mnemonic
+      this.chainConfig.sellerChain.accounts.sellerTreasury.mnemonic
     );
     this.accs.domainRegistrar = await WalletClient.createKeyringPairFromMnem(
-      config.buyerChain.accounts.domainRegistrar.mnemonic
+      this.chainConfig.buyerChain.accounts.domainRegistrar.mnemonic
     );
     this.accs.energyGenerator = await WalletClient.createKeyringPairFromMnem(
-      config.buyerChain.accounts.energyGenerator.mnemonic
+      this.chainConfig.buyerChain.accounts.energyGenerator.mnemonic
     );
     return this;
   }

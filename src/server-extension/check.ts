@@ -1,23 +1,13 @@
 import { RequestCheckContext } from '@subsquid/graphql-server/src/check';
-import { FieldNode, SelectionNode } from 'graphql/language/ast';
+import { FieldNode } from 'graphql/language/ast';
 import { getChain } from '../chains';
-import { naclOpen } from '@polkadot/util-crypto';
-import {
-  hexToU8a,
-  stringToHex,
-  stringToU8a,
-  u8aToHex,
-  u8aToString
-} from '@polkadot/util';
+import { decodeAddress, naclOpen } from '@polkadot/util-crypto';
+import { hexToU8a, u8aToString } from '@polkadot/util';
 import { WalletClient } from '../walletClient';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-const protectedQueries = [
-  'publishDraftOrder',
-  'getAllDraftOrdersByClientId',
-  'getDraftOrderByDomain'
-];
+const protectedQueries = ['publishDraftOrder'];
 
 /**
  * We need to check such headers as:
@@ -61,15 +51,15 @@ export function isTokenValid(
   token: string,
   clientId: string
 ): string | boolean {
+  dayjs.extend(utc);
   const {
     config: {
       sellerClient: { allowedApiClients },
       sellerIndexer: { apiAuthTokenExp }
     }
   } = getChain();
-  try {
-    console.log('allowedApiClients - ', allowedApiClients);
 
+  try {
     if (!allowedApiClients.has(WalletClient.addressToHex(clientId)))
       return 'Method is not allowed. Client is not allowed.';
 
@@ -77,10 +67,10 @@ export function isTokenValid(
     nonce[0] = 111;
 
     const decodedToken = naclOpen(
-      stringToU8a(token),
+      hexToU8a(token),
       nonce,
-      stringToU8a(clientId),
-      WalletClient.getInstance().account.sellerIndexerTokenManager.secretKey
+      decodeAddress(clientId),
+      WalletClient.getInstance().account.sellerIndexerAuthTokenMngEd25519.secretKey
     );
 
     const tokenTimestamp = dayjs.utc(
