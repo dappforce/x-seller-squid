@@ -1,6 +1,6 @@
 manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-polkadot-sub
-version: 101
+version: 103
 description: 'X Seller Squid based on Polkadot/Subsocial chains'
 build:
 deploy:
@@ -9,35 +9,30 @@ deploy:
     - SUBSOCIAL_ACC_MNEM_DOMAIN_REGISTRAR
     - SUBSOCIAL_ACC_MNEM_ENERGY_GENERATOR
     - SUBSOCIAL_ALLOWED_API_CLIENTS
+    - SUBSOCIAL_API_TOKEN_MANAGER_MNEM
   addons:
     postgres:
   processor:
     env:
-      CHAIN:
-        polkadotSubsocial
-      POLKADOT_REMARK_PROT_NAME:
-        social_t_0
-      POLKADOT_REMARK_PROT_VERSION:
-        0.1
-      TOKEN_PRICE_COEFF_ROC_SOON:
-        0.001
-      TOKEN_PRICE_COEFF_DOT_SUB:
-        0.001
+      CHAIN: polkadotSubsocial
+      POLKADOT_REMARK_PROT_NAME: social_t_0
+      POLKADOT_REMARK_PROT_VERSION: 0.1
+      TOKEN_PRICE_COEFF_ROC_SOON: 0.001
+      TOKEN_PRICE_COEFF_DOT_SUB: 0.001
+      SUBSOCIAL_API_TOKEN_EXP_TIME: 10000
+      SUBSOCIAL_DMN_REG_PENDING_ORDER_EXP_TIME: 7
     cmd:
       - node
       - lib/processor
   api:
     env:
-      CHAIN:
-        polkadotSubsocial
-      POLKADOT_REMARK_PROT_NAME:
-        social_t_0
-      POLKADOT_REMARK_PROT_VERSION:
-        0.1
-      TOKEN_PRICE_COEFF_ROC_SOON:
-        0.001
-      TOKEN_PRICE_COEFF_DOT_SUB:
-        0.001
+      CHAIN: polkadotSubsocial
+      POLKADOT_REMARK_PROT_NAME: social_t_0
+      POLKADOT_REMARK_PROT_VERSION: 0.1
+      TOKEN_PRICE_COEFF_ROC_SOON: 0.001
+      TOKEN_PRICE_COEFF_DOT_SUB: 0.001
+      SUBSOCIAL_API_TOKEN_EXP_TIME: 10000
+      SUBSOCIAL_DMN_REG_PENDING_ORDER_EXP_TIME: 7
     cmd:
       - npx
       - squid-graphql-server
