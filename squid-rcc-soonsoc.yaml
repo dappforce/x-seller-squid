@@ -1,6 +1,6 @@
 manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-rococo-soon
-version: 103
+version: 104
 description: 'X Seller Squid based on Rococo/Soonsocial chains'
 build:
 deploy:
