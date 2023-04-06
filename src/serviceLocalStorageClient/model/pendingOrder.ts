@@ -1,8 +1,8 @@
 import { Entity, PrimaryColumn, Column } from 'typeorm';
 
 @Entity()
-export class DraftOrder {
-  constructor(props?: Partial<DraftOrder>) {
+export class PendingOrder {
+  constructor(props?: Partial<PendingOrder>) {
     Object.assign(this, props);
   }
 

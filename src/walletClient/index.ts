@@ -35,7 +35,7 @@ export class WalletClient {
     return WalletClient.instance;
   }
 
-  public static addressToHex(address: string) {
+  public static addressToHex(address: string | Uint8Array) {
     const publicKey = decodeAddress(address);
     return u8aToHex(publicKey);
   }

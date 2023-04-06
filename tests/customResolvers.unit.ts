@@ -27,6 +27,10 @@ import utc from 'dayjs/plugin/utc';
 import { isTokenValid } from '../src/server-extension/check';
 import { Keypair } from '@polkadot/util-crypto/types';
 
+import { getChain } from '../src/chains';
+
+const { config } = getChain();
+
 describe('API Custom Resolvers', () => {
   dayjs.extend(utc);
 
@@ -40,7 +44,9 @@ describe('API Custom Resolvers', () => {
   beforeAll(async () => {
     walletClient = await WalletClient.getInstance().init();
     sellerKeypair = naclBoxPairFromSecret(
-      mnemonicToMiniSecret(process.env.SOONSOCIAL_BE_CLIENT_TOKEN_SIGNER || '')
+      mnemonicToMiniSecret(
+        process.env.SELLER_SOONSOCIAL_BE_CLIENT_TOKEN_SIGNER || ''
+      )
     );
   });
 
@@ -54,7 +60,9 @@ describe('API Custom Resolvers', () => {
     const tokenMessage = dayjs.utc().valueOf().toString();
 
     const requesterKeypair = naclBoxPairFromSecret(
-      mnemonicToMiniSecret(process.env.SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER || '')
+      mnemonicToMiniSecret(
+        process.env.SELLER_SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER || ''
+      )
     );
 
     /**
@@ -68,13 +76,15 @@ describe('API Custom Resolvers', () => {
       nonce
     );
 
+    console.log(u8aToHex(signedToken.sealed))
+
     /**
      * ==================
      * Seller-squid side
      * ==================
      */
 
-    const isValid = isTokenValid(
+    const isValid = await isTokenValid(
       u8aToHex(signedToken.sealed),
       encodeAddress(decodeAddress(requesterKeypair.publicKey), 42)
     );
@@ -93,7 +103,7 @@ describe('API Custom Resolvers', () => {
 
     const requesterKeypair = naclBoxPairFromSecret(
       mnemonicToMiniSecret(
-        process.env.SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER_INVALID || ''
+        process.env.SELLER_SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER_INVALID || ''
       )
     );
 
@@ -114,7 +124,7 @@ describe('API Custom Resolvers', () => {
      * ==================
      */
 
-    const isValid = isTokenValid(
+    const isValid = await isTokenValid(
       u8aToHex(signedToken.sealed),
       encodeAddress(decodeAddress(requesterKeypair.publicKey), 42)
     );
@@ -132,7 +142,9 @@ describe('API Custom Resolvers', () => {
     const tokenMessage = dayjs.utc().valueOf().toString();
 
     const requesterKeypair = naclBoxPairFromSecret(
-      mnemonicToMiniSecret(process.env.SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER || '')
+      mnemonicToMiniSecret(
+        process.env.SELLER_SOONSOCIAL_FE_CLIENT_TOKEN_SIGNER || ''
+      )
     );
 
     const signedToken = naclSeal(
@@ -150,11 +162,15 @@ describe('API Custom Resolvers', () => {
 
     await new Promise((res) => setTimeout(res, 12000));
 
-    const isValid = isTokenValid(
+    const isValid = await isTokenValid(
       u8aToHex(signedToken.sealed),
       encodeAddress(decodeAddress(requesterKeypair.publicKey), 42)
     );
 
-    expect(isValid).toBe('Method is not allowed. Token is not valid.');
+    if (config.sellerIndexer.apiDebugMode) {
+      expect(isValid).toBe(true);
+    } else {
+      expect(isValid).toBe('Method is not allowed. Token is not valid.');
+    }
   });
 });

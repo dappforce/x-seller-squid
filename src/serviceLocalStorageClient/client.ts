@@ -1,5 +1,5 @@
 import { DataSource, EntityManager } from 'typeorm';
-import { DraftOrder } from './model';
+import { PendingOrder } from './model';
 
 export class ServiceLocalStorage {
   private static instance: ServiceLocalStorage;
@@ -32,7 +32,7 @@ export class ServiceLocalStorage {
       dropSchema: false,
       synchronize: true,
       logging: false,
-      entities: [DraftOrder]
+      entities: [PendingOrder]
     });
 
     await this.ds.initialize();
@@ -40,6 +40,6 @@ export class ServiceLocalStorage {
   }
 
   async deleteDraftOrderById(orderId: string): Promise<void> {
-    await this.em.delete(DraftOrder, orderId);
+    await this.em.delete(PendingOrder, orderId);
   }
 }

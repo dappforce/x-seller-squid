@@ -22,6 +22,7 @@ export type ProcessorConfig = {
     };
     apiAuthTokenExp: number;
     dmnRegPendingOrderExpTime: number;
+    apiDebugMode: boolean;
   };
   sellerChain: {
     chainName: string;

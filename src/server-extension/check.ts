@@ -7,7 +7,7 @@ import { WalletClient } from '../walletClient';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-const protectedQueries = ['publishDraftOrder'];
+const protectedQueries = ['createPendingOrder', 'deletePendingOrderById'];
 
 /**
  * We need to check such headers as:
@@ -25,6 +25,8 @@ export async function requestCheck(
   let clientId: string | undefined =
     req.http.headers.get('client-id') ?? undefined;
 
+  req.context.openreader.clientId = clientId;
+
   try {
     const selections = new Set<string>(
       req.operation.selectionSet.selections
@@ -38,7 +40,7 @@ export async function requestCheck(
     if (!clientId)
       return 'Method is not allowed. Client ID has not been provided.'; // TODO add method name to error message
 
-    return isTokenValid(token, clientId);
+    return await isTokenValid(token, clientId);
 
     return 'Method is not allowed. Token is not valid.'; // TODO add method name to error message
   } catch (e) {
@@ -47,15 +49,15 @@ export async function requestCheck(
   }
 }
 
-export function isTokenValid(
+export async function isTokenValid(
   token: string,
   clientId: string
-): string | boolean {
+): Promise<string | boolean> {
   dayjs.extend(utc);
   const {
     config: {
       sellerClient: { allowedApiClients },
-      sellerIndexer: { apiAuthTokenExp }
+      sellerIndexer: { apiAuthTokenExp, apiDebugMode }
     }
   } = getChain();
 
@@ -70,13 +72,19 @@ export function isTokenValid(
       hexToU8a(token),
       nonce,
       decodeAddress(clientId),
-      WalletClient.getInstance().account.sellerIndexerAuthTokenMngEd25519.secretKey
+      (await WalletClient.getInstance().init()).account
+        .sellerIndexerAuthTokenMngEd25519.secretKey
     );
 
     const tokenTimestamp = dayjs.utc(
       Number.parseInt(u8aToString(decodedToken))
     );
     const diff = dayjs.utc().diff(tokenTimestamp);
+
+    console.log('diff - ', diff);
+    console.log('apiDebugMode - ', apiDebugMode);
+
+    if (apiDebugMode) return true;
 
     /**
      * We need add 100ms for execution previous decoding functionality.
@@ -86,6 +94,6 @@ export function isTokenValid(
     return true;
   } catch (e) {
     console.log(e);
-    return 'Method is not allowed.';
+    return 'Authorization is failed with unknown error.';
   }
 }

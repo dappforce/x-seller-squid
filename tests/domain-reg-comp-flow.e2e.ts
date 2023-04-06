@@ -30,7 +30,7 @@ describe('Register domain with completion flow', () => {
   test('Send valid purchase batch', async () => {
     const buyerAccount =
       await WalletClient.getInstance().createKeyringPairFromMnem(
-        process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_BUYER || ''
+        process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_BUYER || ''
       );
     if (!buyerAccount) return;
     if (!sellerWsClient) return;
@@ -56,7 +56,7 @@ describe('Register domain with completion flow', () => {
         // domainName: `tdotdomain${randomAsNumber()}.sub`,
         domainName: `tdotdomain334433wwww.sub`,
         target: WalletClient.addressToHex(
-          process.env.SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
+          process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
         token: 'ROC'
       }
