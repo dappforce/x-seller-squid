@@ -56,6 +56,7 @@ export class PendingOrdersResolver {
         clientId: requestClientId ?? undefined
       })
     );
+    lsClient.cronDeletePendingOrderWhenExp(domain);
     return true;
   }
 

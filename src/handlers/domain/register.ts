@@ -77,7 +77,7 @@ export async function handleDomainRegisterPayment(
   const lsClient = await ServiceLocalStorage.getInstance().init();
 
   const saveRegOrderEntity = async () => {
-    await lsClient.deleteDraftOrderById(domainRegistrationOrder.domain.id);
+    await lsClient.deletePendingOrderById(domainRegistrationOrder.domain.id);
     await ctx.store.save(domainRegistrationOrder);
   };
 
