@@ -7,6 +7,7 @@ export type DomainModuleStatusName =
   | 'ErrorRegMaxLengthInvalid'
   | 'ErrorRegPaymentAmountInsufficient'
   | 'ErrorRegPaymentTokenInvalid'
+  | 'ErrorRegInvalidTarget'
   | 'ErrorRegAlreadyOwnedByTarget'
   | 'ErrorRegUnavailable'
   | 'ErrorRegForbiddenTld'
