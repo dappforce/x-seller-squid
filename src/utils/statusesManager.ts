@@ -6,6 +6,7 @@ export type DomainModuleStatusName =
   | 'ErrorRegMinLengthInvalid'
   | 'ErrorRegMaxLengthInvalid'
   | 'ErrorRegPaymentAmountInsufficient'
+  | 'ErrorRegPaymentTokenInvalid'
   | 'ErrorRegAlreadyOwnedByTarget'
   | 'ErrorRegUnavailable'
   | 'ErrorRegForbiddenTld'
@@ -40,6 +41,12 @@ const statusReasonMap: Record<
       module: 'Domain',
       status: 'ErrorRegPaymentAmountInsufficient',
       reason: 'Transferred amount is '
+    },
+    ErrorRegPaymentTokenInvalid: {
+      module: 'Domain',
+      status: 'ErrorRegPaymentTokenInvalid',
+      reason:
+        'Mentioned token in remark does not match to native token of the seller chain.'
     },
     ErrorRegMinLengthInvalid: {
       module: 'Domain',

@@ -44,10 +44,10 @@ export async function handleDomainRegisterPayment(
   /**
    * Check paid amount
    */
-  const transferredAmountValidation = await validateRegistrationPayment(amount);
+  const registrationPaymentValidation = await validateRegistrationPayment(amount, token);
 
-  if (!transferredAmountValidation.success) {
-    ctx.log.error(transferredAmountValidation);
+  if (!registrationPaymentValidation.success) {
+    ctx.log.error(registrationPaymentValidation);
     ctx.log.error('Processing of current registration request is skipped.');
     return null;
   }

@@ -4,11 +4,16 @@ import {
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
 
-export type TokenDetails = {
-  name: string;
+export enum TokenName {
+  DOT = 'DOT',
+  ROC = 'ROC'
+}
+
+export interface TokenDetails {
+  name: TokenName;
   decimal: number;
   coefficientWithBuyerToken: string;
-};
+}
 
 export type ProcessorConfig = {
   sellerClient: {

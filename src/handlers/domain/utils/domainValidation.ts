@@ -6,6 +6,7 @@ import {
   StatusModule
 } from '../../../utils/statusesManager';
 import { getChain } from '../../../chains';
+import { TokenName } from '../../../chains/interfaces/processorConfig';
 
 const { config } = getChain();
 
@@ -31,8 +32,18 @@ async function getFailedStatusWithMeta(
 }
 
 export async function validateRegistrationPayment(
-  transferredAmount: bigint
+  transferredAmount: bigint,
+  transferredToken: TokenName
 ): Promise<ValidationResult> {
+  if (transferredToken !== config.sellerChain.token.name) {
+    return await getFailedStatusWithMeta({
+      ...StatusesMng.getStatusWithReason(
+        'Domain',
+        'ErrorRegPaymentTokenInvalid'
+      )
+    });
+  }
+
   const buyerChainClient = BuyerChainClient.getInstance();
   const registrationPrice = await buyerChainClient.getDomainRegistrationPrice(
     config.sellerChain.token
