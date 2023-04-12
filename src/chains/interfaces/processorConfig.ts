@@ -49,4 +49,9 @@ export type ProcessorConfig = {
       energyGenerator: { mnemonic: string };
     };
   };
+  blocksMapper: {
+    dataSource: {
+      endpoint: string;
+    };
+  };
 };

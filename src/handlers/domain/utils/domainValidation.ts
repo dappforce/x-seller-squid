@@ -6,6 +6,7 @@ import {
   StatusModule
 } from '../../../utils/statusesManager';
 import { getChain } from '../../../chains';
+import { MultiChainBlocksMapper } from '../../../multichainBlocksMapper';
 
 const { config } = getChain();
 
@@ -57,13 +58,17 @@ export async function validateRegistrationPayment(
 
 export async function validateDomainAvailability(
   domainName: string,
-  target: string
+  target: string,
+  relayBlockNumber: number
 ): Promise<ValidationResult> {
   const buyerChainClient = BuyerChainClient.getInstance();
 
-  const existingDomain = await buyerChainClient.getRegisteredDomains([
-    domainName
-  ]);
+  const existingDomain = await buyerChainClient.getRegisteredDomains(
+    [domainName],
+    (await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockNumber(
+      relayBlockNumber
+    )) ?? undefined
+  );
 
   if (!existingDomain) {
     return await getFailedStatusWithMeta({

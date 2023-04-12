@@ -1,5 +1,5 @@
 import { DataSource, EntityManager, LessThan } from 'typeorm';
-import { PendingOrder } from './model';
+import { PendingOrder, RelayParaBlockRel } from './model';
 import cron, { ScheduledTask } from 'node-cron';
 import { ProcessorConfig } from '../chains/interfaces/processorConfig';
 import { getChain } from '../chains';
@@ -46,7 +46,7 @@ export class ServiceLocalStorage {
       dropSchema: false,
       synchronize: true,
       logging: false,
-      entities: [PendingOrder]
+      entities: [PendingOrder, RelayParaBlockRel]
     });
 
     await this.ds.initialize();
@@ -70,6 +70,7 @@ export class ServiceLocalStorage {
       }
     });
     const idsToDelete = expiredPendingOrders.map((or) => or.id);
+    if (!idsToDelete || idsToDelete.length === 0) return;
     await this.em.delete(PendingOrder, idsToDelete);
     this.sqdLogger.info(
       `Next Pending Orders have been deleted automatically due to reaching expiration time: ${idsToDelete.join(

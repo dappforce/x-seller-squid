@@ -57,6 +57,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await WalletClient.getInstance().init();
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
+
   SocialRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
 
   let callsData = parseCalls(ctx);
