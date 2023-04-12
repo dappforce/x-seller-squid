@@ -8,6 +8,8 @@ import type { ISubmittableResult } from '@polkadot/types/types';
 import { StatusesMng } from '../utils/statusesManager';
 import { IMethod } from '@polkadot/types/types/interfaces';
 import { AnyTuple } from '@polkadot/types-codec/types/helpers';
+import { hexToNumber, numberToU8a, u8aToHex } from '@polkadot/util';
+import { BlockHash } from '@polkadot/types/interfaces/chain/types';
 
 type ClientArgs = {
   apiUrl: string;
@@ -271,5 +273,13 @@ export class BaseChainClient extends WsClient {
       return status.asFinalized.toHex();
     }
     return '';
+  }
+
+  public async getCurrentBlockNumber(): Promise<number> {
+    return hexToNumber((await this.api.query.system.number()).toHex());
+  }
+
+  public async getBlockHashByBlocNumber(blockNumber: number): Promise<BlockHash> {
+    return await this.api.rpc.chain.getBlockHash(numberToU8a(blockNumber));
   }
 }

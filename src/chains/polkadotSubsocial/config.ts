@@ -79,5 +79,10 @@ export const config: ProcessorConfig = {
         mnemonic: process.env.SELLER_SUBSOCIAL_ACC_MNEM_ENERGY_GENERATOR || ''
       }
     }
+  },
+  blocksMapper: {
+    dataSource: {
+      endpoint: 'https://squid.subsquid.io/blocks-mapper-roc-soon/graphql'
+    }
   }
 };

@@ -27,6 +27,7 @@ import {
 import { StatusesMng } from '../../utils/statusesManager';
 import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
 import { TokenName } from '../../chains/interfaces/processorConfig';
+import { sleepTo } from '../../utils';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -36,11 +37,30 @@ export async function handleDomainRegisterPayment(
   ctx: Ctx
 ): Promise<string | null> {
   const {
+    blockNumber,
     amount,
     remark: {
       content: { domainName, target, opId, token }
     }
   } = callData;
+
+  const existingRegistrationOrderEntity = await ctx.store.findOne(
+    DomainRegistrationOrder,
+    {
+      where: {
+        id: opId
+      }
+    }
+  );
+
+  if (existingRegistrationOrderEntity) {
+    ctx.log.error(
+      `Domain Registration Order "${opId}" is already existing and registration cannot be duplicated [block#: ${blockNumber}].`
+    );
+    // TODO handle this case
+    return null;
+  }
+
   const buyerChainClient = BuyerChainClient.getInstance();
 
   /**
@@ -113,7 +133,11 @@ export async function handleDomainRegisterPayment(
    * Check is domain available for registration
    */
 
-  const dmnAvValidData = await validateDomainAvailability(domainName, target);
+  const dmnAvValidData = await validateDomainAvailability(
+    domainName,
+    target,
+    callData.timestampRaw
+  );
 
   if (!dmnAvValidData.success) {
     if (
@@ -211,6 +235,12 @@ export async function handleDomainRegisterPayment(
           opId: opId
         }
       };
+
+      /**
+       * Delay is required here to avoid such errors like:
+       * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
+       */
+      await sleepTo(1000);
 
       const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
         WalletClient.getInstance().account.sellerTreasury,

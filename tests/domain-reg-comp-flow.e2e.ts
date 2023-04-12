@@ -29,7 +29,7 @@ describe('Register domain with completion flow', () => {
 
   test('Send valid purchase batch', async () => {
     const buyerAccount =
-      await WalletClient.getInstance().createKeyringPairFromMnem(
+      await WalletClient.createKeyringPairFromMnem(
         process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_BUYER || ''
       );
     if (!buyerAccount) return;
@@ -54,7 +54,7 @@ describe('Register domain with completion flow', () => {
       content: {
         opId: `${transferTx.hash.toHex()}-${randomAsNumber()}`,
         // domainName: `tdotdomain${randomAsNumber()}.sub`,
-        domainName: `tdotdomain334433wwww.sub`,
+        domainName: `man-dude-body-1.sub`,
         target: WalletClient.addressToHex(
           process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),
