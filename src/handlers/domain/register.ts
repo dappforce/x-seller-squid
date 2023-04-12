@@ -35,11 +35,30 @@ export async function handleDomainRegisterPayment(
   ctx: Ctx
 ): Promise<string | null> {
   const {
+    blockNumber,
     amount,
     remark: {
       content: { domainName, target, opId, token }
     }
   } = callData;
+
+  const existingRegistrationOrderEntity = await ctx.store.findOne(
+    DomainRegistrationOrder,
+    {
+      where: {
+        id: opId
+      }
+    }
+  );
+
+  if (existingRegistrationOrderEntity) {
+    ctx.log.error(
+      `Domain Registration Order "${opId}" is already existing and registration cannot be duplicated [block#: ${blockNumber}].`
+    );
+    // TODO handle this case
+    return null;
+  }
+
   const buyerChainClient = BuyerChainClient.getInstance();
 
   /**
