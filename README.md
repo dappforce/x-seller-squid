@@ -29,7 +29,7 @@ Data types can be found [here](./src/server-extension/model/sellerConfigInfo.mod
 
 ## Pending Orders
 
-Current squid has custom API calls upon main API which is bases on [schema.graphql](./schema.graphql).
+Current squid has custom API calls upon main API which is based on [schema.graphql](./schema.graphql).
 Custom resolvers are implemented regarding [Subsquid's recommendations.](https://docs.subsquid.io/graphql-api/custom-resolvers/)
 
 ### PendingOrder entity
