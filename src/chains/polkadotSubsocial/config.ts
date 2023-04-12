@@ -1,4 +1,4 @@
-import { ProcessorConfig } from '../interfaces/processorConfig';
+import { ProcessorConfig, TokenName } from '../interfaces/processorConfig';
 import * as dotenv from 'dotenv';
 import {
   SocialRemarkMessageProtocolName,
@@ -40,7 +40,7 @@ export const config: ProcessorConfig = {
     chainName: 'polkadot',
     prefix: 0,
     token: {
-      name: 'DOT',
+      name: TokenName.DOT,
       decimal: 10,
       coefficientWithBuyerToken:
         process.env.SELLER_TOKEN_PRICE_COEFF_DOT_SUB || '0.001' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001)

@@ -3,10 +3,9 @@ import {
   decodeAddress,
   encodeAddress,
   mnemonicToMiniSecret,
-  naclBoxPairFromSecret,
-  sr25519PairFromSeed
+  naclBoxPairFromSecret
 } from '@polkadot/util-crypto';
-import { stringToU8a, u8aToHex } from '@polkadot/util';
+import { stringToU8a, u8aToHex, hexToU8a, isHex } from '@polkadot/util';
 import { GenericAccountId } from '@polkadot/types';
 import { Keyring } from '@polkadot/api';
 import { getChain } from '../chains';
@@ -48,7 +47,7 @@ export class WalletClient {
     addressAny: string | Uint8Array,
     prefix: number
   ) {
-    const publicKey = decodeAddress(addressAny);
+    // const publicKey = decodeAddress(addressAny);
     const genericAddress = new GenericAccountId(registry, addressAny);
     return encodeAddress(genericAddress.toString(), prefix);
   }
@@ -62,6 +61,20 @@ export class WalletClient {
     }
     let keyring = new Keyring({ type: 'sr25519' });
     return keyring.addFromUri(mnem);
+  }
+
+  public static isAddressValid(maybeAddress: string) {
+    try {
+      encodeAddress(
+        isHex(maybeAddress)
+          ? hexToU8a(maybeAddress)
+          : decodeAddress(maybeAddress)
+      );
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   public static isSigner(msg: string, maybeSigner: string) {}
