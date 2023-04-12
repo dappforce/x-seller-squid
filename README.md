@@ -29,21 +29,21 @@ Data types can be found [here](./src/server-extension/model/sellerConfigInfo.mod
 
 ## Pending Orders
 
-Current squid has custom API calls upon main API which is based on [schema.graphql](./schema.graphql).
-Custom resolvers are implemented regarding [Subsquid's recommendations.](https://docs.subsquid.io/graphql-api/custom-resolvers/)
+The current Squid has custom API calls based on the main API which is based on [schema.graphql](./schema.graphql).
+Custom resolvers have been implemented based on [Subsquid's recommendations](https://docs.subsquid.io/graphql-api/custom-resolvers/).
 
-### PendingOrder entity
+### PendingOrder Entity
 
-As Pending Orders must be available for all clients immediately after creation, so we cannot use
-native Squid Store functions and its native DB (because Squid saves data to DB by one transaction which commits in
-the end of each batch. This provides pretty big delay in accessibility of custom data for fetch by other clients).
+Pending Orders must be available for all clients immediately after creation, so we cannot use
+the native Squid Store functions and its native DB. This is because Squid saves data to the DB with just one transaction which commits at
+the end of each batch. This provides a pretty big delay in the accessibility of custom data for retrieval by other clients.
 
-As result, Pending Orders are managed by [ServiceLocalStorage](./src/serviceLocalStorageClient/client.ts) client
-which based on TypeORM + SQLite. It's fast and lightweight solution.
+As result, Pending Orders are managed by a [ServiceLocalStorage](./src/serviceLocalStorageClient/client.ts) client
+which is based on TypeORM + SQLite. It's a fast and lightweight solution.
 
-#### Structure of PendingOrder entity
+#### Structure Of The PendingOrder Entity
 
-Source code can be found [here](./src/serviceLocalStorageClient/model/pendingOrder.ts).
+The source code can be found [here](./src/serviceLocalStorageClient/model/pendingOrder.ts).
 
 ```typescript
 export class PendingOrder {
@@ -65,33 +65,33 @@ export class PendingOrder {
 }
 ```
 
-Values `account` and `clientId` - account public key and for better compatibility these values
-are saved in DB as Hex value of public key. API resolvers can receive address in any format and
-automatically converts to Hex format.
+`account` and `clientId` are substrate account public keys, and for better compatibility these values
+are saved in the DB as a Hex value of the public key. API resolvers can receive `account` and `clientId` in any format and will
+automatically convert them to the Hex format.
 
 ---
 
 ### PendingOrder API
 
-#### Calls authorization flow
+#### The Calls Authorization Flow
 
-All mutation are protected by Authorization tokens. This feature is based on
+All mutation are protected by Authorization tokens. This is based on asymmetric encryption and the
 [Access Control feature](https://docs.subsquid.io/graphql-api/authorization/)
-from Subsquid framework and asymmetric encryption.
+from the Subsquid framework.
 
-Seller squid and each client application which works with squid's restricted API has
-its own substrate account for decoding/encoding auth token message with asymmetric encryption
-approach. Public and secret keys of these accounts are generated in `ED25519` crypto type from mnemonics.
-It's **important** to understand, as in squid's whitelist, `Client-Id` header, encode/decode functions
-we need to use exactly `ED25519` type of keys but not `SR25519` keys, which we can find in the wallet dapp after
+The Seller Squid, and each client application which works with the Squid's restricted API, have
+their own substrate accounts for encoding/decoding auth token message with the asymmetric encryption
+approach. Public and secret keys of these accounts are generated in the `ED25519` crypto type from mnemonic phrases.
+It's **important** to understand, as in the Squid's whitelist (with the `Client-Id` header), that the encode/decode functions
+need to use exactly the `ED25519` type of keys, but not `SR25519` keys, which we can find in the wallet dapp after the
 creation process.
 
-For access to restricted calls, a client application must be added to clients whitelist in the
-squid (public key of client's account in any format should be added to the whitelist).
-To each mutation request client app must must add 2 headers:
+For access to restricted calls, a client application must be added to the clients whitelist in the
+Squid (the public key of the client's account in any format should be added to the whitelist).
+To each mutation request the client app must add two headers:
 
-- `Authorization: Bearer <SignedTokenMessage>` - `SignedTokenMessage` is a current timestamp
-  in milliseconds in UTC timezone which is stringified and encoded with such encode function as below:
+- `Authorization: Bearer <SignedTokenMessage>` - `SignedTokenMessage` is a current millisecond timestamp in the UTC timezone
+  that is turned into a string and encoded with the below encode function:
 
 ```typescript
 import { stringToU8a, u8aToHex } from '@polkadot/util';
@@ -107,12 +107,12 @@ const messageSigned = naclSeal(
 const signedTokenMessage = u8aToHex(signedToken.sealed);
 ```
 
-Timestamp will be decoded in Seller squid and token will be validated by bunch of parameters
-and especially by expiration time. If timestamp in token is older to expiration time (configured in env variables
-of the squid), than mutation will be rejected as token is expired.
+The timestamp will be decoded in the Seller Squid and the token will be validated by a bunch of parameters,
+especially by expiration time. If the timestamp of token is older than the expiration time (which is configured in the env variables
+of the Squid), then the mutation will be rejected as the token is expired.
 
-- `Client-Id` - client application account `ED25519` public key in any format, which will be used for
-  decoding of the token message in `Authorization` header.
+- `Client-Id` - The client application account's `ED25519` public key in any format, which will be used for
+  decoding of the token message that is in the `Authorization` header.
 
 ```typescript
 const decodedTimestamp = naclOpen(
@@ -125,19 +125,19 @@ const decodedTimestamp = naclOpen(
 
 ---
 
-Custom API calls implementation can be found [here](./src/server-extension/resolvers/pendingOrders.ts).
+The implementation of custom API calls can be found [here](./src/server-extension/resolvers/pendingOrders.ts).
 
-Custom API calls data types can be found [here](./src/server-extension/model/pendingOrder.model.ts)
+Data types for custom API calls can be found [here](./src/server-extension/model/pendingOrder.model.ts)
 
-X-Seller has such custom API queries/mutations as:
+X-Seller has custom API queries/mutations such as:
 
 #### _Mutations_
 
-- `createPendingOrder(account, domain)` - create PendingOrder entity. New entity will have field
-  `clientId` which will be automatically filled by value from `Clien-Id` header of mutation request.
-  - _account_ - owner/initiator of the particular order;
-  - _domain_ - domain name which is booked by `account`. This value will be used for a new
-    PendingOrder entity as unique ID value. So creation of duplicates of PendingOrders are
+- `createPendingOrder(account, domain)` - create a PendingOrder entity. The new entity will have the
+  `clientId` field which will be automatically filled with the value from the `Client-Id` header of the mutation request.
+  - _account_ - the owner/initiator of the particular order;
+  - _domain_ - the domain name that was booked by `account`. This value will be used as a new unique ID value
+    for a new PendingOrder entity in the DB, so that creation of duplicate PendingOrder entities is
     impossible.
 
 ```graphql
@@ -146,11 +146,11 @@ mutation CreatePendingOrder($domain: String!, $account: String!) {
 }
 ```
 
-- `deletePendingOrderById(id)` - delete PendingOrder entity. Client Application can delete only
-  that entities which were created by this particular client. Validation based on `Client-Id` header
+- `deletePendingOrderById(id)` - delete a PendingOrder entity. The client application can delete only
+  those entities which were created by that particular client. Validation is based on the `Client-Id` header
   and `clientId` field in each PendingOrder entity.
-  - _id_ - in practice it is a domain name which has been booked and its name has been used as
-    id of PendingOrder entity.
+  - _id_ - in practice, this is a domain name which has been booked, and its name has been used as the
+    id of a PendingOrder entity.
 
 ```graphql
 mutation DeletePendingOrderById($id: String!) {
@@ -162,8 +162,8 @@ mutation DeletePendingOrderById($id: String!) {
 
 #### _Queries_
 
-- `getPendingOrdersByIds(ids)` - get PendingOrder entities by list of ids (domain names).
-  - _ids_ - array of entities ids === domain names
+- `getPendingOrdersByIds(ids)` - get PendingOrder entities by a list of ids (domain names).
+  - _ids_ - an array of the ids of entities === domain names
 
 ```graphql
 query GetPendingOrdersByIds($ids: [String!]!) {
@@ -179,8 +179,8 @@ query GetPendingOrdersByIds($ids: [String!]!) {
 ```
 
 - `getPendingOrdersByAccount(account)` - get PendingOrder entities by account.
-  - _account_ - account public address of owner of PendingOrder entity.
-    Can be provided in any format, even in Hex.
+  - _account_ - the substrate account public address of the owner of a PendingOrder entity.
+    This can be provided in any format, even in Hex.
 
 ```graphql
 query GetPendingOrdersByAccount($account: String!) {
@@ -199,8 +199,6 @@ query GetPendingOrdersByAccount($account: String!) {
 
 ### Garbage collector for expired PendingOrders
 
-Seller squid has implemented functionality for automatic removing all Pending Orders,
-which are older than PendinOrder expiration time which is configured in the squid env variables
-and exposed to clients via `sellerConfigInfo.dmnRegPendingOrderExpTime` in milliseconds.
-In opposite of exposed value in millisecond, value in squid's env variable must be provided in
-minutes for better DevX.
+The Seller Squid has implemented functionality for automatically removing all Pending Orders
+that are older than the PendingOrder expiration time. The expiration time is configured in the Squid's new env variables
+in minutes, but exposed to clients via `sellerConfigInfo.dmnRegPendingOrderExpTime` in milliseconds.
