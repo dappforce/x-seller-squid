@@ -25,6 +25,7 @@ import {
 } from './utils/domainValidation';
 import { StatusesMng } from '../../utils/statusesManager';
 import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
+import { sleepTo } from '../../utils';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -197,6 +198,12 @@ export async function handleDomainRegisterPayment(
           opId: opId
         }
       };
+
+      /**
+       * Delay is required here to avoid such errors like:
+       * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
+       */
+      await sleepTo(1000);
 
       const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
         WalletClient.getInstance().account.sellerTreasury,

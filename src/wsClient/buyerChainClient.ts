@@ -14,6 +14,7 @@ import { UnsubscribePromise } from '@polkadot/api-base/types/base';
 import { Header } from '@polkadot/types/interfaces/runtime/types';
 import { hexToNumber } from '@polkadot/util';
 import { BlockHash } from '@polkadot/types/interfaces/chain/types';
+import { sleepTo } from '../utils';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
@@ -67,7 +68,7 @@ export class BuyerChainClient extends BaseChainClient {
   async getRegisteredDomains(domainNames: string[], atBlock?: string) {
     let structs = [];
 
-    console.log('atBlock - ', atBlock)
+    console.log('atBlock - ', atBlock);
 
     if (atBlock) {
       const apiAt = await this.api.at(atBlock);
@@ -144,6 +145,12 @@ export class BuyerChainClient extends BaseChainClient {
         );
 
         const sudoWrappedTx = this.api.tx.sudo.sudo(domainRegistrationTx);
+
+        /**
+         * Delay is required here to avoid such errors like:
+         * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
+         */
+        await sleepTo(500);
 
         console.log('sudoWrappedTx hash - ', sudoWrappedTx.hash.toHex());
 
