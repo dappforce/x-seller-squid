@@ -3,6 +3,8 @@ import { Ctx } from '../processor';
 // import * as gql from 'gql-query-builder';
 import { getChain } from '../chains';
 import { ProcessorConfig } from '../chains/interfaces/processorConfig';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
 type BlocksMapperBlockData = {
   id: string;
@@ -31,49 +33,29 @@ export class MultiChainBlocksMapper {
     return MultiChainBlocksMapper.instance;
   }
 
-  async getParaBlockHashByRelayBlockNumber(
-    blockNumber: number
+  async getParaBlockHashByRelayBlockTimestamp(
+    blockTimestampRaw: number
   ): Promise<string | null> {
+    dayjs.extend(utc);
     const queryResp = await this.blocksMapperQuery<
       'relayParaBlockRels',
       BlocksMapperBlockData[]
     >({
-      query: `query ($limit: Int, $orderBy: [RelayParaBlockRelOrderByInput!], $blocksRange: [Int!]) { relayParaBlockRels (limit: $limit, orderBy: $orderBy, where: { relayBlockNumber_in: $blocksRange }) { relayBlockNumber, paraBlockTimestamp, paraBlockNumber, paraBlockHash, id } }`,
+      query: `query ($limit: Int, $orderBy: [RelayParaBlockRelOrderByInput!], $blockTimestamp: DateTime) { relayParaBlockRels (limit: $limit, orderBy: $orderBy, where: { paraBlockTimestamp_gte: $blockTimestamp }) { relayBlockNumber, paraBlockTimestamp, paraBlockNumber, paraBlockHash, id } }`,
       variables: {
-        limit: 10,
-        orderBy: 'paraBlockTimestamp_DESC',
-        blocksRange: (() => [
-          blockNumber + 2,
-          blockNumber + 1,
-          blockNumber,
-          blockNumber - 1,
-          blockNumber - 2
-        ])()
+        limit: 1,
+        orderBy: 'paraBlockTimestamp_ASC',
+        blockTimestamp: (() =>
+          dayjs.utc(blockTimestampRaw).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))()
       }
     });
 
     if (!queryResp) return null;
     const blocks = queryResp.data.relayParaBlockRels;
 
-    let matchedBlock = blocks.find(
-      (block) =>
-        block.relayBlockNumber !== null &&
-        block.relayBlockNumber === blockNumber
-    );
+    if (!blocks || blocks.length == 0) return null;
 
-    if (matchedBlock) return matchedBlock.paraBlockHash;
-
-    matchedBlock = blocks.find(
-      (block) =>
-        block.relayBlockNumber !== null && block.relayBlockNumber > blockNumber
-    );
-    if (matchedBlock) return matchedBlock.paraBlockHash;
-    matchedBlock = blocks.find(
-      (block) =>
-        block.relayBlockNumber !== null && block.relayBlockNumber < blockNumber
-    );
-
-    return matchedBlock ? matchedBlock.paraBlockHash : null;
+    return blocks[0].paraBlockHash;
   }
 
   private async blocksMapperQuery<N extends string, R>(graphqlQuery: {

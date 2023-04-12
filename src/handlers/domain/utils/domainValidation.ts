@@ -59,14 +59,14 @@ export async function validateRegistrationPayment(
 export async function validateDomainAvailability(
   domainName: string,
   target: string,
-  relayBlockNumber: number
+  relayBlockTimestampRaw: number
 ): Promise<ValidationResult> {
   const buyerChainClient = BuyerChainClient.getInstance();
 
   const existingDomain = await buyerChainClient.getRegisteredDomains(
     [domainName],
-    (await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockNumber(
-      relayBlockNumber
+    (await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockTimestamp(
+      relayBlockTimestampRaw
     )) ?? undefined
   );
 

@@ -118,7 +118,7 @@ export async function handleDomainRegisterPayment(
   const dmnAvValidData = await validateDomainAvailability(
     domainName,
     target,
-    callData.blockNumber
+    callData.timestampRaw
   );
 
   if (!dmnAvValidData.success) {

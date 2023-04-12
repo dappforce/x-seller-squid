@@ -15,6 +15,7 @@ export interface CallParsed<
   txHash: string;
   txIndex: string;
   timestamp: Date;
+  timestampRaw: number;
   extrinsicHash: string;
   from: string;
   to: string;
