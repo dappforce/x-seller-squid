@@ -19,12 +19,14 @@ import {
   validateDomainAvailability,
   validateDomainMaxLength,
   validateDomainMinLength,
+  validateDomainRegistrationTargetAddress,
   validateDomainTld,
   validateRegistrationPayment,
   validateTargetDomainsMaxLimit
 } from './utils/domainValidation';
 import { StatusesMng } from '../../utils/statusesManager';
 import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
+import { TokenName } from '../../chains/interfaces/processorConfig';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -44,10 +46,13 @@ export async function handleDomainRegisterPayment(
   /**
    * Check paid amount
    */
-  const transferredAmountValidation = await validateRegistrationPayment(amount);
+  const registrationPaymentValidation = await validateRegistrationPayment(
+    amount,
+    token as TokenName
+  );
 
-  if (!transferredAmountValidation.success) {
-    ctx.log.error(transferredAmountValidation);
+  if (!registrationPaymentValidation.success) {
+    ctx.log.error(registrationPaymentValidation);
     ctx.log.error('Processing of current registration request is skipped.');
     return null;
   }
@@ -90,6 +95,19 @@ export async function handleDomainRegisterPayment(
 
     await saveRegOrderEntity();
   };
+
+  /**
+   * Check is domain registration target address valid
+   */
+
+  const dmnRegTargetValidData = await validateDomainRegistrationTargetAddress(
+    target
+  );
+
+  if (!dmnRegTargetValidData.success) {
+    await saveDomainRegOrderOnFail(dmnRegTargetValidData);
+    return opId;
+  }
 
   /**
    * Check is domain available for registration
