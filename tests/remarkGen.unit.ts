@@ -1,7 +1,8 @@
 import {
   SocialRemark,
   SocialRemarkMessageProtocolName,
-  SubSclSource
+  SubSclSource,
+  SocialRemarkDestChainsNameId
 } from '@subsocial/utils';
 import { randomAsNumber } from '@polkadot/util-crypto';
 
@@ -15,6 +16,7 @@ describe('Remark Unit', () => {
   const subsclRemarkSourceDomainRegPay: SubSclSource<'DMN_REG'> = {
     protName: testRemarkTitle,
     version: protocolVersion,
+    destination: SocialRemarkDestChainsNameId.soonsocial,
     action: 'DMN_REG',
     content: {
       domainName: `tdotdomain${randomAsNumber()}.sub`,
@@ -33,9 +35,8 @@ describe('Remark Unit', () => {
       .fromSource(subsclRemarkSourceDomainRegPay)
       .toMessage();
 
-    console.log(remarkMessage)
+    console.log(remarkMessage);
 
     expect(remarkMessage).toEqual(remarkMessage);
   });
-
 });

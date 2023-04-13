@@ -1,6 +1,6 @@
 manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-rococo-soon
-version: 104
+version: 105
 description: 'X Seller Squid based on Rococo/Soonsocial chains'
 build:
 deploy:
@@ -17,6 +17,7 @@ deploy:
       CHAIN: rococoSoonsocial
       SELLER_ROCOCO_REMARK_PROT_NAME: social_t_0
       SELLER_ROCOCO_REMARK_PROT_VERSION: 0.1
+      SELLER_ROCOCO_REMARK_DESTINATION: 3
       SELLER_TOKEN_PRICE_COEFF_ROC_SOON: 0.001
       SELLER_TOKEN_PRICE_COEFF_DOT_SUB: 0.001
       SELLER_SOONSOCIAL_API_TOKEN_EXP_TIME: 10000

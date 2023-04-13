@@ -9,6 +9,10 @@ import {
   parseApiAuthTokenExpTime,
   parsePendingOrderExpTime
 } from '../utils/common';
+import {
+  SocialRemarkDestChainsNameId,
+  SocialRemarkMessageDestination
+} from '@subsocial/utils/socialRemark/types';
 dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
@@ -62,7 +66,11 @@ export const config: ProcessorConfig = {
       version:
         (process.env
           .SELLER_POLKADOT_REMARK_PROT_VERSION as SocialRemarkMessageVersion) ||
-        '0.1'
+        '0.1',
+      destination:
+        (process.env
+          .SELLER_POLKADOT_REMARK_DESTINATION as SocialRemarkMessageDestination) ||
+        SocialRemarkDestChainsNameId.subsocial
     }
   },
   buyerChain: {

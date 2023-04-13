@@ -12,6 +12,7 @@ export function ensureDomainRegRemark(
   return new DmnRegRemark({
     protName: remark.protName,
     action: remark.action,
+    destination: remark.destination,
     version: remark.version,
     content: new DmnRegRemarkContent({
       opId: remark.content.opId,
@@ -28,6 +29,7 @@ export function ensureEnergyGenRemark(
   return new NrgRemark({
     protName: remark.protName,
     action: remark.action,
+    destination: remark.destination,
     version: remark.version,
     content: new NrgRemarkContent({
       opId: remark.content.opId,

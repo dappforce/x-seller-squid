@@ -81,6 +81,6 @@ export function parseDomainRegisterPayCall(
     to: transferData.to,
     amount: transferData.amount,
     // @ts-ignore
-    remark: remark.message
+    remark: remark.source
   };
 }

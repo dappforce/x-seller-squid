@@ -14,8 +14,9 @@ export function parseDomainRegisterCompletedCall(
     blockNumber: block.header.height,
     blockHash: block.header.hash,
     timestamp: new Date(block.header.timestamp),
+    timestampRaw: block.header.timestamp,
     extrinsicHash: callItem.extrinsic.hash,
     // @ts-ignore
-    remark: remark.message
+    remark: remark.source
   };
 }

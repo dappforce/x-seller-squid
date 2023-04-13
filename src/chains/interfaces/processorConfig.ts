@@ -3,6 +3,7 @@ import {
   SocialRemarkMessageProtocolName,
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
+import { SocialRemarkMessageDestination } from '@subsocial/utils/socialRemark/types';
 
 export enum TokenName {
   DOT = 'DOT',
@@ -43,6 +44,7 @@ export type ProcessorConfig = {
     remark: {
       protName: SocialRemarkMessageProtocolName;
       version: SocialRemarkMessageVersion;
+      destination: SocialRemarkMessageDestination;
     };
   };
   buyerChain: {

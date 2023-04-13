@@ -227,6 +227,7 @@ export async function handleDomainRegisterPayment(
       const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
         protName: config.sellerChain.remark.protName,
         version: config.sellerChain.remark.version,
+        destination: config.sellerChain.remark.destination,
         action: 'DMN_REG_OK',
         content: {
           domainName: domainName,
