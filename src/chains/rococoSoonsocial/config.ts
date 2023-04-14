@@ -42,6 +42,10 @@ export const config: ProcessorConfig = {
     processingDisabled: !!(
       process.env.SELLER_PROCESSING_DISABLED &&
       process.env.SELLER_PROCESSING_DISABLED === 'true'
+    ),
+    extendedApi: !!(
+      process.env.SELLER_EXTENDED_API &&
+      process.env.SELLER_EXTENDED_API === 'true'
     )
   },
   sellerChain: {
@@ -66,7 +70,7 @@ export const config: ProcessorConfig = {
       protName:
         (process.env
           .SELLER_ROCOCO_REMARK_PROT_NAME as SocialRemarkMessageProtocolName) ||
-        'social_t_0',
+        'social_t_1',
       version:
         (process.env
           .SELLER_ROCOCO_REMARK_PROT_VERSION as SocialRemarkMessageVersion) ||

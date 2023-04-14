@@ -166,4 +166,35 @@ export class PendingOrdersResolver {
       )
     });
   }
+
+  @Query(() => PendingOrdersList, {
+    nullable: false,
+    description:
+      'Get existing Pending Orders by provided domain names (IDs) list.'
+  })
+  async getPendingOrdersAll(): Promise<PendingOrdersList> {
+    const { config } = getChain();
+    if (!config.sellerIndexer.extendedApi)
+      throw new Error('Extended API is disabled.');
+
+    const lsClient = await ServiceLocalStorage.getInstance().init();
+    const savedOrders = await lsClient.em.find(PendingOrder, {
+      where: {},
+      order: {
+        timestamp: 'ASC'
+      }
+    });
+
+    return new PendingOrdersList({
+      orders: savedOrders.map(
+        (savedOrder) =>
+          new PendingOrderData({
+            id: savedOrder.id,
+            timestamp: savedOrder.timestamp,
+            account: savedOrder.account,
+            clientId: savedOrder.clientId
+          })
+      )
+    });
+  }
 }

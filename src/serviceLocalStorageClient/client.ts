@@ -58,6 +58,7 @@ export class ServiceLocalStorage {
   }
 
   async deletePendingOrderById(orderId: string): Promise<void> {
+    this.sqdLogger.info(`>>>>> deletePendingOrderById - ${orderId}`);
     await this.em.delete(PendingOrder, orderId);
   }
 
@@ -82,9 +83,10 @@ export class ServiceLocalStorage {
   public cronDeletePendingOrderWhenExp(orderId: string, schedule?: string) {
     const intervalMinutes =
       this.chainConfig.sellerIndexer.dmnRegPendingOrderExpTime / 60 / 1000;
+
     this.dmnRegPendingOrdersCleanTasks.set(
       orderId,
-      cron.schedule(schedule || `* ${intervalMinutes} * * * *`, async () => {
+      cron.schedule(schedule || `*/${intervalMinutes} * * * *`, async () => {
         await this.deletePendingOrderById(orderId);
         this.sqdLogger.info(
           `Pending Order with ID: "${orderId}" has been automatically deleted by cron job in ${intervalMinutes} minutes after creation.`

@@ -14,6 +14,7 @@ import { handleSellerActions } from './handlers';
 import { parseCalls } from './parser';
 import { SocialRemark } from '@subsocial/utils';
 import { getChain } from './chains';
+import { ServiceLocalStorage } from './serviceLocalStorageClient';
 
 const { config } = getChain();
 
@@ -59,6 +60,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await WalletClient.getInstance().init();
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
+  await ServiceLocalStorage.getInstance().init();
 
   if (ctx.isHead && config.sellerIndexer.processingDisabled) return;
 

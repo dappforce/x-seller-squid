@@ -82,6 +82,7 @@ export async function isTokenValid(
     if (!diff || Number.isNaN(diff))
       return 'Method is not allowed. Token is not valid.';
 
+    console.log('apiDebugMode - ', apiDebugMode);
     if (apiDebugMode) return true;
 
     /**

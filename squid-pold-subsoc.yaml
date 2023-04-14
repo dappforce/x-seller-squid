@@ -16,7 +16,8 @@ deploy:
     env:
       CHAIN: polkadotSubsocial
       SELLER_PROCESSING_DISABLED: false
-      SELLER_POLKADOT_REMARK_PROT_NAME: social_t_0
+      SELLER_EXTENDED_API: false
+      SELLER_POLKADOT_REMARK_PROT_NAME: social_t_1
       SELLER_POLKADOT_REMARK_PROT_VERSION: 0.1
       SELLER_POLKADOT_REMARK_DESTINATION: 1
       SELLER_TOKEN_PRICE_COEFF_ROC_SOON: 0.001
@@ -30,7 +31,8 @@ deploy:
     env:
       CHAIN: polkadotSubsocial
       SELLER_PROCESSING_DISABLED: false
-      SELLER_POLKADOT_REMARK_PROT_NAME: social_t_0
+      SELLER_EXTENDED_API: false
+      SELLER_POLKADOT_REMARK_PROT_NAME: social_t_1
       SELLER_POLKADOT_REMARK_PROT_VERSION: 0.1
       SELLER_TOKEN_PRICE_COEFF_ROC_SOON: 0.001
       SELLER_TOKEN_PRICE_COEFF_DOT_SUB: 0.001
@@ -39,7 +41,7 @@ deploy:
     cmd:
       - npx
       - squid-graphql-server
-      - "--subscriptions"
+      - '--subscriptions'
       - '--dumb-cache'
       - in-memory
       - '--dumb-cache-ttl'
