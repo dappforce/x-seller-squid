@@ -38,6 +38,10 @@ export const config: ProcessorConfig = {
     apiDebugMode: !!(
       process.env.SELLER_SOONSOCIAL_API_DEBUG_MODE &&
       process.env.SELLER_SOONSOCIAL_API_DEBUG_MODE === 'true'
+    ),
+    processingDisabled: !!(
+      process.env.SELLER_PROCESSING_DISABLED &&
+      process.env.SELLER_PROCESSING_DISABLED === 'true'
     )
   },
   sellerChain: {

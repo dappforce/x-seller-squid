@@ -11,6 +11,7 @@ import {
   PendingOrdersList
 } from '../model/pendingOrder.model';
 import { WalletClient } from '../../walletClient';
+import { getChain } from '../../chains';
 
 @Resolver()
 export class PendingOrdersResolver {
@@ -39,6 +40,9 @@ export class PendingOrdersResolver {
     account: string,
     @Ctx() ctx: any
   ): Promise<boolean> {
+    const { config } = getChain();
+    if (config.sellerIndexer.processingDisabled) return true;
+
     const requestClientId: string | null = ctx.openreader.clientId
       ? WalletClient.addressToHex(ctx.openreader.clientId)
       : null;
@@ -72,6 +76,9 @@ export class PendingOrdersResolver {
     id: string,
     @Ctx() ctx: any
   ): Promise<boolean> {
+    const { config } = getChain();
+    if (config.sellerIndexer.processingDisabled) return true;
+
     const requestClientId = ctx.openreader.clientId
       ? WalletClient.addressToHex(ctx.openreader.clientId)
       : '';

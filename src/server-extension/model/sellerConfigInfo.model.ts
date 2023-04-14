@@ -11,6 +11,9 @@ class Token {
 
 @ObjectType()
 export class SellerConfigInfo {
+  @Field(() => Boolean, { nullable: false })
+  isServiceOperational!: boolean;
+
   @Field(() => String, { nullable: false })
   sellerChain!: string;
 

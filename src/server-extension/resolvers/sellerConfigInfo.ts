@@ -24,6 +24,7 @@ export class SellerConfigInfoResolver {
     assert(registrationPrice != null);
 
     return new SellerConfigInfo({
+      isServiceOperational: !config.sellerIndexer.processingDisabled,
       sellerChain: config.sellerChain.chainName,
       sellerChainPrefix: config.sellerChain.prefix,
       sellerTreasuryAccount: WalletClient.addressFromAnyToFormatted(

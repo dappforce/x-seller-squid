@@ -53,10 +53,14 @@ export type EventItem = BatchProcessorEventItem<typeof processor>;
 export type Block = BatchBlock<Item>;
 
 processor.run(new TypeormDatabase(), async (ctx) => {
-  ctx.log.info(`Is head of archive - ${ctx.isHead}`);
+  ctx.log.info(
+    `Is head of archive - ${ctx.isHead} :: Batch size - ${ctx.blocks.length}`
+  );
   await WalletClient.getInstance().init();
   await SellerChainClient.getInstance().init();
   await BuyerChainClient.getInstance().init();
+
+  if (ctx.isHead && config.sellerIndexer.processingDisabled) return;
 
   SocialRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
 

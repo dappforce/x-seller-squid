@@ -76,7 +76,7 @@ describe('API Custom Resolvers', () => {
       nonce
     );
 
-    console.log(u8aToHex(signedToken.sealed))
+    console.log(u8aToHex(signedToken.sealed));
 
     /**
      * ==================
@@ -85,7 +85,8 @@ describe('API Custom Resolvers', () => {
      */
 
     const isValid = await isTokenValid(
-      u8aToHex(signedToken.sealed),
+      // u8aToHex(signedToken.sealed),
+      '0x1598e5c50fecbadfb53b64cabe4faccc3e96e9a3814fefa1c4e2721dcesasdasd',
       encodeAddress(decodeAddress(requesterKeypair.publicKey), 42)
     );
 

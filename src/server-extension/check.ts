@@ -41,8 +41,6 @@ export async function requestCheck(
       return 'Method is not allowed. Client ID has not been provided.'; // TODO add method name to error message
 
     return await isTokenValid(token, clientId);
-
-    return 'Method is not allowed. Token is not valid.'; // TODO add method name to error message
   } catch (e) {
     console.log(e);
     return true;
@@ -81,8 +79,8 @@ export async function isTokenValid(
     );
     const diff = dayjs.utc().diff(tokenTimestamp);
 
-    console.log('diff - ', diff);
-    console.log('apiDebugMode - ', apiDebugMode);
+    if (!diff || Number.isNaN(diff))
+      return 'Method is not allowed. Token is not valid.';
 
     if (apiDebugMode) return true;
 
@@ -91,6 +89,7 @@ export async function isTokenValid(
      */
     if (diff > apiAuthTokenExp + 100)
       return 'Method is not allowed. Token is not valid.';
+
     return true;
   } catch (e) {
     console.log(e);
