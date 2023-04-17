@@ -1,6 +1,13 @@
 # X-Seller-Squid
 
-Based on Subsquid
+Based on [Subsquid](https://www.subsquid.io/) framework. Powered by [Subsocial](https://subsocial.network/).
+
+- [Seller-Squid config information API](#seller-squid-config-information-api)
+- [Domain registration validation steps](#domain-registration-validation-steps)
+- [Blocks Mapping](#blocks-mapping)
+- [Pending Orders API](#pending-orders)
+
+---
 
 ## Seller-Squid configuration information `sellerConfigInfo`
 
@@ -10,6 +17,8 @@ Implementation of query resolver can be found [here](./src/server-extension/reso
 
 Data types can be found [here](./src/server-extension/model/sellerConfigInfo.model.ts)
 
+- `isServiceOperational`: is squid processing new remarks from the blockchains and are PendingOrder
+  mutation calls are active and available.
 - `dmnRegPendingOrderExpTime`: expiration time of PendingOrder (milliseconds)
 - `domainHostChain`: blockchain name where domain will be registered (subsocial/soonsocial)
 - `domainHostChainPrefix`: blockchain prefix where domain will be registered
@@ -24,6 +33,48 @@ Data types can be found [here](./src/server-extension/model/sellerConfigInfo.mod
   - `decimal`
   - `name`
 - `sellerTreasuryAccount`: seller blockchain account, which will receive payments
+
+---
+
+## Domain registration validation steps
+
+Domain registration handler contains vary of validations to prevent wrong or malicious actions.
+`DMN_REG` action processing flow has such validations as:
+
+1. *NO REFUND* :: is remark valid - [here](src/parser/index.ts:25) - check SocialRemark `propName`, `version`, `destination`, `action`.
+2. *NO REFUND* :: is transfer destination correct - [here](src/parser/utils/domainRegisterPayCall.ts:68) - transfer receiver must
+   be SellerTreasury
+3. *NO REFUND* :: is DomainRegistrationOrder entity already existing in squid DB (prevent duplicated registration requests with the
+   same `opId` in SocialRemark) - [here](src/handlers/domain/register.ts:56)
+4. *WITH REFUND* :: is transfer token valid - [here](src/handlers/domain/register.ts) - compare `token` from remark and allowed token in particular seller squid instance
+5.  *WITH REFUND* :: is transfer amount valid - [here](src/handlers/domain/register.ts) - amount must be equal or higher than domain price
+6.  *WITH REFUND* :: is `target` account valid - [here](src/handlers/domain/register.ts) - validate Substrate account
+7.  *WITH REFUND* :: is domain available at particular request point of time - [here](src/handlers/domain/register.ts) - storage request
+   to domain hosting chain (Subsocial/Soonsocial/xSocial) at specific block. As squid indexes different chain from domain
+   hosting chain (Polkadot/Rococo), squid makes call to domain hosting chain Subsquid archive which returns block hash by transfer chain timestamp.
+More details in [Blocks mapping](#blocks-mapping)
+8.  *WITH REFUND* :: is domain TLD valid - [here](src/handlers/domain/register.ts) - storage call
+9.  *WITH REFUND* :: is domain name minimum length valid - [here](src/handlers/domain/register.ts) - `api.consts.domains.minDomainLength`
+10.  *WITH REFUND* :: is domain name maximum length valid - [here](src/handlers/domain/register.ts) - `api.consts.domains.maxDomainLength`
+11.  *WITH REFUND* :: is registration target not reached maximum number of owned domains - [here](src/handlers/domain/register.ts) - `api.query.domains.domainsByOwner`
+
+
+---
+
+## Blocks Mapping
+
+In seller squid we need make relation between blocks of 2 different blockchains (`Chain#1 <=>Chain#2`: Polkadot <=> Subsocial, Kusama <=> xSocial, etc.).
+It's required to make correct storage calls at specific block of `Chain#2` when we know only block timestamp from `Chain#1`. 
+For this purposes we can make call directly to [Subsquid archive](https://docs.subsquid.io/archives/overview/) and search block by timestamp. 
+As Chain#1 and Chain#2 can have different time of block producing, this relation cannot be strict. That's why 
+we make search with `timestamp_gte` search parameter, which returns block with exact timestamp or most close younger block. 
+
+You can find implementation [here](src/multichainBlocksMapper/index.ts).
+
+- Subsocial archive GraphQL endpoint - https://subsocial.explorer.subsquid.io/graphql
+- Soonsocial archive GraphQL endpoint - https://soonsocial.explorer.subsquid.io/graphql
+- More public archives - https://app.subsquid.io/archives
+
 
 ---
 

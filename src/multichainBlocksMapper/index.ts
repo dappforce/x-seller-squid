@@ -6,12 +6,8 @@ import { ProcessorConfig } from '../chains/interfaces/processorConfig';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-type BlocksMapperBlockData = {
-  id: string;
-  relayBlockNumber: number | null;
-  paraBlockTimestamp: string;
-  paraBlockNumber: number;
-  paraBlockHash: string;
+type ArchiveBlockData = {
+  hash: string;
 };
 
 export class MultiChainBlocksMapper {
@@ -37,25 +33,26 @@ export class MultiChainBlocksMapper {
     blockTimestampRaw: number
   ): Promise<string | null> {
     dayjs.extend(utc);
+
     const queryResp = await this.blocksMapperQuery<
-      'relayParaBlockRels',
-      BlocksMapperBlockData[]
+      'blocks',
+      ArchiveBlockData[]
     >({
-      query: `query ($limit: Int, $orderBy: [RelayParaBlockRelOrderByInput!], $blockTimestamp: DateTime) { relayParaBlockRels (limit: $limit, orderBy: $orderBy, where: { paraBlockTimestamp_gte: $blockTimestamp }) { relayBlockNumber, paraBlockTimestamp, paraBlockNumber, paraBlockHash, id } }`,
+      query: `query ($limit: Int, $orderBy: [BlockOrderByInput!], $blockTimestamp: DateTime) { blocks (limit: $limit, orderBy: $orderBy, where: { timestamp_gte: $blockTimestamp }) { hash } }`,
       variables: {
         limit: 1,
-        orderBy: 'paraBlockTimestamp_ASC',
+        orderBy: 'timestamp_ASC',
         blockTimestamp: (() =>
           dayjs.utc(blockTimestampRaw).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'))()
       }
     });
 
     if (!queryResp) return null;
-    const blocks = queryResp.data.relayParaBlockRels;
+    const blocks = queryResp.data.blocks;
 
     if (!blocks || blocks.length == 0) return null;
 
-    return blocks[0].paraBlockHash;
+    return blocks[0].hash;
   }
 
   private async blocksMapperQuery<N extends string, R>(graphqlQuery: {

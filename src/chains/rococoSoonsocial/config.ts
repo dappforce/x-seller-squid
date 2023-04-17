@@ -98,7 +98,7 @@ export const config: ProcessorConfig = {
   },
   blocksMapper: {
     dataSource: {
-      endpoint: 'https://squid.subsquid.io/blocks-mapper-roc-soon/graphql'
+      endpoint: 'https://soonsocial.archive.subsquid.io/graphql'
     }
   }
 };

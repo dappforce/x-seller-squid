@@ -149,7 +149,7 @@ export async function validateDomainTld(
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason(
         'Domain',
-        'ErrorRegPaymentAmountInsufficient'
+        'ErrorRegForbiddenTld'
       )
     });
   }
