@@ -174,6 +174,8 @@ const decodedTimestamp = naclOpen(
 );
 ```
 
+![Seller squid API auth flow](./docs/SellerSquidAuthFlow.png)
+
 ---
 
 The implementation of custom API calls can be found [here](./src/server-extension/resolvers/pendingOrders.ts).
