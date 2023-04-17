@@ -76,10 +76,11 @@ export function parseDomainRegisterPayCall(
     blockNumber: block.header.height,
     blockHash: block.header.hash,
     timestamp: new Date(block.header.timestamp),
+    timestampRaw: block.header.timestamp,
     from: transferData.from,
     to: transferData.to,
     amount: transferData.amount,
     // @ts-ignore
-    remark: remark.message
+    remark: remark.source
   };
 }

@@ -7,18 +7,27 @@ import {
   ensureDomainRegistrationOrder,
   createAndGetTransfer
 } from '../../entities';
-import { OrderRefundStatus, OrderRequestStatus, OrderError } from '../../model';
+import {
+  OrderRefundStatus,
+  OrderRequestStatus,
+  OrderError,
+  DomainRegistrationOrder
+} from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { getChain } from '../../chains';
 import {
   validateDomainAvailability,
   validateDomainMaxLength,
   validateDomainMinLength,
+  validateDomainRegistrationTargetAddress,
   validateDomainTld,
   validateRegistrationPayment,
   validateTargetDomainsMaxLimit
 } from './utils/domainValidation';
 import { StatusesMng } from '../../utils/statusesManager';
+import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
+import { TokenName } from '../../chains/interfaces/processorConfig';
+import { sleepTo } from '../../utils';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -28,20 +37,42 @@ export async function handleDomainRegisterPayment(
   ctx: Ctx
 ): Promise<string | null> {
   const {
+    blockNumber,
     amount,
     remark: {
       content: { domainName, target, opId, token }
     }
   } = callData;
+
+  const existingRegistrationOrderEntity = await ctx.store.findOne(
+    DomainRegistrationOrder,
+    {
+      where: {
+        id: opId
+      }
+    }
+  );
+
+  if (existingRegistrationOrderEntity) {
+    ctx.log.error(
+      `Domain Registration Order "${opId}" is already existing and registration cannot be duplicated [block#: ${blockNumber}].`
+    );
+    // TODO handle this case
+    return null;
+  }
+
   const buyerChainClient = BuyerChainClient.getInstance();
 
   /**
    * Check paid amount
    */
-  const transferredAmountValidation = await validateRegistrationPayment(amount);
+  const registrationPaymentValidation = await validateRegistrationPayment(
+    amount,
+    token as TokenName
+  );
 
-  if (!transferredAmountValidation.success) {
-    ctx.log.error(transferredAmountValidation);
+  if (!registrationPaymentValidation.success) {
+    ctx.log.error(registrationPaymentValidation);
     ctx.log.error('Processing of current registration request is skipped.');
     return null;
   }
@@ -67,21 +98,46 @@ export async function handleDomainRegisterPayment(
       ctx
     )
   );
-  const saveUnameRegEntityOnFail = async (
+
+  const lsClient = await ServiceLocalStorage.getInstance().init();
+
+  const saveRegOrderEntity = async () => {
+    await lsClient.deletePendingOrderById(domainRegistrationOrder.domain.id);
+    await ctx.store.save(domainRegistrationOrder);
+  };
+
+  const saveDomainRegOrderOnFail = async (
     errorData: ChainActionResult
   ): Promise<void> => {
     domainRegistrationOrder.status = OrderRequestStatus.Failed;
     domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
     domainRegistrationOrder.errorRegistration = new OrderError(errorData);
 
-    await ctx.store.save(domainRegistrationOrder);
+    await saveRegOrderEntity();
   };
+
+  /**
+   * Check is domain registration target address valid
+   */
+
+  const dmnRegTargetValidData = await validateDomainRegistrationTargetAddress(
+    target
+  );
+
+  if (!dmnRegTargetValidData.success) {
+    await saveDomainRegOrderOnFail(dmnRegTargetValidData);
+    return opId;
+  }
 
   /**
    * Check is domain available for registration
    */
 
-  const dmnAvValidData = await validateDomainAvailability(domainName, target);
+  const dmnAvValidData = await validateDomainAvailability(
+    domainName,
+    target,
+    callData.timestampRaw
+  );
 
   if (!dmnAvValidData.success) {
     if (
@@ -93,7 +149,7 @@ export async function handleDomainRegisterPayment(
       domainRegistrationOrder.status = OrderRequestStatus.Failed;
       domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
 
-      await saveUnameRegEntityOnFail(dmnAvValidData);
+      await saveDomainRegOrderOnFail(dmnAvValidData);
       return opId;
     }
 
@@ -102,7 +158,7 @@ export async function handleDomainRegisterPayment(
       dmnAvValidData.status === 'ErrorRegAlreadyOwnedByTarget'
     ) {
       domainRegistrationOrder.status = OrderRequestStatus.Processing;
-      await ctx.store.save(domainRegistrationOrder);
+      await saveRegOrderEntity();
       return null;
     }
   }
@@ -112,7 +168,7 @@ export async function handleDomainRegisterPayment(
    */
   const dmnTldValidData = await validateDomainTld(domainName);
   if (!dmnTldValidData.success) {
-    await saveUnameRegEntityOnFail(dmnTldValidData);
+    await saveDomainRegOrderOnFail(dmnTldValidData);
     return opId;
   }
 
@@ -123,7 +179,7 @@ export async function handleDomainRegisterPayment(
   const dmnMinLengthValidData = await validateDomainMinLength(domainName);
 
   if (!dmnMinLengthValidData.success) {
-    await saveUnameRegEntityOnFail(dmnMinLengthValidData);
+    await saveDomainRegOrderOnFail(dmnMinLengthValidData);
     return opId;
   }
 
@@ -134,7 +190,7 @@ export async function handleDomainRegisterPayment(
   const dmnMaxLengthValidData = await validateDomainMaxLength(domainName);
 
   if (!dmnMaxLengthValidData.success) {
-    await saveUnameRegEntityOnFail(dmnMaxLengthValidData);
+    await saveDomainRegOrderOnFail(dmnMaxLengthValidData);
     return opId;
   }
 
@@ -146,7 +202,7 @@ export async function handleDomainRegisterPayment(
   );
 
   if (!targetMaxRegisteredDmnsValidData.success) {
-    await saveUnameRegEntityOnFail(targetMaxRegisteredDmnsValidData);
+    await saveDomainRegOrderOnFail(targetMaxRegisteredDmnsValidData);
     return opId;
   }
 
@@ -166,11 +222,12 @@ export async function handleDomainRegisterPayment(
     if (result.success) {
       domainRegistrationOrder.status = OrderRequestStatus.Processing;
 
-      await ctx.store.save(domainRegistrationOrder);
+      await saveRegOrderEntity();
 
       const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
         protName: config.sellerChain.remark.protName,
         version: config.sellerChain.remark.version,
+        destination: config.sellerChain.remark.destination,
         action: 'DMN_REG_OK',
         content: {
           domainName: domainName,
@@ -179,6 +236,12 @@ export async function handleDomainRegisterPayment(
           opId: opId
         }
       };
+
+      /**
+       * Delay is required here to avoid such errors like:
+       * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
+       */
+      await sleepTo(1000);
 
       const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
         WalletClient.getInstance().account.sellerTreasury,
@@ -197,7 +260,7 @@ export async function handleDomainRegisterPayment(
         ...(await buyerChainClient.getBlockMeta())
       };
       ctx.log.error(eData);
-      await saveUnameRegEntityOnFail(eData);
+      await saveDomainRegOrderOnFail(eData);
       return opId;
     }
   } catch (rejected) {
@@ -212,7 +275,7 @@ export async function handleDomainRegisterPayment(
       ...(await buyerChainClient.getBlockMeta())
     };
     ctx.log.error(eData);
-    await saveUnameRegEntityOnFail(eData);
+    await saveDomainRegOrderOnFail(eData);
     return opId;
   }
 }

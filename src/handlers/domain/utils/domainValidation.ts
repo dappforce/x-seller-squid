@@ -6,6 +6,8 @@ import {
   StatusModule
 } from '../../../utils/statusesManager';
 import { getChain } from '../../../chains';
+import { TokenName } from '../../../chains/interfaces/processorConfig';
+import { MultiChainBlocksMapper } from '../../../multichainBlocksMapper';
 
 const { config } = getChain();
 
@@ -30,15 +32,35 @@ async function getFailedStatusWithMeta(
   };
 }
 
+export async function validateDomainRegistrationTargetAddress(address: string) {
+  if (!WalletClient.isAddressValid(address))
+    return await getFailedStatusWithMeta({
+      ...StatusesMng.getStatusWithReason('Domain', 'ErrorRegInvalidTarget')
+    });
+
+  return {
+    success: true
+  };
+}
+
 export async function validateRegistrationPayment(
-  transferredAmount: bigint
+  transferredAmount: bigint,
+  transferredToken: TokenName
 ): Promise<ValidationResult> {
+  if (transferredToken !== config.sellerChain.token.name)
+    return await getFailedStatusWithMeta({
+      ...StatusesMng.getStatusWithReason(
+        'Domain',
+        'ErrorRegPaymentTokenInvalid'
+      )
+    });
+
   const buyerChainClient = BuyerChainClient.getInstance();
   const registrationPrice = await buyerChainClient.getDomainRegistrationPrice(
     config.sellerChain.token
   );
 
-  if (registrationPrice === null || transferredAmount < registrationPrice) {
+  if (registrationPrice === null || transferredAmount < registrationPrice)
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason(
         'Domain',
@@ -48,7 +70,6 @@ export async function validateRegistrationPayment(
         registrationPrice ? registrationPrice.toString() : 'NaN'
       } but transferred ${transferredAmount.toString()}`
     });
-  }
 
   return {
     success: true
@@ -57,13 +78,17 @@ export async function validateRegistrationPayment(
 
 export async function validateDomainAvailability(
   domainName: string,
-  target: string
+  target: string,
+  relayBlockTimestampRaw: number
 ): Promise<ValidationResult> {
   const buyerChainClient = BuyerChainClient.getInstance();
 
-  const existingDomain = await buyerChainClient.getRegisteredDomains([
-    domainName
-  ]);
+  const existingDomain = await buyerChainClient.getRegisteredDomains(
+    [domainName],
+    (await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockTimestamp(
+      relayBlockTimestampRaw
+    )) ?? undefined
+  );
 
   if (!existingDomain) {
     return await getFailedStatusWithMeta({

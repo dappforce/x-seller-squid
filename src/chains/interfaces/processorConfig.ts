@@ -3,14 +3,35 @@ import {
   SocialRemarkMessageProtocolName,
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
+import { SocialRemarkMessageDestination } from '@subsocial/utils/socialRemark/types';
 
-export type TokenDetails = {
-  name: string;
+export enum TokenName {
+  DOT = 'DOT',
+  ROC = 'ROC'
+}
+
+export interface TokenDetails {
+  name: TokenName;
   decimal: number;
   coefficientWithBuyerToken: string;
-};
+}
 
 export type ProcessorConfig = {
+  sellerClient: {
+    allowedApiClients: Set<string>;
+  };
+  sellerIndexer: {
+    accounts: {
+      tokenManager: {
+        mnemonic: string;
+      };
+    };
+    apiAuthTokenExp: number;
+    dmnRegPendingOrderExpTime: number;
+    apiDebugMode: boolean;
+    processingDisabled: boolean;
+    extendedApi: boolean;
+  };
   sellerChain: {
     chainName: string;
     prefix: number;
@@ -25,6 +46,7 @@ export type ProcessorConfig = {
     remark: {
       protName: SocialRemarkMessageProtocolName;
       version: SocialRemarkMessageVersion;
+      destination: SocialRemarkMessageDestination;
     };
   };
   buyerChain: {
@@ -34,6 +56,11 @@ export type ProcessorConfig = {
     accounts: {
       domainRegistrar: { mnemonic: string };
       energyGenerator: { mnemonic: string };
+    };
+  };
+  blocksMapper: {
+    dataSource: {
+      endpoint: string;
     };
   };
 };

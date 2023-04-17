@@ -11,11 +11,31 @@ class Token {
 
 @ObjectType()
 export class SellerConfigInfo {
+  @Field(() => Boolean, { nullable: false })
+  isServiceOperational!: boolean;
+
   @Field(() => String, { nullable: false })
   sellerChain!: string;
 
   @Field(() => Number, { nullable: true })
   sellerChainPrefix!: number | null;
+
+  @Field(() => String, { nullable: false })
+  sellerTreasuryAccount!: string;
+
+  @Field(() => String, {
+    nullable: false,
+    description:
+      'Seller Indexer Public key for signing Authentication Bearer token by client app'
+  })
+  sellerApiAuthTokenManager!: string;
+
+  @Field(() => Number, {
+    nullable: false,
+    description:
+      'Domain Registration Pending Order expiration time (milliseconds)'
+  })
+  dmnRegPendingOrderExpTime!: number;
 
   @Field(() => String, { nullable: false })
   domainHostChain!: string;

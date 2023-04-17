@@ -1,6 +1,7 @@
 /node_modules
 /lib
 /builds
+/src/serviceLocalStorageClient/db
 
 /**Versions.json
 /**Versions.jsonl

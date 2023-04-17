@@ -26,7 +26,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
           continue;
         }
 
-        switch (remark.message.action) {
+        switch (remark.source.action) {
           case 'DMN_REG': {
             const data = parseDomainRegisterPayCall(remark, item, block, ctx);
             if (data) callsParsed.push(data);
@@ -55,7 +55,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
           default:
             console.log(
               `Handler for action ${
-                remark.message!.action
+                remark.source!.action
               } is not implemented yet.`
             );
         }

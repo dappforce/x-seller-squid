@@ -81,6 +81,7 @@ type Transfer @entity {
 type DmnRegRemark {
   protName: String!
   version: String!
+  destination: String!
   action: String!
   content: DmnRegRemarkContent!
 }
@@ -95,6 +96,7 @@ type DmnRegRemarkContent {
 type NrgRemark {
   protName: String!
   version: String!
+  destination: String!
   action: String!
   content: NrgRemarkContent!
 }

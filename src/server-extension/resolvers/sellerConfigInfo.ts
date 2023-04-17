@@ -4,6 +4,7 @@ import assert from 'assert';
 import { getChain } from '../../chains';
 import { SellerConfigInfo } from '../model/sellerConfigInfo.model';
 import { BuyerChainClient } from '../../wsClient';
+import { WalletClient } from '../../walletClient';
 
 @Resolver()
 export class SellerConfigInfoResolver {
@@ -16,11 +17,25 @@ export class SellerConfigInfoResolver {
       await BuyerChainClient.getInstance().init()
     ).getDomainRegistrationPrice(config.sellerChain.token);
 
+    const walletClient = await WalletClient.getInstance().init();
+
+    await walletClient.init();
+
     assert(registrationPrice != null);
 
     return new SellerConfigInfo({
+      isServiceOperational: !config.sellerIndexer.processingDisabled,
       sellerChain: config.sellerChain.chainName,
       sellerChainPrefix: config.sellerChain.prefix,
+      sellerTreasuryAccount: WalletClient.addressFromAnyToFormatted(
+        walletClient.account.sellerTreasury.address,
+        28
+      ),
+      sellerApiAuthTokenManager: WalletClient.addressFromAnyToFormatted(
+        walletClient.account.sellerIndexerAuthTokenMngEd25519.publicKey,
+        28
+      ),
+      dmnRegPendingOrderExpTime: config.sellerIndexer.dmnRegPendingOrderExpTime,
       domainHostChain: config.buyerChain.chainName,
       domainHostChainPrefix: config.buyerChain.prefix,
       sellerToken: {

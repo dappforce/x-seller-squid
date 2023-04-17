@@ -57,6 +57,7 @@ export async function refundDomainRegistrationPaymentByOrder(
   const refundRmrkMsg: SubSclSource<'DMN_REG_REFUND'> = {
     protName: config.sellerChain.remark.protName,
     version: config.sellerChain.remark.version,
+    destination: config.sellerChain.remark.destination,
     action: 'DMN_REG_REFUND',
     content: {
       domainName: purchaseRmrk.content.domainName,

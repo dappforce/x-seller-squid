@@ -23,3 +23,11 @@ export function encodeAccount(
 export function getLastBatchBlockHeight(ctx: Ctx) {
   return ctx.blocks[ctx.blocks.length - 1].header.height;
 }
+
+/**
+ * Make delay to provided time
+ * @param delay: number - delay in milliseconds
+ */
+export async function sleepTo(delay: number): Promise<void> {
+  await new Promise((res) => setTimeout(res, delay));
+}

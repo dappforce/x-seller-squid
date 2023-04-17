@@ -3,11 +3,18 @@ import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
 import { ChainActionResult } from './types';
 import { IpfsContent } from '@subsocial/api/substrate/wrappers';
-const { config } = getChain();
 import { BN } from 'bn.js';
 import '@polkadot/api-augment';
 import { StatusesMng } from '../utils/statusesManager';
-import { TokenDetails } from '../chains/interfaces/processorConfig';
+import {
+  ProcessorConfig,
+  TokenDetails
+} from '../chains/interfaces/processorConfig';
+import { UnsubscribePromise } from '@polkadot/api-base/types/base';
+import { Header } from '@polkadot/types/interfaces/runtime/types';
+import { hexToNumber } from '@polkadot/util';
+import { BlockHash } from '@polkadot/types/interfaces/chain/types';
+import { sleepTo } from '../utils';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
@@ -15,11 +22,14 @@ const BLOCKS_IN_YEAR = new BN((SECS_IN_DAY * 365) / BLOCK_TIME);
 
 export class BuyerChainClient extends BaseChainClient {
   private static instance: BuyerChainClient;
+  private chainConfig: ProcessorConfig;
+  private unsubscribeNewHeads: UnsubscribePromise | null = null;
 
   constructor() {
     super({
-      apiUrl: config.buyerChain.dataSource.chain
+      apiUrl: getChain().config.buyerChain.dataSource.chain
     });
+    this.chainConfig = getChain().config;
   }
 
   static getInstance(): BuyerChainClient {
@@ -29,10 +39,45 @@ export class BuyerChainClient extends BaseChainClient {
     return BuyerChainClient.instance;
   }
 
-  async getRegisteredDomains(domainNames: string[]) {
-    const structs = await this.api.query.domains.registeredDomains.multi(
-      domainNames
+  async subscribeNewHeads(handler: (header: Header) => void) {
+    this.unsubscribeNewHeads = this.api.rpc.chain.subscribeNewHeads(
+      (header: Header) => {
+        handler(header);
+      }
     );
+  }
+
+  async getRelayBlockNumberByParaBlockHash(
+    hash: BlockHash
+  ): Promise<number | null> {
+    // const apiAt = await this.api.at(hash);
+
+    try {
+      return hexToNumber(
+        (
+          await this.api.query.parachainSystem.lastRelayChainBlockNumber.at(
+            hash
+          )
+        ).toHex()
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async getRegisteredDomains(domainNames: string[], atBlock?: string) {
+    let structs = [];
+
+    console.log('atBlock - ', atBlock);
+
+    if (atBlock) {
+      const apiAt = await this.api.at(atBlock);
+      structs = await apiAt.query.domains.registeredDomains.multi(domainNames);
+    } else {
+      structs = await this.api.query.domains.registeredDomains.multi(
+        domainNames
+      );
+    }
 
     // @ts-ignore
     return structs.filter((x) => x.isSome).map((x) => x.unwrap());
@@ -40,7 +85,6 @@ export class BuyerChainClient extends BaseChainClient {
 
   /**
    * Returns domain registration price in seller chain token (DOT || ROC)
-   * @param tokenName
    */
   async getDomainRegistrationPrice(
     tokenData: TokenDetails
@@ -101,6 +145,12 @@ export class BuyerChainClient extends BaseChainClient {
         );
 
         const sudoWrappedTx = this.api.tx.sudo.sudo(domainRegistrationTx);
+
+        /**
+         * Delay is required here to avoid such errors like:
+         * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
+         */
+        await sleepTo(500);
 
         console.log('sudoWrappedTx hash - ', sudoWrappedTx.hash.toHex());
 
