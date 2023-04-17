@@ -16,5 +16,8 @@ export class PendingOrder {
   account!: string;
 
   @Column()
+  destination!: string;
+
+  @Column()
   clientId!: string;
 }

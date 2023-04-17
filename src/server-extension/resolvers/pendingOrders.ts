@@ -32,6 +32,11 @@ export class PendingOrdersResolver {
         'Pending Order domain name (can be unique in Seller storage).'
     })
     domain: string,
+    @Arg('destination', {
+      nullable: false,
+      description: 'Action destination of the order'
+    })
+    destination: string,
     @Arg('account', {
       nullable: false,
       description:
@@ -54,6 +59,7 @@ export class PendingOrdersResolver {
     await lsClient.em.insert(
       PendingOrder,
       new PendingOrder({
+        destination,
         id: domain,
         timestamp: new Date(),
         account: WalletClient.addressToHex(account),
@@ -128,6 +134,7 @@ export class PendingOrdersResolver {
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
             account: savedOrder.account,
+            destination: savedOrder.destination,
             clientId: savedOrder.clientId
           })
       )
@@ -161,6 +168,7 @@ export class PendingOrdersResolver {
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
             account: savedOrder.account,
+            destination: savedOrder.destination,
             clientId: savedOrder.clientId
           })
       )
@@ -192,6 +200,7 @@ export class PendingOrdersResolver {
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
             account: savedOrder.account,
+            destination: savedOrder.destination,
             clientId: savedOrder.clientId
           })
       )

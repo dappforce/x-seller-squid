@@ -1,6 +1,5 @@
 import { ArgsType, Field, ObjectType } from 'type-graphql';
 import { IsString } from 'class-validator';
-import { Column } from 'typeorm';
 
 @ObjectType()
 export class PendingOrderData {
@@ -12,6 +11,9 @@ export class PendingOrderData {
 
   @Field(() => String, { nullable: false })
   account!: string;
+
+  @Field(() => String, { nullable: false })
+  destination!: string;
 
   @Field(() => String, { nullable: false })
   clientId!: string;
