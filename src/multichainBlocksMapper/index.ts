@@ -47,7 +47,7 @@ export class MultiChainBlocksMapper {
       }
     });
 
-    if (!queryResp) return null;
+    if (!queryResp || !queryResp.data) return null;
     const blocks = queryResp.data.blocks;
 
     if (!blocks || blocks.length == 0) return null;

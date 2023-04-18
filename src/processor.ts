@@ -62,7 +62,10 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await BuyerChainClient.getInstance().init();
   await ServiceLocalStorage.getInstance().init();
 
-  if (ctx.isHead && config.sellerIndexer.processingDisabled) return;
+  if (ctx.isHead && config.sellerIndexer.processingDisabled) {
+    ctx.log.info(`Processing flow has been interrupted as squid is in silent mode.`);
+    return;
+  }
 
   SocialRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
 
