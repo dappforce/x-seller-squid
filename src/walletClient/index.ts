@@ -22,7 +22,9 @@ export class WalletClient {
 
   private accs: WalletClientAccounts = {
     sellerIndexerAuthTokenMngEd25519: null,
-    sellerTreasury: null,
+    sellerTreasuryPubKey: null,
+    sellerServicePayer: null,
+    // sellerTreasury: null,
     domainRegistrar: null,
     energyGenerator: null
   };
@@ -45,7 +47,7 @@ export class WalletClient {
 
   public static addressFromAnyToFormatted(
     addressAny: string | Uint8Array,
-    prefix: number
+    prefix?: number
   ) {
     // const publicKey = decodeAddress(addressAny);
     const genericAddress = new GenericAccountId(registry, addressAny);
@@ -81,7 +83,8 @@ export class WalletClient {
 
   public clientValid(): boolean {
     return !!(
-      this.accs.sellerTreasury &&
+      this.accs.sellerServicePayer &&
+      this.accs.sellerTreasuryPubKey &&
       this.accs.domainRegistrar &&
       this.accs.energyGenerator
     );
@@ -94,7 +97,8 @@ export class WalletClient {
     return {
       sellerIndexerAuthTokenMngEd25519:
         this.accs.sellerIndexerAuthTokenMngEd25519!,
-      sellerTreasury: this.accs.sellerTreasury!,
+      sellerServicePayer: this.accs.sellerServicePayer!,
+      sellerTreasuryPubKey: this.accs.sellerTreasuryPubKey!,
       domainRegistrar: this.accs.domainRegistrar!,
       energyGenerator: this.accs.energyGenerator!
     };
@@ -109,8 +113,11 @@ export class WalletClient {
       )
     );
 
-    this.accs.sellerTreasury = await WalletClient.createKeyringPairFromMnem(
-      this.chainConfig.sellerChain.accounts.sellerTreasury.mnemonic
+    this.accs.sellerServicePayer = await WalletClient.createKeyringPairFromMnem(
+      this.chainConfig.sellerChain.accounts.sellerServicePayer.mnemonic
+    );
+    this.accs.sellerTreasuryPubKey = decodeAddress(
+      this.chainConfig.sellerChain.accounts.sellerTreasury.publicKey
     );
     this.accs.domainRegistrar = await WalletClient.createKeyringPairFromMnem(
       this.chainConfig.buyerChain.accounts.domainRegistrar.mnemonic

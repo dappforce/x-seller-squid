@@ -65,7 +65,7 @@ export async function refundDomainRegistrationPaymentByOrder(
 
   try {
     const result = await sellerWsClient.sendBatchAll(
-      WalletClient.getInstance().account.sellerTreasury,
+      WalletClient.getInstance().account.sellerServicePayer,
       [refundTransfer, remarkTx]
     );
     ctx.log.info(

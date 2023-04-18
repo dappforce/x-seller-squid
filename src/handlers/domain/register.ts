@@ -286,7 +286,7 @@ export async function handleDomainRegisterPayment(
       await sleepTo(1000);
 
       const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
-        WalletClient.getInstance().account.sellerTreasury,
+        WalletClient.getInstance().account.sellerServicePayer,
         new SocialRemark().fromSource(compRmrkMsg).toMessage()
       );
 

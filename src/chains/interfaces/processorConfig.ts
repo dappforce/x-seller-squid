@@ -41,7 +41,8 @@ export type ProcessorConfig = {
     >;
     blockRange?: Parameters<SubstrateProcessor<any>['setBlockRange']>[0];
     accounts: {
-      sellerTreasury: { mnemonic: string };
+      sellerTreasury: { publicKey: string };
+      sellerServicePayer: { mnemonic: string };
     };
     remark: {
       protName: SocialRemarkMessageProtocolName;

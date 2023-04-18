@@ -28,7 +28,7 @@ export class SellerConfigInfoResolver {
       sellerChain: config.sellerChain.chainName,
       sellerChainPrefix: config.sellerChain.prefix,
       sellerTreasuryAccount: WalletClient.addressFromAnyToFormatted(
-        walletClient.account.sellerTreasury.address,
+        walletClient.account.sellerTreasuryPubKey,
         28
       ),
       sellerApiAuthTokenManager: WalletClient.addressFromAnyToFormatted(

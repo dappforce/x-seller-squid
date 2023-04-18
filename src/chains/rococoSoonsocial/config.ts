@@ -63,7 +63,10 @@ export const config: ProcessorConfig = {
     },
     accounts: {
       sellerTreasury: {
-        mnemonic: process.env.SELLER_ROCOCO_ACC_MNEM_SELLER_TREASURY || ''
+        publicKey: process.env.SELLER_ROCOCO_ACC_SELLER_TREASURY_PUB_KEY || ''
+      },
+      sellerServicePayer: {
+        mnemonic: process.env.SELLER_ROCOCO_ACC_SELLER_SERVICE_PAYER_MNEM || ''
       }
     },
     remark: {

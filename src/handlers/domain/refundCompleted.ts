@@ -50,7 +50,7 @@ export async function handleDomainRegistrationRefundCompleted(
       blockHash: callData.blockHash,
       txIndex: callData.transferEventIndexInBlock,
       extrinsicHash: callData.extrinsicHash,
-      from: WalletClient.getInstance().account.sellerTreasury.address,
+      from: WalletClient.getInstance().account.sellerServicePayer.address,
       to: callData.to,
       amount: callData.amount,
       token: remark.content.token

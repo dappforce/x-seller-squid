@@ -17,7 +17,7 @@ function isTransferDestinationCorrect(destination: string): boolean {
   return (
     WalletClient.addressFromAnyToFormatted(destination, 28) ===
     WalletClient.addressFromAnyToFormatted(
-      WalletClient.getInstance().account.sellerTreasury.address,
+      WalletClient.getInstance().account.sellerTreasuryPubKey,
       28
     )
   );

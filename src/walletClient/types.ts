@@ -7,7 +7,8 @@ export interface KeyringPairWithSecret extends KeyringPair {
 
 export type WalletClientAccounts = {
   sellerIndexerAuthTokenMngEd25519: Keypair | null;
-  sellerTreasury: KeyringPair | null;
+  sellerTreasuryPubKey: Uint8Array | null;
+  sellerServicePayer: KeyringPair | null;
   domainRegistrar: KeyringPair | null;
   energyGenerator: KeyringPair | null;
 };

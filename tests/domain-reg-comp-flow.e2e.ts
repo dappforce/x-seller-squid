@@ -42,7 +42,10 @@ describe('Register domain with completion flow', () => {
      * Create Balances.Transfer transaction
      */
     const transferTx = sellerWsClient.api.tx.balances.transfer(
-      WalletClient.getInstance().account.sellerTreasury.address,
+      WalletClient.addressFromAnyToFormatted(
+        WalletClient.getInstance().account.sellerTreasuryPubKey,
+        28
+      ),
       validDomainPrice
       // invalidDomainPrice
     );
