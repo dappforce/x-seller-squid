@@ -70,7 +70,7 @@ export const config: ProcessorConfig = {
       protName:
         (process.env
           .SELLER_ROCOCO_REMARK_PROT_NAME as SocialRemarkMessageProtocolName) ||
-        'social_t_1',
+        't_social_t_1',
       version:
         (process.env
           .SELLER_ROCOCO_REMARK_PROT_VERSION as SocialRemarkMessageVersion) ||
@@ -98,7 +98,7 @@ export const config: ProcessorConfig = {
   },
   blocksMapper: {
     dataSource: {
-      endpoint: 'https://soonsocial.archive.subsquid.io/graphql'
+      endpoint: 'https://soonsocial.explorer.subsquid.io/graphql'
     }
   }
 };

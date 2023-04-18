@@ -11,6 +11,7 @@ import {
 import { ChainActionResult } from '../../wsClient/types';
 import { In } from 'typeorm';
 import { StatusesMng } from '../../utils/statusesManager';
+import { saveDomainRegOrderOnRefundFailed } from './utils/common';
 
 const { config } = getChain();
 
@@ -37,15 +38,6 @@ export async function refundDomainRegistrationPaymentByOrder(
   }
 
   const { purchaseTx, purchaseRmrk } = registrationOrderEntity;
-
-  const saveDomainRegOrderOnFail = async (
-    errorData: ChainActionResult
-  ): Promise<void> => {
-    registrationOrderEntity.refundStatus = OrderRefundStatus.Failed;
-    registrationOrderEntity.errorRefund = new OrderError(errorData);
-
-    await ctx.store.save(registrationOrderEntity);
-  };
 
   const sellerWsClient = SellerChainClient.getInstance();
 
@@ -96,7 +88,7 @@ export async function refundDomainRegistrationPaymentByOrder(
         ...(await sellerWsClient.getBlockMeta())
       };
       ctx.log.error(eData);
-      await saveDomainRegOrderOnFail(eData);
+      await saveDomainRegOrderOnRefundFailed(registrationOrderEntity, eData, ctx);
       ctx.log.error('Refund has been finished with error. Order updated.');
     }
   } catch (errorResult) {
@@ -112,7 +104,7 @@ export async function refundDomainRegistrationPaymentByOrder(
       ...(await sellerWsClient.getBlockMeta())
     };
     ctx.log.error(eData);
-    await saveDomainRegOrderOnFail(eData);
+    await saveDomainRegOrderOnRefundFailed(registrationOrderEntity, eData, ctx);
     ctx.log.error('Refund has been finished with error. Order updated.');
   }
 }

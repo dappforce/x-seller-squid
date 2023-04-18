@@ -8,6 +8,7 @@ import { WalletClient } from '../src/walletClient';
 import { BN } from 'bn.js';
 import * as dotenv from 'dotenv';
 import { randomAsNumber } from '@polkadot/util-crypto';
+import { getChain } from '../src/chains';
 
 dotenv.config({ path: `${__dirname}/../.env.local` });
 
@@ -17,8 +18,11 @@ describe('Register domain with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
   const validDomainPrice = new BN('100000000'); // 0.01
   const invalidDomainPrice = new BN('1000000'); // 0.0001
-  const testRemarkTitle: SocialRemarkMessageProtocolName = 'social_t_0';
-  SocialRemark.setConfig({ protNames: ['social_t_0'] });
+
+  const { config } = getChain();
+  const testRemarkTitle: SocialRemarkMessageProtocolName =
+    config.sellerChain.remark.protName;
+  SocialRemark.setConfig({ protNames: [config.sellerChain.remark.protName] });
 
   jest.setTimeout(1000 * 60 * 5);
 
@@ -28,10 +32,9 @@ describe('Register domain with completion flow', () => {
   });
 
   test('Send valid purchase batch', async () => {
-    const buyerAccount =
-      await WalletClient.createKeyringPairFromMnem(
-        process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_BUYER || ''
-      );
+    const buyerAccount = await WalletClient.createKeyringPairFromMnem(
+      process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_BUYER || ''
+    );
     if (!buyerAccount) return;
     if (!sellerWsClient) return;
 
@@ -50,11 +53,12 @@ describe('Register domain with completion flow', () => {
     const regRmrkMsg: SubSclSource<'DMN_REG'> = {
       protName: testRemarkTitle,
       action: 'DMN_REG',
+      destination: '3',
       version: '0.1',
       content: {
         opId: `${transferTx.hash.toHex()}-${randomAsNumber()}`,
         // domainName: `tdotdomain${randomAsNumber()}.sub`,
-        domainName: `man-dude-body-1.sub`,
+        domainName: `man-dude-body-3.sub`,
         target: WalletClient.addressToHex(
           process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),

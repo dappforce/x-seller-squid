@@ -5,7 +5,6 @@ import { ensureDomainRegRemark } from '../../entities/remark';
 
 export async function handleUsernameRegistrationCompleted(
   callData: CallParsed<'DMN_REG_OK', true>,
-  isHeadOfEventsPool: boolean,
   ctx: Ctx
 ) {
   const { remark } = callData;
@@ -14,7 +13,8 @@ export async function handleUsernameRegistrationCompleted(
     DomainRegistrationOrder,
     {
       where: {
-        id: remark.content.opId
+        id: remark.content.opId,
+        status: OrderRequestStatus.Processing,
       },
       relations: {
         domain: true,

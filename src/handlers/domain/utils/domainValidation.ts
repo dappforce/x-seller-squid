@@ -147,10 +147,7 @@ export async function validateDomainTld(
   // TODO get supported tlds from blockchain "domains.supportedTlds"
   if (domainNameChunked.length < 2 || domainNameChunked[1] !== 'sub') {
     return await getFailedStatusWithMeta({
-      ...StatusesMng.getStatusWithReason(
-        'Domain',
-        'ErrorRegForbiddenTld'
-      )
+      ...StatusesMng.getStatusWithReason('Domain', 'ErrorRegForbiddenTld')
     });
   }
 

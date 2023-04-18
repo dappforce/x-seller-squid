@@ -30,7 +30,7 @@ export async function ensureDomainRegistrationOrder(
     target: await getOrCreateAccount(remark.content.target, ctx),
     domain: await getOrCreateDomain(remark.content.domainName, ctx),
     price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(
-      config.sellerChain.token
+      config.sellerChain.token // TODO we should get price which is actual for this particular point of time (in case squid reindexing)
     ),
     token: config.sellerChain.token.name, // TODO should be reviewed
     purchaseTx: purchaseTx ?? null,

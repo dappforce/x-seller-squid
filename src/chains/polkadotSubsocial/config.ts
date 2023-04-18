@@ -98,7 +98,7 @@ export const config: ProcessorConfig = {
   },
   blocksMapper: {
     dataSource: {
-      endpoint: 'https://subsocial.archive.subsquid.io/graphql'
+      endpoint: 'https://subsocial.explorer.subsquid.io/graphql'
     }
   }
 };

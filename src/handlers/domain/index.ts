@@ -1,1 +1,4 @@
-export { handleDomainRegisterPayment } from './register';
+export {
+  handleDomainRegisterPayment,
+  handleDomainRegisterPaymentNotHead
+} from './register';

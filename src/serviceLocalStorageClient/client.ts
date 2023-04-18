@@ -59,6 +59,15 @@ export class ServiceLocalStorage {
 
   async deletePendingOrderById(orderId: string): Promise<void> {
     this.sqdLogger.info(`>>>>> deletePendingOrderById - ${orderId}`);
+    const allOrders = await this.em.find(PendingOrder, {
+      where: {},
+      order: {
+        timestamp: 'ASC'
+      }
+    });
+    this.sqdLogger.info('>>>>> deletePendingOrderById allOrders:');
+    console.dir(allOrders, { depth: null });
+
     await this.em.delete(PendingOrder, orderId);
   }
 

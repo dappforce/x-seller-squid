@@ -1,13 +1,17 @@
 import { CallParsed } from '../../parser/types';
 import { Ctx } from '../../processor';
-import { OrderRefundStatus, DomainRegistrationOrder } from '../../model';
+import {
+  DomainRegistrationOrder,
+  OrderRefundStatus,
+  OrderRequestStatus
+} from '../../model';
 import { ensureDomainRegRemark } from '../../entities/remark';
 import { createAndGetTransfer } from '../../entities';
 import { WalletClient } from '../../walletClient';
+import { In, Not } from 'typeorm';
 
 export async function handleDomainRegistrationRefundCompleted(
   callData: CallParsed<'DMN_REG_REFUND', true>,
-  isHeadOfEventsPool: boolean,
   ctx: Ctx
 ) {
   const { remark } = callData;
@@ -16,7 +20,9 @@ export async function handleDomainRegistrationRefundCompleted(
     DomainRegistrationOrder,
     {
       where: {
-        id: remark.content.opId
+        id: remark.content.opId,
+        status: In([OrderRequestStatus.Failed, OrderRequestStatus.Processing]),
+        refundStatus: In([OrderRefundStatus.None, OrderRefundStatus.Waiting])
       },
       relations: {
         domain: true,
