@@ -37,6 +37,11 @@ export class PendingOrdersResolver {
       description: 'Action destination of the order'
     })
     destination: string,
+    @Arg('target', {
+      nullable: false,
+      description: 'Target for new domain'
+    })
+    target: string,
     @Arg('account', {
       nullable: false,
       description:
@@ -63,6 +68,7 @@ export class PendingOrdersResolver {
         id: domain,
         timestamp: new Date(),
         account: WalletClient.addressToHex(account),
+        target: WalletClient.addressToHex(target),
         clientId: requestClientId ?? undefined
       })
     );
@@ -135,6 +141,7 @@ export class PendingOrdersResolver {
             timestamp: savedOrder.timestamp,
             account: savedOrder.account,
             destination: savedOrder.destination,
+            target: savedOrder.target,
             clientId: savedOrder.clientId
           })
       )
@@ -169,6 +176,7 @@ export class PendingOrdersResolver {
             timestamp: savedOrder.timestamp,
             account: savedOrder.account,
             destination: savedOrder.destination,
+            target: savedOrder.target,
             clientId: savedOrder.clientId
           })
       )
@@ -201,6 +209,7 @@ export class PendingOrdersResolver {
             timestamp: savedOrder.timestamp,
             account: savedOrder.account,
             destination: savedOrder.destination,
+            target: savedOrder.target,
             clientId: savedOrder.clientId
           })
       )

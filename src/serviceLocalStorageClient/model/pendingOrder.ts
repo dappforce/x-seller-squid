@@ -19,5 +19,8 @@ export class PendingOrder {
   destination!: string;
 
   @Column()
+  target!: string;
+
+  @Column()
   clientId!: string;
 }

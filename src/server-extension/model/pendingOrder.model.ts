@@ -16,6 +16,9 @@ export class PendingOrderData {
   destination!: string;
 
   @Field(() => String, { nullable: false })
+  target!: string;
+
+  @Field(() => String, { nullable: false })
   clientId!: string;
 
   constructor(props?: Partial<PendingOrderData>) {
