@@ -27,9 +27,11 @@ export type ParsedCallsDataList = CallParsed<
   | 'DMN_REG'
   | 'DMN_REG_OK'
   | 'DMN_REG_REFUND'
+  | 'DMN_REG_REFUND_OK'
   | 'NRG_GEN'
   | 'NRG_GEN_OK'
   | 'NRG_GEN_REFUND'
+  | 'NRG_GEN_REFUND_OK'
 >[];
 
 export type BalanceTransferData = {

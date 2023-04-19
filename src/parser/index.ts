@@ -42,7 +42,7 @@ export function parseCalls(ctx: Ctx): ParsedCallsDataList {
             if (data) callsParsed.push(data);
             break;
           }
-          case 'DMN_REG_REFUND': {
+          case 'DMN_REG_REFUND_OK': {
             const data = parseDomainRegisterRefundCall(
               remark,
               item,

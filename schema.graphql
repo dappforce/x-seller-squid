@@ -109,6 +109,7 @@ type NrgRemarkContent {
 
 enum OrderRequestStatus {
   Processing
+  InBlock
   Successful
   Failed
 }

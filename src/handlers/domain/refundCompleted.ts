@@ -11,7 +11,7 @@ import { WalletClient } from '../../walletClient';
 import { In, Not } from 'typeorm';
 
 export async function handleDomainRegistrationRefundCompleted(
-  callData: CallParsed<'DMN_REG_REFUND', true>,
+  callData: CallParsed<'DMN_REG_REFUND_OK', true>,
   ctx: Ctx
 ) {
   const { remark } = callData;

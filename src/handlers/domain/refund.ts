@@ -46,11 +46,11 @@ export async function refundDomainRegistrationPaymentByOrder(
     purchaseTx.amount // TODO calculate refund amount
   );
 
-  const refundRmrkMsg: SubSclSource<'DMN_REG_REFUND'> = {
+  const refundRmrkMsg: SubSclSource<'DMN_REG_REFUND_OK'> = {
     protName: config.sellerChain.remark.protName,
     version: config.sellerChain.remark.version,
     destination: config.sellerChain.remark.destination,
-    action: 'DMN_REG_REFUND',
+    action: 'DMN_REG_REFUND_OK',
     content: {
       domainName: purchaseRmrk.content.domainName,
       target: purchaseRmrk.content.target,
@@ -70,7 +70,7 @@ export async function refundDomainRegistrationPaymentByOrder(
     );
     ctx.log.info(
       result,
-      'DMN_REG_REFUND remark and refund transfer TS result >>> '
+      'DMN_REG_REFUND_OK remark and refund transfer TS result >>> '
     );
 
     if (result.success) {
@@ -78,7 +78,7 @@ export async function refundDomainRegistrationPaymentByOrder(
       // registrationOrder.refundStatus = OrderRefundStatus.Fulfilled;
 
       await ctx.store.save(registrationOrderEntity);
-      // TODO implement some solution how to deal with delay between refund batch and processing of DMN_REG_REFUND remark + update DB and closing order
+      // TODO implement some solution how to deal with delay between refund batch and processing of DMN_REG_REFUND_OK remark + update DB and closing order
       ctx.log.info('Refund has been done successfully. Order updated.');
     } else {
       const eData = {

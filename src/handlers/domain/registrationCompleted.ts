@@ -2,6 +2,7 @@ import { CallParsed } from '../../parser/types';
 import { Ctx } from '../../processor';
 import { OrderRequestStatus, DomainRegistrationOrder } from '../../model';
 import { ensureDomainRegRemark } from '../../entities/remark';
+import { In } from 'typeorm';
 
 export async function handleUsernameRegistrationCompleted(
   callData: CallParsed<'DMN_REG_OK', true>,
@@ -14,7 +15,7 @@ export async function handleUsernameRegistrationCompleted(
     {
       where: {
         id: remark.content.opId,
-        status: OrderRequestStatus.Processing,
+        status: In([OrderRequestStatus.InBlock, OrderRequestStatus.Processing])
       },
       relations: {
         domain: true,

@@ -66,9 +66,9 @@ export async function handleSellerActions(
         );
         break;
       }
-      case 'DMN_REG_REFUND': {
+      case 'DMN_REG_REFUND_OK': {
         await handleDomainRegistrationRefundCompleted(
-          actionsData as CallParsed<'DMN_REG_REFUND'>,
+          actionsData as CallParsed<'DMN_REG_REFUND_OK'>,
           ctx
         );
         break;

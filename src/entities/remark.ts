@@ -7,7 +7,7 @@ import {
 } from '../model';
 
 export function ensureDomainRegRemark(
-  remark: SocialRemarkMessage<'DMN_REG' | 'DMN_REG_OK' | 'DMN_REG_REFUND', true>
+  remark: SocialRemarkMessage<'DMN_REG' | 'DMN_REG_OK' | 'DMN_REG_REFUND_OK', true>
 ) {
   return new DmnRegRemark({
     protName: remark.protName,
