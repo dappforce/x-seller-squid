@@ -5,7 +5,7 @@ import {
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
 import {
-  parseAllowedApiClients,
+  parseAccountsFromEnvs,
   parseApiAuthTokenExpTime,
   parsePendingOrderExpTime
 } from '../utils/common';
@@ -17,7 +17,7 @@ dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
   sellerClient: {
-    allowedApiClients: parseAllowedApiClients(
+    allowedApiClients: parseAccountsFromEnvs(
       process.env.SELLER_SUBSOCIAL_ALLOWED_API_CLIENTS || ''
     )
   },
@@ -27,6 +27,9 @@ export const config: ProcessorConfig = {
         mnemonic: process.env.SELLER_SUBSOCIAL_API_TOKEN_MANAGER_MNEM ?? ''
       }
     },
+    allowedRemarkSigners: parseAccountsFromEnvs(
+      process.env.SELLER_POLKADOT_ALLOWED_REMARK_SIGNERS || ''
+    ),
     apiAuthTokenExp: parseApiAuthTokenExpTime(
       process.env.SELLER_SUBSOCIAL_API_TOKEN_EXP_TIME,
       10000
@@ -66,7 +69,8 @@ export const config: ProcessorConfig = {
         publicKey: process.env.SELLER_POLKADOT_ACC_SELLER_TREASURY_PUB_KEY || ''
       },
       sellerServicePayer: {
-        mnemonic: process.env.SELLER_POLKADOT_ACC_SELLER_SERVICE_PAYER_MNEM || ''
+        mnemonic:
+          process.env.SELLER_POLKADOT_ACC_SELLER_SERVICE_PAYER_MNEM || ''
       }
     },
     remark: {

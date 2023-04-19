@@ -5,6 +5,7 @@ import { AllCallItem, RemarkCallItem } from '../../types/common';
 import { encodeAccount } from '../../utils';
 import { getChain } from '../../chains';
 import { getTransferData } from './getTransferData';
+import { WalletClient } from '../../walletClient';
 
 const { config } = getChain();
 
@@ -16,7 +17,7 @@ export function parseDomainRegisterRefundCall(
 ): CallParsed<'DMN_REG_REFUND'> | null {
   // @ts-ignore
   if (callItem.call.parent.name !== 'Utility.batch_all') return;
-  let signerEncoded: string | null = null;
+  let signer: Uint8Array | null = null;
 
   if (
     callItem.extrinsic.signature &&
@@ -24,14 +25,19 @@ export function parseDomainRegisterRefundCall(
     callItem.extrinsic.signature.address.__kind &&
     callItem.extrinsic.signature.address.__kind === 'Id'
   ) {
-    signerEncoded = encodeAccount(
-      callItem.extrinsic.signature.address.value,
-      config.sellerChain.prefix
-    );
+    signer = callItem.extrinsic.signature.address.value;
   }
 
+  if (!signer)
+    ctx.log.warn(
+      `Utility.batch_all signer is undefined :: block ${block.header.height}`
+    );
+
   if (
-    !signerEncoded ||
+    !signer ||
+    !config.sellerIndexer.allowedRemarkSigners.has(
+      WalletClient.addressToHex(signer)
+    ) ||
     !callItem.call.parent ||
     callItem.call.parent.name !== 'Utility.batch_all' ||
     (callItem.call.parent.name === 'Utility.batch_all' &&
@@ -43,8 +49,12 @@ export function parseDomainRegisterRefundCall(
       const callName = `${c.__kind}.${c.value.__kind}`;
       return requiredPurchaseBatchCalls.has(callName);
     })
-  )
+  ) {
+    ctx.log.warn(
+      `Utility.batch_all is not valid at block ${block.header.height}`
+    );
     return null;
+  }
 
   const batchAllCallId = callItem.call.parent!.id;
 

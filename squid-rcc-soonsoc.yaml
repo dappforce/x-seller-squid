@@ -1,12 +1,13 @@
 manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-rococo-soon
-version: 112
+version: 113
 description: 'X Seller Squid based on Rococo/Soonsocial chains'
 build:
 deploy:
   secrets:
     - SELLER_ROCOCO_ACC_SELLER_TREASURY_PUB_KEY
     - SELLER_ROCOCO_ACC_SELLER_SERVICE_PAYER_MNEM
+    - SELLER_ROCOCO_ALLOWED_REMARK_SIGNERS
     - SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRAR
     - SELLER_SOONSOCIAL_ACC_MNEM_ENERGY_GENERATOR
     - SELLER_SOONSOCIAL_ALLOWED_API_CLIENTS

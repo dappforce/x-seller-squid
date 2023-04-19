@@ -26,6 +26,7 @@ export type ProcessorConfig = {
         mnemonic: string;
       };
     };
+    allowedRemarkSigners: Set<string>;
     apiAuthTokenExp: number;
     dmnRegPendingOrderExpTime: number;
     apiDebugMode: boolean;

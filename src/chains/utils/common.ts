@@ -1,6 +1,6 @@
 import { WalletClient } from '../../walletClient';
 
-export function parseAllowedApiClients(src: string): Set<string> {
+export function parseAccountsFromEnvs(src: string): Set<string> {
   return new Set<string>(
     src.split(',').map((client) => WalletClient.addressToHex(client))
   );

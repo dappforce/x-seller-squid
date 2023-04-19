@@ -5,7 +5,7 @@ import {
   SocialRemarkMessageVersion
 } from '@subsocial/utils';
 import {
-  parseAllowedApiClients,
+  parseAccountsFromEnvs,
   parseApiAuthTokenExpTime,
   parsePendingOrderExpTime
 } from '../utils/common';
@@ -17,7 +17,7 @@ dotenv.config({ path: `${__dirname}/../../../.env.local` });
 
 export const config: ProcessorConfig = {
   sellerClient: {
-    allowedApiClients: parseAllowedApiClients(
+    allowedApiClients: parseAccountsFromEnvs(
       process.env.SELLER_SOONSOCIAL_ALLOWED_API_CLIENTS || ''
     )
   },
@@ -27,6 +27,9 @@ export const config: ProcessorConfig = {
         mnemonic: process.env.SELLER_SOONSOCIAL_API_TOKEN_MANAGER_MNEM ?? ''
       }
     },
+    allowedRemarkSigners: parseAccountsFromEnvs(
+      process.env.SELLER_ROCOCO_ALLOWED_REMARK_SIGNERS || ''
+    ),
     apiAuthTokenExp: parseApiAuthTokenExpTime(
       process.env.SELLER_SOONSOCIAL_API_TOKEN_EXP_TIME,
       10000
