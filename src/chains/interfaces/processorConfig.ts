@@ -31,6 +31,7 @@ export type ProcessorConfig = {
     dmnRegPendingOrderExpTime: number;
     apiDebugMode: boolean;
     processingDisabled: boolean;
+    autoRefundDisabled: boolean;
     extendedApi: boolean;
   };
   sellerChain: {

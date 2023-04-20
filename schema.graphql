@@ -108,15 +108,43 @@ type NrgRemarkContent {
 }
 
 enum OrderRequestStatus {
+  """
+  Processing of the Registration request has been stated and validations are passed or validation process is ongoing.
+  Orders with such status are subject to refund if indexer is already in chain head but order status is not changed
+  during long time (more than 20 blocks).
+  """
   Processing
+  """
+  Registration request has been validated and domain is registered in blockchain but registration confirmation has not
+  been found yet. Refund for orders with such status is not needed as domain is registered so service is completed.
+  """
   InBlock
+  """
+  Registration request has been validated, domain is registered in blockchain and proof remark (DMN_REG_OK) has been
+  found. Order is fulfilled and closed.
+  """
   Successful
+  """
+  Registration request has been failed by vary of reasons. Refund is required.
+  """
   Failed
 }
 enum OrderRefundStatus {
+  """
+  Order is processing or already fulfilled successfully without errors.
+  """
   None
+  """
+  Order waits for refund because registration process has failed and order has `status: Failed`.
+  """
   Waiting
+  """
+  Refund is successfully fulfilled.
+  """
   Fulfilled
+  """
+  Refund is failed with error.
+  """
   Failed
 }
 

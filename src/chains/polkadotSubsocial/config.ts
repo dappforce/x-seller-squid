@@ -46,6 +46,10 @@ export const config: ProcessorConfig = {
       process.env.SELLER_PROCESSING_DISABLED &&
       process.env.SELLER_PROCESSING_DISABLED === 'true'
     ),
+    autoRefundDisabled: !!(
+      process.env.SELLER_POLKADOT_AUTO_REFUND_DISABLED &&
+      process.env.SELLER_POLKADOT_AUTO_REFUND_DISABLED === 'true'
+    ),
     extendedApi: !!(
       process.env.SELLER_EXTENDED_API &&
       process.env.SELLER_EXTENDED_API === 'true'

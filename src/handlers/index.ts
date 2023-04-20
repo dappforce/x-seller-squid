@@ -13,6 +13,8 @@ import {
 } from './domain/refund';
 import { getOrCreateProcessingState } from '../entities/procesingState';
 import { getLastBatchBlockHeight } from '../utils';
+import { getChain } from '../chains';
+const { config } = getChain();
 
 export async function handleSellerActions(
   parsedActions: ParsedCallsDataList,
@@ -94,25 +96,32 @@ export async function handleSellerActions(
 
   const processingState = await getOrCreateProcessingState(ctx);
 
-  if (
-    ctx.isHead &&
-    processingState.domainRegRefundFullProcessingAtBlock + 1000 <
-      getLastBatchBlockHeight(ctx)
-  ) {
-    /**
-     * Check each 1000 blocks === about 3 hours
-     */
+  /**
+   * Automatic refund is dangerous. If Service Payer account will have zero
+   * balance, squid won't be able to send remarks DMN_REG_OK on successful
+   * registrations.
+   */
+  if (config.sellerIndexer.autoRefundDisabled) {
+    if (
+      ctx.isHead &&
+      processingState.domainRegRefundFullProcessingAtBlock + 1000 <
+        getLastBatchBlockHeight(ctx)
+    ) {
+      /**
+       * Check each 1000 blocks === about 3 hours
+       */
 
-    await handleRefundActionOnWaitingAll(ctx);
+      await handleRefundActionOnWaitingAll(ctx);
 
-    processingState.domainRegRefundFullProcessingAtBlock =
-      getLastBatchBlockHeight(ctx);
-    await ctx.store.save(processingState);
-  } else if (ctx.isHead && currentBatchDmnRegRefundActionOpIds.length > 0) {
-    await handleRefundActionOnWaitingFromList(
-      currentBatchDmnRegRefundActionOpIds,
-      ctx
-    );
+      processingState.domainRegRefundFullProcessingAtBlock =
+        getLastBatchBlockHeight(ctx);
+      await ctx.store.save(processingState);
+    } else if (ctx.isHead && currentBatchDmnRegRefundActionOpIds.length > 0) {
+      await handleRefundActionOnWaitingFromList(
+        currentBatchDmnRegRefundActionOpIds,
+        ctx
+      );
+    }
   }
 
   // TODO add checking all orders with status Processing which are older than

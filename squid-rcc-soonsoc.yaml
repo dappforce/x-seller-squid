@@ -1,6 +1,6 @@
 manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-rococo-soon
-version: 113
+version: 114
 description: 'X Seller Squid based on Rococo/Soonsocial chains'
 build:
 deploy:
@@ -26,6 +26,7 @@ deploy:
       SELLER_TOKEN_PRICE_COEFF_DOT_SUB: 0.001
       SELLER_SOONSOCIAL_API_TOKEN_EXP_TIME: 10000
       SELLER_SOONSOCIAL_DMN_REG_PENDING_ORDER_EXP_TIME: 7
+      SELLER_ROCOCO_AUTO_REFUND_DISABLED: true
     cmd:
       - node
       - lib/processor
@@ -40,6 +41,7 @@ deploy:
       SELLER_TOKEN_PRICE_COEFF_DOT_SUB: 0.001
       SELLER_SOONSOCIAL_API_TOKEN_EXP_TIME: 10000
       SELLER_SOONSOCIAL_DMN_REG_PENDING_ORDER_EXP_TIME: 7
+      SELLER_ROCOCO_AUTO_REFUND_DISABLED: true
     cmd:
       - npx
       - squid-graphql-server

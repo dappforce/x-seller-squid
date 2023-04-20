@@ -7,6 +7,7 @@ import {
   OrderRequestStatus
 } from '../../../model';
 import { Ctx } from '../../../processor';
+import { getChain } from '../../../chains';
 
 export async function saveRegOrderEntity(
   domainRegistrationOrder: DomainRegistrationOrder,
@@ -29,9 +30,16 @@ export async function saveDomainRegOrderOnRegistrationFailed(
   errorData: ChainActionResult,
   ctx: Ctx
 ): Promise<void> {
+  const { config } = getChain();
   domainRegistrationOrder.status = OrderRequestStatus.Failed;
   domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
   domainRegistrationOrder.errorRegistration = new OrderError(errorData);
+
+  if (config.sellerIndexer.autoRefundDisabled) {
+    ctx.log.error(
+      `Order ${domainRegistrationOrder.id} for domain name "${domainRegistrationOrder.domain.id}" has status Failed and refund is required.`
+    );
+  }
 
   await saveRegOrderEntity(domainRegistrationOrder, ctx);
 }
@@ -46,4 +54,3 @@ export async function saveDomainRegOrderOnRefundFailed(
 
   await ctx.store.save(registrationOrderEntity);
 }
-

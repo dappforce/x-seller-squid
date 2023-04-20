@@ -28,7 +28,10 @@ import { StatusesMng } from '../../utils/statusesManager';
 import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
 import { TokenName } from '../../chains/interfaces/processorConfig';
 import { sleepTo } from '../../utils';
-import { saveDomainRegOrderOnRegistrationFailed, saveRegOrderEntity } from './utils/common';
+import {
+  saveDomainRegOrderOnRegistrationFailed,
+  saveRegOrderEntity
+} from './utils/common';
 // import { refundDomainRegistrationPayment } from './refund';
 const { config } = getChain();
 
@@ -248,10 +251,11 @@ export async function handleDomainRegisterPayment(
     return opId;
   }
 
+  await saveRegOrderEntity(domainRegistrationOrder, ctx);
+
   /**
    * Execute registration process
    */
-
   try {
     const { domainName, target, token, opId } = callData.remark.content;
 
@@ -261,39 +265,49 @@ export async function handleDomainRegisterPayment(
     });
     ctx.log.info(result, 'Domain registration request result');
 
-    if (result.success) {
-      domainRegistrationOrder.status = OrderRequestStatus.Processing;
+    // TODO add extra check to avoid failing process without saving order status
 
+    if (result.success) {
+      domainRegistrationOrder.status = OrderRequestStatus.InBlock;
       await saveRegOrderEntity(domainRegistrationOrder, ctx);
 
-      const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
-        protName: config.sellerChain.remark.protName,
-        version: config.sellerChain.remark.version,
-        destination: config.sellerChain.remark.destination,
-        action: 'DMN_REG_OK',
-        content: {
-          domainName: domainName,
-          target: target,
-          token: token,
-          opId: opId
+      try {
+        const compRmrkMsg: SubSclSource<'DMN_REG_OK'> = {
+          protName: config.sellerChain.remark.protName,
+          version: config.sellerChain.remark.version,
+          destination: config.sellerChain.remark.destination,
+          action: 'DMN_REG_OK',
+          content: {
+            domainName: domainName,
+            target: target,
+            token: token,
+            opId: opId
+          }
+        };
+
+        /**
+         * Delay is required here to avoid such errors like:
+         * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
+         */
+        await sleepTo(1000);
+
+        const compRemarkResult =
+          await SellerChainClient.getInstance().sendRemark(
+            WalletClient.getInstance().account.sellerServicePayer,
+            new SocialRemark().fromSource(compRmrkMsg).toMessage()
+          );
+
+        if (!compRemarkResult.success) {
+          ctx.log.warn(
+            compRemarkResult,
+            'DMN_REG_OK remark sending failed with error:'
+          );
+          // TODO add handling of such case when domain is registered successfully but DMN_REG_OK remark has not ben sent
         }
-      };
-
-      /**
-       * Delay is required here to avoid such errors like:
-       * RpcError: 1014: Priority is too low: (*** vs ***): The transaction has too low priority to replace another transaction already in the pool
-       */
-      await sleepTo(1000);
-
-      const compRemarkResult = await SellerChainClient.getInstance().sendRemark(
-        WalletClient.getInstance().account.sellerServicePayer,
-        new SocialRemark().fromSource(compRmrkMsg).toMessage()
-      );
-
-      if (!compRemarkResult.success) {
-        // TODO add handling of such case when domain is registered successfully but DMN_REG_OK remark has not ben sent
+        ctx.log.info(compRemarkResult, 'DMN_REG_OK remark sending result >>> ');
+      } finally {
+        ctx.log.warn('DMN_REG_OK remark sending failed');
       }
-      ctx.log.info(compRemarkResult, 'DMN_REG_OK remark sending result >>> ');
       return null;
     } else {
       const eData = {
@@ -302,7 +316,11 @@ export async function handleDomainRegisterPayment(
         ...(await buyerChainClient.getBlockMeta())
       };
       ctx.log.error(eData);
-      await saveDomainRegOrderOnRegistrationFailed(domainRegistrationOrder, eData, ctx);
+      await saveDomainRegOrderOnRegistrationFailed(
+        domainRegistrationOrder,
+        eData,
+        ctx
+      );
       return opId;
     }
   } catch (rejected) {
@@ -317,7 +335,11 @@ export async function handleDomainRegisterPayment(
       ...(await buyerChainClient.getBlockMeta())
     };
     ctx.log.error(eData);
-    await saveDomainRegOrderOnRegistrationFailed(domainRegistrationOrder, eData, ctx);
+    await saveDomainRegOrderOnRegistrationFailed(
+      domainRegistrationOrder,
+      eData,
+      ctx
+    );
     return opId;
   }
 }
