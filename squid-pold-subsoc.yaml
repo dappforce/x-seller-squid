@@ -1,6 +1,6 @@
 manifestVersion: subsquid.io/v0.1
-name: x-seller-squid-polkadot-sub
-version: 103
+name: x-seller-dot-sub
+version: 114
 description: 'X Seller Squid based on Polkadot/Subsocial chains'
 build:
 deploy:
@@ -18,8 +18,8 @@ deploy:
     env:
       CHAIN: polkadotSubsocial
       SELLER_PROCESSING_DISABLED: false
-      SELLER_EXTENDED_API: false
-      SELLER_POLKADOT_REMARK_PROT_NAME: social_t_1
+      SELLER_EXTENDED_API: true
+      SELLER_POLKADOT_REMARK_PROT_NAME: st_ss_v_1
       SELLER_POLKADOT_REMARK_PROT_VERSION: 0.1
       SELLER_POLKADOT_REMARK_DESTINATION: 1
       SELLER_TOKEN_PRICE_COEFF_ROC_SOON: 0.001
@@ -34,8 +34,8 @@ deploy:
     env:
       CHAIN: polkadotSubsocial
       SELLER_PROCESSING_DISABLED: false
-      SELLER_EXTENDED_API: false
-      SELLER_POLKADOT_REMARK_PROT_NAME: social_t_1
+      SELLER_EXTENDED_API: true
+      SELLER_POLKADOT_REMARK_PROT_NAME: st_ss_v_1
       SELLER_POLKADOT_REMARK_PROT_VERSION: 0.1
       SELLER_TOKEN_PRICE_COEFF_ROC_SOON: 0.001
       SELLER_TOKEN_PRICE_COEFF_DOT_SUB: 0.001

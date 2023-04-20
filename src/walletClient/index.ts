@@ -65,6 +65,17 @@ export class WalletClient {
     return keyring.addFromUri(mnem);
   }
 
+  public static async createKeyringPairFromSeed(seed: Uint8Array) {
+    if (!(await cryptoWaitReady())) {
+      throw 'cryptoWaitReady() resolved to false';
+    }
+    if (!seed) {
+      throw 'suri cannot be undefined';
+    }
+    let keyring = new Keyring({ type: 'sr25519' });
+    return keyring.addFromSeed(seed);
+  }
+
   public static isAddressValid(maybeAddress: string) {
     try {
       encodeAddress(

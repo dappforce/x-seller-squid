@@ -81,7 +81,7 @@ export const config: ProcessorConfig = {
       protName:
         (process.env
           .SELLER_POLKADOT_REMARK_PROT_NAME as SocialRemarkMessageProtocolName) ||
-        'social_t_1',
+        'st_ss_v_1',
       version:
         (process.env
           .SELLER_POLKADOT_REMARK_PROT_VERSION as SocialRemarkMessageVersion) ||
