@@ -4,14 +4,13 @@ import { Ctx } from '../../processor';
 import { SocialRemark, SubSclSource } from '@subsocial/utils';
 import { WalletClient } from '../../walletClient';
 import {
-  ensureDomainRegistrationOrder,
-  createAndGetTransfer
+  createAndGetTransfer,
+  ensureDomainRegistrationOrder
 } from '../../entities';
 import {
+  DomainRegistrationOrder,
   OrderRefundStatus,
-  OrderRequestStatus,
-  OrderError,
-  DomainRegistrationOrder
+  OrderRequestStatus
 } from '../../model';
 import { ChainActionResult } from '../../wsClient/types';
 import { getChain } from '../../chains';
@@ -25,7 +24,6 @@ import {
   validateTargetDomainsMaxLimit
 } from './utils/domainValidation';
 import { StatusesMng } from '../../utils/statusesManager';
-import { ServiceLocalStorage } from '../../serviceLocalStorageClient';
 import { TokenName } from '../../chains/interfaces/processorConfig';
 import { sleepTo } from '../../utils';
 import {
@@ -302,11 +300,17 @@ export async function handleDomainRegisterPayment(
             compRemarkResult,
             'DMN_REG_OK remark sending failed with error:'
           );
+          domainRegistrationOrder.status = OrderRequestStatus.Failed;
+          domainRegistrationOrder.refundStatus = OrderRefundStatus.None;
+          await saveRegOrderEntity(domainRegistrationOrder, ctx);
           // TODO add handling of such case when domain is registered successfully but DMN_REG_OK remark has not ben sent
         }
         ctx.log.info(compRemarkResult, 'DMN_REG_OK remark sending result >>> ');
       } finally {
         ctx.log.warn('DMN_REG_OK remark sending failed');
+        domainRegistrationOrder.status = OrderRequestStatus.Failed;
+        domainRegistrationOrder.refundStatus = OrderRefundStatus.None;
+        await saveRegOrderEntity(domainRegistrationOrder, ctx);
       }
       return null;
     } else {

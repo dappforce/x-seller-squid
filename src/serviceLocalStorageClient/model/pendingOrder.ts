@@ -13,13 +13,16 @@ export class PendingOrder {
   timestamp!: Date;
 
   @Column()
-  account!: string;
+  createdByAccount!: string;
 
   @Column()
-  destination!: string;
+  signer!: string;
 
   @Column()
   target!: string;
+
+  @Column()
+  destination!: string;
 
   @Column()
   clientId!: string;

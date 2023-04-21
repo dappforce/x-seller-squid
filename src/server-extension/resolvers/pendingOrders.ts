@@ -12,6 +12,7 @@ import {
 } from '../model/pendingOrder.model';
 import { WalletClient } from '../../walletClient';
 import { getChain } from '../../chains';
+import { getPendingOrdersByAccount } from '../utils';
 
 @Resolver()
 export class PendingOrdersResolver {
@@ -32,22 +33,28 @@ export class PendingOrdersResolver {
         'Pending Order domain name (can be unique in Seller storage).'
     })
     domain: string,
+    @Arg('signer', {
+      nullable: false,
+      description:
+        'Account address who signed request transaction (batchAll with transfer and remark) (will be saved in Hex format)'
+    })
+    signer: string,
+    @Arg('createdByAccount', {
+      nullable: false,
+      description:
+        'Account address who created Pending Order (will be saved in Hex format)'
+    })
+    createdByAccount: string,
+    @Arg('target', {
+      nullable: false,
+      description: 'Target for new domain (domain recipient)'
+    })
+    target: string,
     @Arg('destination', {
       nullable: false,
       description: 'Action destination of the order'
     })
     destination: string,
-    @Arg('target', {
-      nullable: false,
-      description: 'Target for new domain'
-    })
-    target: string,
-    @Arg('account', {
-      nullable: false,
-      description:
-        'Account address who initiates Pending Order (will be saved in Hex format)'
-    })
-    account: string,
     @Ctx() ctx: any
   ): Promise<boolean> {
     const { config } = getChain();
@@ -67,7 +74,8 @@ export class PendingOrdersResolver {
         destination,
         id: domain,
         timestamp: new Date(),
-        account: WalletClient.addressToHex(account),
+        signer: WalletClient.addressToHex(signer),
+        createdByAccount: WalletClient.addressToHex(createdByAccount),
         target: WalletClient.addressToHex(target),
         clientId: requestClientId ?? undefined
       })
@@ -139,9 +147,10 @@ export class PendingOrdersResolver {
           new PendingOrderData({
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
-            account: savedOrder.account,
-            destination: savedOrder.destination,
+            signer: savedOrder.signer,
+            createdByAccount: savedOrder.createdByAccount,
             target: savedOrder.target,
+            destination: savedOrder.destination,
             clientId: savedOrder.clientId
           })
       )
@@ -151,35 +160,55 @@ export class PendingOrdersResolver {
   @Query(() => PendingOrdersList, {
     nullable: false,
     description:
-      'Get existing Pending Orders by provided domain names (IDs) list.'
+      'Get existing Pending Orders by provided purchase transaction signer'
   })
-  async getPendingOrdersByAccount(
-    @Arg('account', {
+  async getPendingOrdersBySigner(
+    @Arg('signer', {
       nullable: false,
       description:
-        'Pending order owner account address (Public key in Hex format)'
+        'Account address who signed request transaction (Public key in Hex format)'
     })
-    account: string
+    signer: string
   ): Promise<PendingOrdersList> {
-    const lsClient = await ServiceLocalStorage.getInstance().init();
-    const savedOrders = await lsClient.em.find(PendingOrder, {
-      where: {
-        account: WalletClient.addressToHex(account)
-      }
-    });
-
     return new PendingOrdersList({
-      orders: savedOrders.map(
-        (savedOrder) =>
-          new PendingOrderData({
-            id: savedOrder.id,
-            timestamp: savedOrder.timestamp,
-            account: savedOrder.account,
-            destination: savedOrder.destination,
-            target: savedOrder.target,
-            clientId: savedOrder.clientId
-          })
+      orders: await getPendingOrdersByAccount(signer, 'signer')
+    });
+  }
+
+  @Query(() => PendingOrdersList, {
+    nullable: false,
+    description: `Get existing Pending Orders by it's creator`
+  })
+  async getPendingOrdersByCreatedByAccount(
+    @Arg('createdByAccount', {
+      nullable: false,
+      description:
+        'Account address who created Pending Order (Public key in Hex format)'
+    })
+    createdByAccount: string
+  ): Promise<PendingOrdersList> {
+    return new PendingOrdersList({
+      orders: await getPendingOrdersByAccount(
+        createdByAccount,
+        'createdByAccount'
       )
+    });
+  }
+
+  @Query(() => PendingOrdersList, {
+    nullable: false,
+    description: `Get existing Pending Orders by domain registration target`
+  })
+  async getPendingOrdersByTarget(
+    @Arg('target', {
+      nullable: false,
+      description:
+        'Account address or domain recipient (Public key in Hex format)'
+    })
+    target: string
+  ): Promise<PendingOrdersList> {
+    return new PendingOrdersList({
+      orders: await getPendingOrdersByAccount(target, 'target')
     });
   }
 
@@ -207,7 +236,8 @@ export class PendingOrdersResolver {
           new PendingOrderData({
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
-            account: savedOrder.account,
+            signer: savedOrder.signer,
+            createdByAccount: savedOrder.createdByAccount,
             destination: savedOrder.destination,
             target: savedOrder.target,
             clientId: savedOrder.clientId

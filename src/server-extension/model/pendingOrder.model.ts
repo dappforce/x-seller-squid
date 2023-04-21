@@ -6,20 +6,23 @@ export class PendingOrderData {
   @Field(() => String, { nullable: false })
   id!: string;
 
-  @Field(() => Date, { nullable: false })
-  timestamp!: Date;
+  @Field(() => String, { nullable: false })
+  createdByAccount!: string;
 
   @Field(() => String, { nullable: false })
-  account!: string;
-
-  @Field(() => String, { nullable: false })
-  destination!: string;
+  signer!: string;
 
   @Field(() => String, { nullable: false })
   target!: string;
 
   @Field(() => String, { nullable: false })
+  destination!: string;
+
+  @Field(() => String, { nullable: false })
   clientId!: string;
+
+  @Field(() => Date, { nullable: false })
+  timestamp!: Date;
 
   constructor(props?: Partial<PendingOrderData>) {
     Object.assign(this, props);
