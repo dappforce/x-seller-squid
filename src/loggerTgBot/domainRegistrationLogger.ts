@@ -67,6 +67,7 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
       | 'Successful'
       | 'DmnRegFailed'
       | 'DmnRegRefundFailed'
+      | 'DmnRegRefundOk'
       | 'DmnRegOkRemarkFailed'
   ) {
     const existingTgMessage = await (
@@ -101,6 +102,9 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
         break;
       case 'DmnRegRefundFailed':
         text += `      ❎ [${currentTime}] Domain registration refund has failed.`;
+        break;
+      case 'DmnRegRefundOk':
+        text += `      🏁 [${currentTime}] Domain registration refund has fulfilled successfully.`;
         break;
       case 'Successful':
         text +=

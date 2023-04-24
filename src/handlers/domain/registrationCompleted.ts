@@ -51,6 +51,7 @@ export async function handleUsernameRegistrationCompleted(
   await ctx.store.save(domain);
   await ctx.store.save(existingRegistrationEntity);
 
+  // TODO Dont run if it's not a head of archive
   await domainRegTgLogger.addOrderStatus(
     existingRegistrationEntity.id,
     'DmnRegOk'

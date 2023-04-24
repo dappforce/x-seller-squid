@@ -9,6 +9,7 @@ import { ensureDomainRegRemark } from '../../entities/remark';
 import { createAndGetTransfer } from '../../entities';
 import { WalletClient } from '../../walletClient';
 import { In, Not } from 'typeorm';
+import { DomainRegistrationTgLogger } from '../../loggerTgBot';
 
 export async function handleDomainRegistrationRefundCompleted(
   callData: CallParsed<'DMN_REG_REFUND_OK', true>,
@@ -39,6 +40,9 @@ export async function handleDomainRegistrationRefundCompleted(
     return;
   }
 
+  const domainRegTgLogger = await DomainRegistrationTgLogger.getInstance().init();
+
+
   existingRegistrationEntity.updatedAtBlock = callData.blockNumber;
   existingRegistrationEntity.updatedAtTime = callData.timestamp;
   existingRegistrationEntity.refundStatus = OrderRefundStatus.Fulfilled;
@@ -59,4 +63,9 @@ export async function handleDomainRegistrationRefundCompleted(
   );
 
   await ctx.store.save(existingRegistrationEntity);
+
+  await domainRegTgLogger.addOrderStatus(
+    existingRegistrationEntity.id,
+    'DmnRegRefundOk'
+  );
 }
