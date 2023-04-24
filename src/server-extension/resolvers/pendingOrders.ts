@@ -74,6 +74,7 @@ export class PendingOrdersResolver {
         destination,
         id: domain,
         timestamp: new Date(),
+        purchaseInterrupted: false,
         signer: WalletClient.addressToHex(signer),
         createdByAccount: WalletClient.addressToHex(createdByAccount),
         target: WalletClient.addressToHex(target),
@@ -87,6 +88,45 @@ export class PendingOrdersResolver {
   @Mutation(() => Boolean, {
     description:
       'Create new Pending Order for provided domain and Seller Client'
+  })
+  async updatePendingOrderPurchaseStatusById(
+    @Arg('id', {
+      nullable: false,
+      description: 'Domain name to delete'
+    })
+    id: string,
+    @Arg('interrupted', {
+      nullable: false,
+      description: 'Purchase interruption status'
+    })
+    interrupted: boolean,
+    @Ctx() ctx: any
+  ): Promise<boolean> {
+    const { config } = getChain();
+    if (config.sellerIndexer.processingDisabled) return true;
+
+    const requestClientId = ctx.openreader.clientId
+      ? WalletClient.addressToHex(ctx.openreader.clientId)
+      : '';
+    const lsClient = await ServiceLocalStorage.getInstance().init();
+    const itemForUpdate = await lsClient.em.findOneBy(PendingOrder, {
+      id
+    });
+    if (!itemForUpdate)
+      throw new Error(
+        `Domain registration Pending order for domain "${id} has not been found" `
+      );
+    if (!requestClientId || itemForUpdate.clientId !== requestClientId)
+      throw new Error(
+        `Permissions denied. Client ${requestClientId} can not update Domain registration Pending order for domain "${id}" `
+      );
+    itemForUpdate.purchaseInterrupted = interrupted;
+    await lsClient.em.save(itemForUpdate);
+    return true;
+  }
+
+  @Mutation(() => Boolean, {
+    description: 'Delete Pending Order by ID'
   })
   async deletePendingOrderById(
     @Arg('id', {
@@ -147,6 +187,7 @@ export class PendingOrdersResolver {
           new PendingOrderData({
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
+            purchaseInterrupted: savedOrder.purchaseInterrupted,
             signer: savedOrder.signer,
             createdByAccount: savedOrder.createdByAccount,
             target: savedOrder.target,
@@ -236,6 +277,7 @@ export class PendingOrdersResolver {
           new PendingOrderData({
             id: savedOrder.id,
             timestamp: savedOrder.timestamp,
+            purchaseInterrupted: savedOrder.purchaseInterrupted,
             signer: savedOrder.signer,
             createdByAccount: savedOrder.createdByAccount,
             destination: savedOrder.destination,

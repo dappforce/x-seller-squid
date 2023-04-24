@@ -7,7 +7,11 @@ import { WalletClient } from '../walletClient';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-const protectedQueries = ['createPendingOrder', 'deletePendingOrderById'];
+const protectedQueries = [
+  'createPendingOrder',
+  'deletePendingOrderById',
+  'updatePendingOrderPurchaseStatusById'
+];
 
 /**
  * We need to check such headers as:

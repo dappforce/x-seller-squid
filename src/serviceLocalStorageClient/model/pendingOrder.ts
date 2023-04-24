@@ -25,5 +25,8 @@ export class PendingOrder {
   destination!: string;
 
   @Column()
+  purchaseInterrupted!: boolean;
+
+  @Column()
   clientId!: string;
 }

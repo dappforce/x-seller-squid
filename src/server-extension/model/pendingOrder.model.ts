@@ -21,6 +21,9 @@ export class PendingOrderData {
   @Field(() => String, { nullable: false })
   clientId!: string;
 
+  @Field(() => Boolean, { nullable: false })
+  purchaseInterrupted!: boolean;
+
   @Field(() => Date, { nullable: false })
   timestamp!: Date;
 

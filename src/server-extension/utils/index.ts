@@ -24,6 +24,7 @@ export async function getPendingOrdersByAccount(
       new PendingOrderData({
         id: savedOrder.id,
         timestamp: savedOrder.timestamp,
+        purchaseInterrupted: savedOrder.purchaseInterrupted,
         signer: savedOrder.signer,
         createdByAccount: savedOrder.createdByAccount,
         target: savedOrder.target,

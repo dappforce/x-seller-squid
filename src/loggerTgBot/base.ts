@@ -41,7 +41,7 @@ export class LoggerTgBot {
     if (this.initialized) return this;
     this.initialized = true;
 
-    if (this.chainConfig.sellerIndexer.processingDisabled) return;
+    if (this.chainConfig.sellerIndexer.processingDisabled) return this;
 
     this.commands = [new InitChatCommand(this.bot, this)];
 
