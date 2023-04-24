@@ -22,6 +22,11 @@ export const config: ProcessorConfig = {
     )
   },
   sellerIndexer: {
+    loggerTgBotToken: process.env.SELLER_SUBSOCIAL_LOGGER_TG_BOT_TOKEN ?? '',
+    loggerTgBotChannelId:
+      Number.parseInt(
+        process.env.SELLER_SUBSOCIAL_LOGGER_TG_BOT_CHAT_ID || '0'
+      ) ?? 0,
     accounts: {
       tokenManager: {
         mnemonic: process.env.SELLER_SUBSOCIAL_API_TOKEN_MANAGER_MNEM ?? ''

@@ -3,6 +3,7 @@ import { Ctx } from '../../processor';
 import { OrderRequestStatus, DomainRegistrationOrder } from '../../model';
 import { ensureDomainRegRemark } from '../../entities/remark';
 import { In } from 'typeorm';
+import { DomainRegistrationTgLogger } from '../../loggerTgBot';
 
 export async function handleUsernameRegistrationCompleted(
   callData: CallParsed<'DMN_REG_OK', true>,
@@ -32,6 +33,8 @@ export async function handleUsernameRegistrationCompleted(
     return;
   }
 
+  const domainRegTgLogger = await DomainRegistrationTgLogger.getInstance().init();
+
   existingRegistrationEntity.updatedAtBlock = callData.blockNumber;
   existingRegistrationEntity.updatedAtTime = callData.timestamp;
   existingRegistrationEntity.status = OrderRequestStatus.Successful;
@@ -47,4 +50,13 @@ export async function handleUsernameRegistrationCompleted(
 
   await ctx.store.save(domain);
   await ctx.store.save(existingRegistrationEntity);
+
+  await domainRegTgLogger.addOrderStatus(
+    existingRegistrationEntity.id,
+    'DmnRegOk'
+  );
+  await domainRegTgLogger.addOrderStatus(
+    existingRegistrationEntity.id,
+    'Successful'
+  );
 }

@@ -15,6 +15,7 @@ import { parseCalls } from './parser';
 import { SocialRemark } from '@subsocial/utils';
 import { getChain } from './chains';
 import { ServiceLocalStorage } from './serviceLocalStorageClient';
+import { DomainRegistrationTgLogger } from './loggerTgBot';
 
 const { config } = getChain();
 
@@ -53,6 +54,8 @@ export type CallItem = BatchProcessorCallItem<typeof processor>;
 export type EventItem = BatchProcessorEventItem<typeof processor>;
 export type Block = BatchBlock<Item>;
 
+DomainRegistrationTgLogger.getInstance().init();
+
 processor.run(new TypeormDatabase(), async (ctx) => {
   ctx.log.info(
     `Is head of archive - ${ctx.isHead} :: Batch size - ${ctx.blocks.length}`
@@ -63,7 +66,9 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   await ServiceLocalStorage.getInstance().init();
 
   if (ctx.isHead && config.sellerIndexer.processingDisabled) {
-    ctx.log.info(`Processing flow has been interrupted as squid is in silent mode.`);
+    ctx.log.info(
+      `Processing flow has been interrupted as squid is in silent mode.`
+    );
     return;
   }
 

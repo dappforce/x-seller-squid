@@ -1,0 +1,1 @@
+export { DomainRegistrationTgLogger } from './domainRegistrationLogger';

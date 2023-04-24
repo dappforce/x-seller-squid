@@ -33,6 +33,8 @@ export type ProcessorConfig = {
     processingDisabled: boolean;
     autoRefundDisabled: boolean;
     extendedApi: boolean;
+    loggerTgBotToken: string;
+    loggerTgBotChannelId: number;
   };
   sellerChain: {
     chainName: string;

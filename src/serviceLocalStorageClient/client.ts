@@ -5,6 +5,7 @@ import { ProcessorConfig } from '../chains/interfaces/processorConfig';
 import { getChain } from '../chains';
 import dayjs from 'dayjs';
 import { createLogger, Logger } from '@subsquid/logger';
+import { TgLoggerMessage } from './model/tgLoggerMessage';
 
 export class ServiceLocalStorage {
   private static instance: ServiceLocalStorage;
@@ -46,7 +47,7 @@ export class ServiceLocalStorage {
       dropSchema: false,
       synchronize: true,
       logging: false,
-      entities: [PendingOrder, RelayParaBlockRel]
+      entities: [PendingOrder, RelayParaBlockRel, TgLoggerMessage]
     });
 
     await this.ds.initialize();

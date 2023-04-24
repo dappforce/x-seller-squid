@@ -30,7 +30,7 @@ import {
   saveDomainRegOrderOnRegistrationFailed,
   saveRegOrderEntity
 } from './utils/common';
-// import { refundDomainRegistrationPayment } from './refund';
+import { DomainRegistrationTgLogger } from '../../loggerTgBot';
 const { config } = getChain();
 
 export async function handleDomainRegisterPaymentNotHead(
@@ -117,6 +117,8 @@ export async function handleDomainRegisterPayment(
   }
 
   const buyerChainClient = BuyerChainClient.getInstance();
+  const domainRegTgLogger =
+    await DomainRegistrationTgLogger.getInstance().init();
 
   /**
    * Check paid amount
@@ -152,6 +154,12 @@ export async function handleDomainRegisterPayment(
       },
       ctx
     )
+  );
+
+  await domainRegTgLogger.postInitialStatus(domainRegistrationOrder);
+  await domainRegTgLogger.addOrderStatus(
+    domainRegistrationOrder.id,
+    'ProcessingStarted'
   );
 
   /**
@@ -263,6 +271,11 @@ export async function handleDomainRegisterPayment(
     });
     ctx.log.info(result, 'Domain registration request result');
 
+    await domainRegTgLogger.addOrderStatus(
+      domainRegistrationOrder.id,
+      'InBlock'
+    );
+
     // TODO add extra check to avoid failing process without saving order status
 
     if (result.success) {
@@ -303,14 +316,14 @@ export async function handleDomainRegisterPayment(
           domainRegistrationOrder.status = OrderRequestStatus.Failed;
           domainRegistrationOrder.refundStatus = OrderRefundStatus.None;
           await saveRegOrderEntity(domainRegistrationOrder, ctx);
+          await domainRegTgLogger.addOrderStatus(
+            domainRegistrationOrder.id,
+            'DmnRegOkRemarkFailed'
+          );
           // TODO add handling of such case when domain is registered successfully but DMN_REG_OK remark has not ben sent
         }
         ctx.log.info(compRemarkResult, 'DMN_REG_OK remark sending result >>> ');
       } finally {
-        ctx.log.warn('DMN_REG_OK remark sending failed');
-        domainRegistrationOrder.status = OrderRequestStatus.Failed;
-        domainRegistrationOrder.refundStatus = OrderRefundStatus.None;
-        await saveRegOrderEntity(domainRegistrationOrder, ctx);
       }
       return null;
     } else {

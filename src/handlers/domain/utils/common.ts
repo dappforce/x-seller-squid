@@ -8,6 +8,7 @@ import {
 } from '../../../model';
 import { Ctx } from '../../../processor';
 import { getChain } from '../../../chains';
+import { DomainRegistrationTgLogger } from '../../../loggerTgBot';
 
 export async function saveRegOrderEntity(
   domainRegistrationOrder: DomainRegistrationOrder,
@@ -31,6 +32,8 @@ export async function saveDomainRegOrderOnRegistrationFailed(
   ctx: Ctx
 ): Promise<void> {
   const { config } = getChain();
+  const domainRegTgLogger = await DomainRegistrationTgLogger.getInstance().init();
+
   domainRegistrationOrder.status = OrderRequestStatus.Failed;
   domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
   domainRegistrationOrder.errorRegistration = new OrderError(errorData);
@@ -42,6 +45,10 @@ export async function saveDomainRegOrderOnRegistrationFailed(
   }
 
   await saveRegOrderEntity(domainRegistrationOrder, ctx);
+  await domainRegTgLogger.addOrderStatus(
+    domainRegistrationOrder.id,
+    'DmnRegFailed'
+  );
 }
 
 export async function saveDomainRegOrderOnRefundFailed(
@@ -49,8 +56,14 @@ export async function saveDomainRegOrderOnRefundFailed(
   errorData: ChainActionResult,
   ctx: Ctx
 ): Promise<void> {
+  const domainRegTgLogger = await DomainRegistrationTgLogger.getInstance().init();
+
   registrationOrderEntity.refundStatus = OrderRefundStatus.Failed;
   registrationOrderEntity.errorRefund = new OrderError(errorData);
 
   await ctx.store.save(registrationOrderEntity);
+  await domainRegTgLogger.addOrderStatus(
+    registrationOrderEntity.id,
+    'DmnRegRefundFailed'
+  );
 }
