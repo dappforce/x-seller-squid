@@ -1,6 +1,6 @@
 manifestVersion: subsquid.io/v0.1
 name: x-seller-squid-rococo-soon
-version: 116
+version: 117
 description: 'X Seller Squid based on Rococo/Soonsocial chains'
 build:
 deploy:
@@ -14,6 +14,7 @@ deploy:
     - SELLER_SOONSOCIAL_API_TOKEN_MANAGER_MNEM
     - SELLER_SOONSOCIAL_LOGGER_TG_BOT_TOKEN
     - SELLER_SOONSOCIAL_LOGGER_TG_BOT_CHAT_ID
+    - SELLER_SOONSOCIAL_MONGODB_URL
   addons:
     postgres:
   processor:

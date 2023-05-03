@@ -1,10 +1,13 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ObjectIdColumn } from 'typeorm';
 
 @Entity()
 export class PendingOrder {
   constructor(props?: Partial<PendingOrder>) {
     Object.assign(this, props);
   }
+
+  @ObjectIdColumn()
+  _id!: string;
 
   @PrimaryColumn()
   id!: string;
@@ -18,8 +21,8 @@ export class PendingOrder {
   @Column()
   signer!: string;
 
-  @Column()
-  target!: string;
+  @Column({ nullable: true })
+  target?: string;
 
   @Column()
   destination!: string;
@@ -27,6 +30,6 @@ export class PendingOrder {
   @Column()
   purchaseInterrupted!: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   clientId!: string;
 }

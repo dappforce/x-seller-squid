@@ -1,5 +1,5 @@
-import { DataSource, EntityManager, LessThan } from 'typeorm';
-import { PendingOrder, RelayParaBlockRel } from './model';
+import { DataSource, EntityManager, LessThan, MongoRepository } from 'typeorm';
+import { PendingOrder } from './model';
 import cron, { ScheduledTask } from 'node-cron';
 import { ProcessorConfig } from '../chains/interfaces/processorConfig';
 import { getChain } from '../chains';
@@ -26,8 +26,14 @@ export class ServiceLocalStorage {
     return this.ds;
   }
 
-  get em(): EntityManager {
-    return this.dataSource.manager;
+  get repository(): {
+    pendingOrder: MongoRepository<PendingOrder>;
+    tgLoggerMessage: MongoRepository<TgLoggerMessage>;
+  } {
+    return {
+      pendingOrder: this.ds.getMongoRepository(PendingOrder),
+      tgLoggerMessage: this.ds.getMongoRepository(TgLoggerMessage)
+    };
   }
 
   static getInstance(): ServiceLocalStorage {
@@ -40,14 +46,31 @@ export class ServiceLocalStorage {
   async init() {
     if (this.initialized) return this;
 
+    // this.ds = new DataSource({
+    //   type: 'better-sqlite3',
+    //   // database: ':memory:',
+    //   database: 'src/serviceLocalStorageClient/db/serviceLSDb.sql',
+    //   dropSchema: false,
+    //   synchronize: true,
+    //   logging: false,
+    //   entities: [PendingOrder, TgLoggerMessage]
+    // });
+
+    if (
+      !this.chainConfig.sellerIndexer.serviceLocalStorageDbUrl ||
+      this.chainConfig.sellerIndexer.serviceLocalStorageDbUrl.length === 0
+    )
+      throw new Error('ServiceLocalStorageDbUrl is undefined');
+
     this.ds = new DataSource({
-      type: 'better-sqlite3',
-      // database: ':memory:',
-      database: 'src/serviceLocalStorageClient/db/serviceLSDb.sql',
-      dropSchema: false,
+      type: 'mongodb',
+      url: this.chainConfig.sellerIndexer.serviceLocalStorageDbUrl,
+      useNewUrlParser: true,
       synchronize: true,
       logging: false,
-      entities: [PendingOrder, RelayParaBlockRel, TgLoggerMessage]
+      entities: [PendingOrder, TgLoggerMessage],
+      migrations: [],
+      subscribers: []
     });
 
     await this.ds.initialize();
@@ -60,29 +83,18 @@ export class ServiceLocalStorage {
 
   async deletePendingOrderById(orderId: string): Promise<void> {
     this.sqdLogger.info(`>>>>> deletePendingOrderById - ${orderId}`);
-    const allOrders = await this.em.find(PendingOrder, {
-      where: {},
-      order: {
-        timestamp: 'ASC'
-      }
-    });
-    this.sqdLogger.info('>>>>> deletePendingOrderById allOrders:');
-    console.dir(allOrders, { depth: null });
-
-    await this.em.delete(PendingOrder, orderId);
+    await this.repository.pendingOrder.deleteOne({ id: { $eq: orderId } });
   }
 
   private async deletePendingOrderWhenExpInitial() {
     const intervalMinutes =
       this.chainConfig.sellerIndexer.dmnRegPendingOrderExpTime / 60 / 1000;
-    const expiredPendingOrders = await this.em.find(PendingOrder, {
-      where: {
-        timestamp: LessThan(dayjs().subtract(intervalMinutes, 'm').toDate())
-      }
+    const expiredPendingOrders = await this.repository.pendingOrder.findBy({
+      timestamp: { $lt: dayjs().subtract(intervalMinutes, 'm').toDate() }
     });
     const idsToDelete = expiredPendingOrders.map((or) => or.id);
     if (!idsToDelete || idsToDelete.length === 0) return;
-    await this.em.delete(PendingOrder, idsToDelete);
+    await this.repository.pendingOrder.deleteMany({ id: { $in: idsToDelete } });
     this.sqdLogger.info(
       `Next Pending Orders have been deleted automatically due to reaching expiration time: ${idsToDelete.join(
         ', '

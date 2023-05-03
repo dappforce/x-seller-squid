@@ -1,5 +1,4 @@
 import { Query, Resolver, Mutation, Arg, Args, Ctx } from 'type-graphql';
-import { In } from 'typeorm';
 import 'reflect-metadata';
 import {
   ServiceLocalStorage,
@@ -45,17 +44,17 @@ export class PendingOrdersResolver {
         'Account address who created Pending Order (will be saved in Hex format)'
     })
     createdByAccount: string,
-    @Arg('target', {
-      nullable: false,
-      description: 'Target for new domain (domain recipient)'
-    })
-    target: string,
     @Arg('destination', {
       nullable: false,
       description: 'Action destination of the order'
     })
     destination: string,
-    @Ctx() ctx: any
+    @Ctx() ctx: any,
+    @Arg('target', {
+      nullable: true,
+      description: 'Target for new domain (domain recipient)'
+    })
+    target: string
   ): Promise<boolean> {
     const { config } = getChain();
     if (config.sellerIndexer.processingDisabled) return true;
@@ -65,11 +64,15 @@ export class PendingOrdersResolver {
       : null;
 
     if (!requestClientId)
-      new Error('Action forbidden. Client ID has not been provided.');
+      throw new Error('Action forbidden. Client ID has not been provided.');
 
     const lsClient = await ServiceLocalStorage.getInstance().init();
-    await lsClient.em.insert(
-      PendingOrder,
+    if (
+      await lsClient.repository.pendingOrder.findOneBy({ id: { $eq: domain } })
+    )
+      throw new Error(`PendingOrder with ID "${domain}" already exists.`);
+
+    await lsClient.repository.pendingOrder.insert(
       new PendingOrder({
         destination,
         id: domain,
@@ -77,7 +80,7 @@ export class PendingOrdersResolver {
         purchaseInterrupted: false,
         signer: WalletClient.addressToHex(signer),
         createdByAccount: WalletClient.addressToHex(createdByAccount),
-        target: WalletClient.addressToHex(target),
+        target: target ? WalletClient.addressToHex(target) : undefined,
         clientId: requestClientId ?? undefined
       })
     );
@@ -109,7 +112,7 @@ export class PendingOrdersResolver {
       ? WalletClient.addressToHex(ctx.openreader.clientId)
       : '';
     const lsClient = await ServiceLocalStorage.getInstance().init();
-    const itemForUpdate = await lsClient.em.findOneBy(PendingOrder, {
+    const itemForUpdate = await lsClient.repository.pendingOrder.findOneBy({
       id
     });
     if (!itemForUpdate)
@@ -121,7 +124,7 @@ export class PendingOrdersResolver {
         `Permissions denied. Client ${requestClientId} can not update Domain registration Pending order for domain "${id}" `
       );
     itemForUpdate.purchaseInterrupted = interrupted;
-    await lsClient.em.save(itemForUpdate);
+    await lsClient.repository.pendingOrder.save(itemForUpdate);
     return true;
   }
 
@@ -143,7 +146,7 @@ export class PendingOrdersResolver {
       ? WalletClient.addressToHex(ctx.openreader.clientId)
       : '';
     const lsClient = await ServiceLocalStorage.getInstance().init();
-    const itemForDelete = await lsClient.em.findOneBy(PendingOrder, {
+    const itemForDelete = await lsClient.repository.pendingOrder.findOneBy({
       id
     });
     if (!itemForDelete)
@@ -154,7 +157,7 @@ export class PendingOrdersResolver {
       throw new Error(
         `Permissions denied. Client ${requestClientId} can not delete Domain registration Pending order for domain "${id}" `
       );
-    await lsClient.em.delete(PendingOrder, id);
+    await lsClient.repository.pendingOrder.deleteOne({ id: { $eq: id } });
     return true;
   }
 
@@ -175,10 +178,8 @@ export class PendingOrdersResolver {
   ): Promise<PendingOrdersList> {
     const lsClient = await ServiceLocalStorage.getInstance().init();
 
-    const savedOrders = await lsClient.em.find(PendingOrder, {
-      where: {
-        id: In(ids)
-      }
+    const savedOrders = await lsClient.repository.pendingOrder.findBy({
+      id: { $in: ids }
     });
 
     return new PendingOrdersList({
@@ -190,7 +191,7 @@ export class PendingOrdersResolver {
             purchaseInterrupted: savedOrder.purchaseInterrupted,
             signer: savedOrder.signer,
             createdByAccount: savedOrder.createdByAccount,
-            target: savedOrder.target,
+            target: savedOrder.target ?? undefined,
             destination: savedOrder.destination,
             clientId: savedOrder.clientId
           })
@@ -264,7 +265,7 @@ export class PendingOrdersResolver {
       throw new Error('Extended API is disabled.');
 
     const lsClient = await ServiceLocalStorage.getInstance().init();
-    const savedOrders = await lsClient.em.find(PendingOrder, {
+    const savedOrders = await lsClient.repository.pendingOrder.find({
       where: {},
       order: {
         timestamp: 'ASC'

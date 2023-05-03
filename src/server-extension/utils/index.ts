@@ -13,10 +13,8 @@ export async function getPendingOrdersByAccount(
   accountName: 'signer' | 'target' | 'createdByAccount'
 ): Promise<PendingOrderData[]> {
   const lsClient = await ServiceLocalStorage.getInstance().init();
-  const savedOrders = await lsClient.em.find(PendingOrder, {
-    where: {
-      [accountName]: WalletClient.addressToHex(accountValue)
-    }
+  const savedOrders = await lsClient.repository.pendingOrder.findBy({
+    [accountName]: WalletClient.addressToHex(accountValue)
   });
 
   return savedOrders.map(

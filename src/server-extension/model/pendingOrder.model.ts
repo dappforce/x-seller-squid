@@ -12,8 +12,8 @@ export class PendingOrderData {
   @Field(() => String, { nullable: false })
   signer!: string;
 
-  @Field(() => String, { nullable: false })
-  target!: string;
+  @Field(() => String, { nullable: true })
+  target?: string;
 
   @Field(() => String, { nullable: false })
   destination!: string;

@@ -1,10 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, PrimaryColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  PrimaryColumn,
+  Column,
+  ObjectIdColumn
+} from 'typeorm';
 
 @Entity()
 export class TgLoggerMessage {
   constructor(props?: Partial<TgLoggerMessage>) {
     Object.assign(this, props);
   }
+
+  @ObjectIdColumn()
+  _id!: string;
 
   @PrimaryColumn()
   id!: string;

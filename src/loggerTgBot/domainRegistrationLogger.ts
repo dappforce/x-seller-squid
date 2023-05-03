@@ -8,7 +8,7 @@ import {
 import { ServiceLocalStorage } from '../serviceLocalStorageClient';
 import { TgLoggerMessage } from '../serviceLocalStorageClient/model/tgLoggerMessage';
 import { SocialRemarkMessageAction } from '@subsocial/utils';
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
 export class DomainRegistrationTgLogger extends LoggerTgBot {
@@ -47,7 +47,7 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
 
     await (
       await this.storageClient()
-    ).em.save(
+    ).repository.tgLoggerMessage.save(
       new TgLoggerMessage({
         id: order.id,
         tgMsgId: tgMsg.message_id,
@@ -72,7 +72,7 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
   ) {
     const existingTgMessage = await (
       await this.storageClient()
-    ).em.findOne(TgLoggerMessage, { where: { id: orderId } });
+    ).repository.tgLoggerMessage.findOneBy({ id: { $eq: orderId } });
 
     if (!existingTgMessage) {
       console.log('Tg message has not been found');
@@ -81,7 +81,7 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
 
     let text = `${existingTgMessage.tgMsgText} \n`;
 
-    const currentTime = dayjs.utc().format('HH:mm:ss') + ' GMT'
+    const currentTime = dayjs.utc().format('HH:mm:ss') + ' GMT';
 
     switch (status) {
       case 'ProcessingStarted':
@@ -97,8 +97,7 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
         text += `      ❎ [${currentTime}] Domain registration has failed. Refund is required`;
         break;
       case 'DmnRegOkRemarkFailed':
-        text +=
-          `      ❎ [${currentTime}] Domain registration proof remark DMN_REG_OK has not been sent.`;
+        text += `      ❎ [${currentTime}] Domain registration proof remark DMN_REG_OK has not been sent.`;
         break;
       case 'DmnRegRefundFailed':
         text += `      ❎ [${currentTime}] Domain registration refund has failed.`;
@@ -107,8 +106,7 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
         text += `      🏁 [${currentTime}] Domain registration refund has fulfilled successfully.`;
         break;
       case 'Successful':
-        text +=
-          `      🏁 [${currentTime}] Domain registration order has been closed with status Success`;
+        text += `      🏁 [${currentTime}] Domain registration order has been closed with status Success`;
         break;
       default:
     }
@@ -117,6 +115,8 @@ export class DomainRegistrationTgLogger extends LoggerTgBot {
 
     existingTgMessage.tgMsgText = text;
 
-    await (await this.storageClient()).em.save(existingTgMessage);
+    await (
+      await this.storageClient()
+    ).repository.tgLoggerMessage.save(existingTgMessage);
   }
 }

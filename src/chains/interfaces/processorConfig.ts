@@ -35,6 +35,7 @@ export type ProcessorConfig = {
     extendedApi: boolean;
     loggerTgBotToken: string;
     loggerTgBotChannelId: number;
+    serviceLocalStorageDbUrl: string;
   };
   sellerChain: {
     chainName: string;

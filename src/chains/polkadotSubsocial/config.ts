@@ -58,7 +58,8 @@ export const config: ProcessorConfig = {
     extendedApi: !!(
       process.env.SELLER_EXTENDED_API &&
       process.env.SELLER_EXTENDED_API === 'true'
-    )
+    ),
+    serviceLocalStorageDbUrl: process.env.SELLER_SUBSOCIAL_MONGODB_URL || ''
   },
   sellerChain: {
     chainName: 'polkadot',
