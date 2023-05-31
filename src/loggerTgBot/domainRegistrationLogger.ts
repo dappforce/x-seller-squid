@@ -7,7 +7,6 @@ import {
 } from '../model';
 import { ServiceLocalStorage } from '../serviceLocalStorageClient';
 import { TgLoggerMessage } from '../serviceLocalStorageClient/model/tgLoggerMessage';
-import { SocialRemarkMessageAction } from '@subsocial/utils';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 

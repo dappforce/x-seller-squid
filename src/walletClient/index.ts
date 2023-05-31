@@ -2,9 +2,9 @@ import {
   cryptoWaitReady,
   decodeAddress,
   encodeAddress,
-  mnemonicToMiniSecret,
-  naclBoxPairFromSecret
+  mnemonicToMiniSecret
 } from '@polkadot/util-crypto';
+import { naclBoxPairFromSecret } from '@subsocial/utils';
 import { stringToU8a, u8aToHex, hexToU8a, isHex } from '@polkadot/util';
 import { GenericAccountId } from '@polkadot/types';
 import { Keyring } from '@polkadot/api';

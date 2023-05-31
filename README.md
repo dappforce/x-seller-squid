@@ -144,7 +144,7 @@ To each mutation request the client app must add two headers:
 
 ```typescript
 import { stringToU8a, u8aToHex } from '@polkadot/util';
-import { naclSeal } from '@polkadot/util-crypto';
+import { naclSeal } from '@subsocial/utils';
 
 const messageSigned = naclSeal(
   stringToU8a('1680869251230'),

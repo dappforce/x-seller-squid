@@ -1,5 +1,5 @@
 import { KeyringPair } from '@polkadot/keyring/types';
-import { Keypair } from '@polkadot/util-crypto/types';
+import { Keypair } from '@subsocial/utils/nacl/types';
 
 export interface KeyringPairWithSecret extends KeyringPair {
   secretKey: Uint8Array;

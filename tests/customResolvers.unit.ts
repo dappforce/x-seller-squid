@@ -7,25 +7,15 @@ import {
   u8aToString
 } from '@polkadot/util';
 import {
-  mnemonicGenerate,
   mnemonicToMiniSecret,
-  naclBoxPairFromSecret,
-  naclEncrypt,
-  naclDecrypt,
-  naclSeal,
-  naclOpen,
-  randomAsU8a,
   encodeAddress,
-  decodeAddress,
-  ed25519PairFromSeed,
-  sr25519PairFromSeed,
-  blake2AsU8a,
-  blake2AsHex
+  decodeAddress
 } from '@polkadot/util-crypto';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { isTokenValid } from '../src/server-extension/check';
-import { Keypair } from '@polkadot/util-crypto/types';
+import { naclSeal, naclBoxPairFromSecret } from '@subsocial/utils';
+import { Keypair } from '@subsocial/utils/nacl/types';
 
 import { getChain } from '../src/chains';
 
@@ -85,8 +75,7 @@ describe('API Custom Resolvers', () => {
      */
 
     const isValid = await isTokenValid(
-      // u8aToHex(signedToken.sealed),
-      '0x1598e5c50fecbadfb53b64cabe4faccc3e96e9a3814fefa1c4e2721dcesasdasd',
+      u8aToHex(signedToken.sealed),
       encodeAddress(decodeAddress(requesterKeypair.publicKey), 42)
     );
 

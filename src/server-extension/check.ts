@@ -1,7 +1,8 @@
 import { RequestCheckContext } from '@subsquid/graphql-server/src/check';
 import { FieldNode } from 'graphql/language/ast';
 import { getChain } from '../chains';
-import { decodeAddress, naclOpen } from '@polkadot/util-crypto';
+import { decodeAddress } from '@polkadot/util-crypto';
+import { naclOpen } from '@subsocial/utils';
 import { hexToU8a, u8aToString } from '@polkadot/util';
 import { WalletClient } from '../walletClient';
 import dayjs from 'dayjs';
