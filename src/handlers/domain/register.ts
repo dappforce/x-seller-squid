@@ -123,10 +123,12 @@ export async function handleDomainRegisterPayment(
   /**
    * Check paid amount
    */
-  const registrationPaymentValidation = await validateRegistrationPayment(
-    amount,
-    token as TokenName
-  );
+  const registrationPaymentValidation = await validateRegistrationPayment({
+    transferredAmount: amount,
+    transferredToken: token as TokenName,
+    domain: domainName,
+    relayBlockTimestampRaw: callData.timestampRaw
+  });
 
   if (!registrationPaymentValidation.success) {
     ctx.log.error(registrationPaymentValidation);

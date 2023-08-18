@@ -1,6 +1,7 @@
 import { WalletClient } from '../src/walletClient';
 import { BuyerChainClient, SellerChainClient } from '../src/wsClient';
 import { getChain } from '../src/chains';
+import { u8aToString } from '@polkadot/util';
 
 const { config } = getChain();
 
@@ -33,16 +34,21 @@ describe('WS Client Unit', () => {
 
   test('Account does not have registered domains', async () => {
     const list = await buyerClient!.getDomainsByOwner(
-      walletClient!.account.sellerTreasury.address
+      u8aToString(walletClient!.account.sellerTreasuryPubKey)
     );
     expect(list).not.toEqual(null);
     expect(list!.length === 0).toEqual(true);
   });
 
   test('Account does not have registered domains', async () => {
-    const deposit = await buyerClient!.getDomainRegistrationPrice(
-      config.sellerChain.token
-    );
+    const price = await buyerClient!.getDomainRegistrationPrice({
+      domain: 'maxtest',
+      tokenData: config.sellerChain.token,
+      atBlock:
+        '0xc404a252db054312e4edc913169eaac9ae2fcaa516e383ab1ce9118a3d0e470f'
+    });
+
+    console.log('price - ', price);
     expect(1).toEqual(1);
   });
 });

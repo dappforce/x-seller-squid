@@ -68,7 +68,7 @@ export const config: ProcessorConfig = {
       name: TokenName.ROC,
       decimal: 10,
       coefficientWithBuyerToken:
-        process.env.SELLER_TOKEN_PRICE_COEFF_ROC_SOON || '0.001' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001)
+        process.env.SELLER_TOKEN_PRICE_COEFF_ROC_SOON || '0.01' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001)
     },
     dataSource: {
       archive: 'https://rococo.archive.subsquid.io/graphql',
@@ -101,7 +101,8 @@ export const config: ProcessorConfig = {
     chainName: 'soonsocial',
     prefix: 28,
     dataSource: {
-      chain: 'wss://rco-para.subsocial.network'
+      chain: 'wss://rco-para.subsocial.network',
+      rpcHttpUrl: 'https://rco-para.subsocial.network/http'
     },
     accounts: {
       domainRegistrar: {

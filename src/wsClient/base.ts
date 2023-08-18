@@ -93,7 +93,26 @@ class WsClient {
 
         await new ApiPromise({
           provider: wsProvider,
-          noInitWarn: true
+          noInitWarn: true,
+          rpc: {
+            domains: {
+              calculatePrice: {
+                description: 'Calculate domain price',
+                params: [
+                  {
+                    name: 'subdomain',
+                    type: 'Vec<u8>'
+                  },
+                  {
+                    name: 'at',
+                    type: 'Option<BlockHash>',
+                    isOptional: true
+                  }
+                ],
+                type: 'Option<Balance>'
+              }
+            }
+          }
         })
           .on('error', (e) => {
             this.client = null;
@@ -279,7 +298,9 @@ export class BaseChainClient extends WsClient {
     return hexToNumber((await this.api.query.system.number()).toHex());
   }
 
-  public async getBlockHashByBlocNumber(blockNumber: number): Promise<BlockHash> {
+  public async getBlockHashByBlocNumber(
+    blockNumber: number
+  ): Promise<BlockHash> {
     return await this.api.rpc.chain.getBlockHash(numberToU8a(blockNumber));
   }
 }

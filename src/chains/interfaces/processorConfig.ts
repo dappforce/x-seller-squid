@@ -58,7 +58,7 @@ export type ProcessorConfig = {
   buyerChain: {
     chainName: string;
     prefix: number;
-    dataSource: { chain: string };
+    dataSource: { chain: string; rpcHttpUrl: string };
     accounts: {
       domainRegistrar: { mnemonic: string };
       energyGenerator: { mnemonic: string };

@@ -13,15 +13,16 @@ export class SellerConfigInfoResolver {
     const { config } = getChain();
     assert(config != null);
 
-    const registrationPrice = await (
-      await BuyerChainClient.getInstance().init()
-    ).getDomainRegistrationPrice(config.sellerChain.token);
+    // TODO Return domains price config instead of registrationPrice
+    // const registrationPrice = await (
+    //   await BuyerChainClient.getInstance().init()
+    // ).getDomainRegistrationPrice(config.sellerChain.token);
 
     const walletClient = await WalletClient.getInstance().init();
 
     await walletClient.init();
 
-    assert(registrationPrice != null);
+    // assert(registrationPrice != null);
 
     return new SellerConfigInfo({
       isServiceOperational: !config.sellerIndexer.processingDisabled,
@@ -44,7 +45,8 @@ export class SellerConfigInfoResolver {
       },
       remarkProtName: config.sellerChain.remark.protName,
       remarkProtVersion: config.sellerChain.remark.version,
-      domainRegistrationPriceFixed: registrationPrice
+      // domainRegistrationPriceFixed: registrationPrice
+      domainRegistrationPriceFixed: 0n
     });
   }
 }

@@ -8,6 +8,7 @@ import {
 import { getChain } from '../../../chains';
 import { TokenName } from '../../../chains/interfaces/processorConfig';
 import { MultiChainBlocksMapper } from '../../../multichainBlocksMapper';
+import * as domain from 'domain';
 
 const { config } = getChain();
 
@@ -43,10 +44,17 @@ export async function validateDomainRegistrationTargetAddress(address: string) {
   };
 }
 
-export async function validateRegistrationPayment(
-  transferredAmount: bigint,
-  transferredToken: TokenName
-): Promise<ValidationResult> {
+export async function validateRegistrationPayment({
+  transferredAmount,
+  transferredToken,
+  domain,
+  relayBlockTimestampRaw
+}: {
+  transferredAmount: bigint;
+  transferredToken: TokenName;
+  domain: string;
+  relayBlockTimestampRaw: number;
+}): Promise<ValidationResult> {
   if (transferredToken !== config.sellerChain.token.name)
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason(
@@ -56,9 +64,15 @@ export async function validateRegistrationPayment(
     });
 
   const buyerChainClient = BuyerChainClient.getInstance();
-  const registrationPrice = await buyerChainClient.getDomainRegistrationPrice(
-    config.sellerChain.token
-  );
+  const domainParts = domain.split('.');
+  const registrationPrice = await buyerChainClient.getDomainRegistrationPrice({
+    domain: domainParts[0],
+    tokenData: config.sellerChain.token,
+    atBlock:
+      (await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockTimestamp(
+        relayBlockTimestampRaw
+      )) ?? undefined
+  });
 
   if (registrationPrice === null || transferredAmount < registrationPrice)
     return await getFailedStatusWithMeta({

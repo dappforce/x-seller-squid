@@ -29,9 +29,10 @@ export async function ensureDomainRegistrationOrder(
     blockHashSellerChain: callData.blockHash,
     target: await getOrCreateAccount(remark.content.target, ctx),
     domain: await getOrCreateDomain(remark.content.domainName, ctx),
-    price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(
-      config.sellerChain.token // TODO we should get price which is actual for this particular point of time (in case squid reindexing)
-    ),
+    // price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(
+    //   config.sellerChain.token // TODO we should get price which is actual for this particular point of time (in case squid reindexing)
+    // ),
+    price: 0n,
     token: config.sellerChain.token.name, // TODO should be reviewed
     purchaseTx: purchaseTx ?? null,
     status: OrderRequestStatus.Processing,

@@ -1,7 +1,13 @@
 import { BaseChainClient } from './base';
 import { getChain } from '../chains';
 import { WalletClient } from '../walletClient';
-import { ChainActionResult } from './types';
+import {
+  ChainActionResult,
+  RpcParams,
+  RpcResult,
+  StorageItem,
+  SubstrateApiProps
+} from './types';
 import { IpfsContent } from '@subsocial/api/substrate/wrappers';
 import { BN } from 'bn.js';
 import '@polkadot/api-augment';
@@ -12,9 +18,12 @@ import {
 } from '../chains/interfaces/processorConfig';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
 import { Header } from '@polkadot/types/interfaces/runtime/types';
-import { hexToNumber } from '@polkadot/util';
+import { hexToNumber, stringToU8a } from '@polkadot/util';
 import { BlockHash } from '@polkadot/types/interfaces/chain/types';
 import { sleepTo } from '../utils';
+import { toHex } from '@subsquid/util-internal-hex';
+import axios from 'axios';
+import { PalletName } from '@subsocial/api/types';
 
 const BLOCK_TIME = 12;
 const SECS_IN_DAY = 60 * 60 * 24;
@@ -24,12 +33,16 @@ export class BuyerChainClient extends BaseChainClient {
   private static instance: BuyerChainClient;
   private chainConfig: ProcessorConfig;
   private unsubscribeNewHeads: UnsubscribePromise | null = null;
+  private socialCustomRpcClient: SocialCustomRpcClient;
 
   constructor() {
     super({
       apiUrl: getChain().config.buyerChain.dataSource.chain
     });
     this.chainConfig = getChain().config;
+    this.socialCustomRpcClient = new SocialCustomRpcClient({
+      rpcUrl: this.chainConfig.buyerChain.dataSource.rpcHttpUrl
+    });
   }
 
   static getInstance(): BuyerChainClient {
@@ -86,15 +99,33 @@ export class BuyerChainClient extends BaseChainClient {
   /**
    * Returns domain registration price in seller chain token (DOT || ROC)
    */
-  async getDomainRegistrationPrice(
-    tokenData: TokenDetails
-  ): Promise<bigint | null> {
+  async getDomainRegistrationPrice({
+    domain,
+    tokenData,
+    atBlock
+  }: {
+    domain: string;
+    tokenData: TokenDetails;
+    atBlock?: string;
+  }): Promise<bigint | null> {
     const correctorCoeff = 1000;
 
     try {
-      const depositNativeToken = new BN(
-        this.api.consts.domains.baseDomainDeposit.toString()
-      );
+      // TODO Implement price calculation at specific block in case of app reindexing
+
+      // @ts-ignore
+      let domainPriceNativeToken =
+        await this.socialCustomRpcClient.calculatePrice(domain, atBlock);
+
+      console.log('domainPriceNativeToken - ', domainPriceNativeToken);
+
+      if (
+        domainPriceNativeToken === null ||
+        domainPriceNativeToken === undefined
+      )
+        return null;
+
+      const depositNativeToken = new BN(domainPriceNativeToken);
 
       return BigInt(
         depositNativeToken
@@ -222,5 +253,61 @@ export class BuyerChainClient extends BaseChainClient {
         return;
       }
     });
+  }
+}
+
+class SocialCustomRpcClient {
+  private rpcUrl: string;
+
+  constructor({ rpcUrl }: SubstrateApiProps) {
+    this.rpcUrl = rpcUrl;
+  }
+
+  private createRpcJson(
+    { moduleName, method }: StorageItem,
+    params: RpcParams
+  ) {
+    return {
+      jsonrpc: '2.0',
+      id: 1,
+      method: `${moduleName}_${method}`,
+      params
+    };
+  }
+
+  private async rpcQuery<Params, Result = any>(
+    method: StorageItem,
+    value?: Params
+  ): Promise<Result | undefined> {
+    try {
+      const params = Array.isArray(value) ? value : [value];
+      const { data, status, statusText } = await axios.post<RpcResult>(
+        this.rpcUrl,
+        this.createRpcJson(method, [...params]),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      if (status !== 200) {
+        throw statusText;
+      }
+
+      return data.result;
+    } catch (err) {
+      console.log(err);
+      return undefined;
+    }
+  }
+
+  private async queryDomains(method: string, value?: any): Promise<any> {
+    return this.rpcQuery({ moduleName: 'domains', method }, value);
+  }
+
+  async calculatePrice(domain: string, atBlock?: string): Promise<any> {
+    const domainU8a = stringToU8a(domain);
+
+    return this.queryDomains('calculatePrice', [
+      Array.from(domainU8a),
+      ...(atBlock ? [atBlock] : [])
+    ]);
   }
 }
