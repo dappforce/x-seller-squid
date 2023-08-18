@@ -54,7 +54,7 @@ export async function validateRegistrationPayment({
   transferredToken: TokenName;
   domain: string;
   relayBlockTimestampRaw: number;
-}): Promise<ValidationResult> {
+}): Promise<ValidationResult & { domainPrice?: bigint | null }> {
   if (transferredToken !== config.sellerChain.token.name)
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason(
@@ -86,7 +86,8 @@ export async function validateRegistrationPayment({
     });
 
   return {
-    success: true
+    success: true,
+    domainPrice: registrationPrice
   };
 }
 

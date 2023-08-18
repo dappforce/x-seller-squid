@@ -15,11 +15,17 @@ import { ensureDomainRegRemark } from './remark';
 import { getChain } from '../chains';
 const { config } = getChain();
 
-export async function ensureDomainRegistrationOrder(
-  callData: CallParsed<'DMN_REG'>,
-  ctx: Ctx,
-  purchaseTx?: Transfer
-): Promise<DomainRegistrationOrder> {
+export async function ensureDomainRegistrationOrder({
+  callData,
+  domainPrice,
+  ctx,
+  purchaseTx
+}: {
+  callData: CallParsed<'DMN_REG'>;
+  domainPrice: bigint | null;
+  ctx: Ctx;
+  purchaseTx?: Transfer;
+}): Promise<DomainRegistrationOrder> {
   const { remark } = callData;
 
   return new DomainRegistrationOrder({
@@ -29,10 +35,7 @@ export async function ensureDomainRegistrationOrder(
     blockHashSellerChain: callData.blockHash,
     target: await getOrCreateAccount(remark.content.target, ctx),
     domain: await getOrCreateDomain(remark.content.domainName, ctx),
-    // price: await BuyerChainClient.getInstance().getDomainRegistrationPrice(
-    //   config.sellerChain.token // TODO we should get price which is actual for this particular point of time (in case squid reindexing)
-    // ),
-    price: 0n,
+    price: domainPrice || 0n,
     token: config.sellerChain.token.name, // TODO should be reviewed
     purchaseTx: purchaseTx ?? null,
     status: OrderRequestStatus.Processing,

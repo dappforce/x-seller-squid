@@ -31,6 +31,7 @@ import {
   saveRegOrderEntity
 } from './utils/common';
 import { DomainRegistrationTgLogger } from '../../loggerTgBot';
+import { MultiChainBlocksMapper } from '../../multichainBlocksMapper';
 const { config } = getChain();
 
 export async function handleDomainRegisterPaymentNotHead(
@@ -62,15 +63,26 @@ export async function handleDomainRegisterPaymentNotHead(
     return;
   }
 
+  const buyerChainClient = BuyerChainClient.getInstance();
+  const domainPrice = await buyerChainClient.getDomainRegistrationPrice({
+    domain: domainName.split('.')[0],
+    tokenData: config.sellerChain.token,
+    atBlock:
+      (await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockTimestamp(
+        callData.timestampRaw
+      )) ?? undefined
+  });
+
   /**
    * We don't need to create this entity earlier as there are at least 2 steps
    * where process can be terminated. So we don't need wast time for redundant
    * async functionality.
    */
-  const domainRegistrationOrder = await ensureDomainRegistrationOrder(
+  const domainRegistrationOrder = await ensureDomainRegistrationOrder({
     callData,
+    domainPrice,
     ctx,
-    await createAndGetTransfer(
+    purchaseTx: await createAndGetTransfer(
       {
         blockHash: callData.blockHash,
         txIndex: callData.transferEventIndexInBlock,
@@ -82,7 +94,7 @@ export async function handleDomainRegisterPaymentNotHead(
       },
       ctx
     )
-  );
+  });
 
   await saveRegOrderEntity(domainRegistrationOrder, ctx);
 }
@@ -141,10 +153,11 @@ export async function handleDomainRegisterPayment(
    * where process can be terminated. So we don't need wast time for redundant
    * async functionality.
    */
-  const domainRegistrationOrder = await ensureDomainRegistrationOrder(
+  const domainRegistrationOrder = await ensureDomainRegistrationOrder({
     callData,
+    domainPrice: registrationPaymentValidation.domainPrice!,
     ctx,
-    await createAndGetTransfer(
+    purchaseTx: await createAndGetTransfer(
       {
         blockHash: callData.blockHash,
         txIndex: callData.transferEventIndexInBlock,
@@ -156,7 +169,7 @@ export async function handleDomainRegisterPayment(
       },
       ctx
     )
-  );
+  });
 
   await domainRegTgLogger.postInitialStatus(domainRegistrationOrder);
   await domainRegTgLogger.addOrderStatus(
