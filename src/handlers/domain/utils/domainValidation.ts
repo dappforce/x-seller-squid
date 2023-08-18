@@ -159,7 +159,10 @@ export async function validateDomainTld(
 ): Promise<ValidationResult> {
   const domainNameChunked = domainName.split('.');
   // TODO get supported tlds from blockchain "domains.supportedTlds"
-  if (domainNameChunked.length < 2 || domainNameChunked[1] !== 'sub') {
+  if (
+    domainNameChunked.length < 2 ||
+    (domainNameChunked[1] !== 'sub' && domainNameChunked[1] !== 'polka')
+  ) {
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason('Domain', 'ErrorRegForbiddenTld')
     });
