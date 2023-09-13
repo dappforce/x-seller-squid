@@ -120,6 +120,8 @@ export async function handleDomainRegisterPayment(
     }
   );
 
+  console.log(1)
+
   if (existingRegistrationOrderEntity) {
     ctx.log.error(
       `Domain Registration Order "${opId}" is already existing and registration cannot be duplicated [block#: ${blockNumber}].`
@@ -127,6 +129,7 @@ export async function handleDomainRegisterPayment(
     // TODO handle this case
     return null;
   }
+  console.log(2)
 
   const buyerChainClient = BuyerChainClient.getInstance();
   const domainRegTgLogger =
@@ -142,11 +145,14 @@ export async function handleDomainRegisterPayment(
     relayBlockTimestampRaw: callData.timestampRaw
   });
 
+
+
   if (!registrationPaymentValidation.success) {
     ctx.log.error(registrationPaymentValidation);
     ctx.log.error('Processing of current registration request is skipped.');
     return null;
   }
+  console.log(3)
 
   /**
    * We don't need to create this entity earlier as there are at least 2 steps
@@ -194,6 +200,8 @@ export async function handleDomainRegisterPayment(
     return opId;
   }
 
+  console.log(4)
+
   /**
    * Check is domain available for registration
    */
@@ -212,6 +220,7 @@ export async function handleDomainRegisterPayment(
     );
     return opId;
   }
+  console.log(5)
 
   /**
    * Check domain ending
@@ -225,6 +234,8 @@ export async function handleDomainRegisterPayment(
     );
     return opId;
   }
+
+  console.log(6)
 
   /**
    * Check domain MIN length
@@ -241,6 +252,8 @@ export async function handleDomainRegisterPayment(
     return opId;
   }
 
+  console.log(7)
+
   /**
    * Check domain MAX length
    */
@@ -255,6 +268,8 @@ export async function handleDomainRegisterPayment(
     );
     return opId;
   }
+
+  console.log(8)
 
   /**
    * Check number of already registered domains by target
@@ -271,6 +286,8 @@ export async function handleDomainRegisterPayment(
     );
     return opId;
   }
+
+  console.log(9)
 
   await saveRegOrderEntity(domainRegistrationOrder, ctx);
 

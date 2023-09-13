@@ -16,7 +16,7 @@ jest.useRealTimers();
 
 describe('Register domain with completion flow', () => {
   let sellerWsClient: SellerChainClient | null = null;
-  const validDomainPrice = new BN('100000000'); // 0.01
+  const validDomainPrice = new BN('10000000000'); // 0.01 // 1
   const invalidDomainPrice = new BN('1000000'); // 0.0001
 
   const { config } = getChain();
@@ -61,7 +61,9 @@ describe('Register domain with completion flow', () => {
       content: {
         opId: `${transferTx.hash.toHex()}-${randomAsNumber()}`,
         // domainName: `tdotdomain${randomAsNumber()}.sub`,
-        domainName: `man-dude-body-10.sub`,
+        // domainName: `caw-tester-2.sub`,
+        // domainName: `xxx.sub`,
+        domainName: `dudedude4.sub`,
         target: WalletClient.addressToHex(
           process.env.SELLER_SOONSOCIAL_ACC_MNEM_DOMAIN_REGISTRANT_ADDRESS || ''
         ),

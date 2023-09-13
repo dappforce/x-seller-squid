@@ -111,13 +111,12 @@ export class BuyerChainClient extends BaseChainClient {
     const correctorCoeff = 1000;
 
     try {
-      // TODO Implement price calculation at specific block in case of app reindexing
-
-      // @ts-ignore
       let domainPriceNativeToken =
         await this.socialCustomRpcClient.calculatePrice(domain, atBlock);
 
-      console.log('domainPriceNativeToken - ', domainPriceNativeToken);
+      console.log(
+        `domainPriceNativeToken - ${domainPriceNativeToken} at block - ${atBlock}`
+      );
 
       if (
         domainPriceNativeToken === null ||
@@ -163,7 +162,7 @@ export class BuyerChainClient extends BaseChainClient {
   }): Promise<ChainActionResult> {
     return new Promise(async (resolve, reject) => {
       try {
-        const domainRegistrationTx = this.api.tx.domains.forceRegisterDomain(
+        const domainRegistrationTx = this.api.tx.domains.registerDomain(
           target,
           domain,
           IpfsContent(),
@@ -175,7 +174,7 @@ export class BuyerChainClient extends BaseChainClient {
           domainRegistrationTx.hash.toHex()
         );
 
-        const sudoWrappedTx = this.api.tx.sudo.sudo(domainRegistrationTx);
+        // const sudoWrappedTx = this.api.tx.sudo.sudo(domainRegistrationTx);
 
         /**
          * Delay is required here to avoid such errors like:
@@ -183,60 +182,60 @@ export class BuyerChainClient extends BaseChainClient {
          */
         await sleepTo(500);
 
-        console.log('sudoWrappedTx hash - ', sudoWrappedTx.hash.toHex());
+        // console.log('sudoWrappedTx hash - ', sudoWrappedTx.hash.toHex());
 
-        const sudoKey = await this.api.query.sudo.key();
+        // const sudoKey = await this.api.query.sudo.key();
 
         // TODO add handling tx errors which is terminating an app (e.g. RpcError: 1010: Invalid Transaction: Inability to pay some fees , e.g. account balance too low)
 
-        const unsub = await this.api.tx.proxy
-          .proxy(sudoKey.toString(), null, sudoWrappedTx)
-          .signAndSend(
-            WalletClient.getInstance().account.domainRegistrar,
-            async (resp) => {
-              const { status, txHash, txIndex, dispatchError, isCompleted } =
-                resp;
+        // const unsub = await this.api.tx.proxy
+        // .proxy(sudoKey.toString(), null, sudoWrappedTx)
+        const unsub = await domainRegistrationTx.signAndSend(
+          WalletClient.getInstance().account.domainRegistrar,
+          async (resp) => {
+            const { status, txHash, txIndex, dispatchError, isCompleted } =
+              resp;
 
-              console.log('txHash >>>');
-              console.dir(txHash.toHex(), { depth: null });
+            console.log('txHash >>>');
+            console.dir(txHash.toHex(), { depth: null });
 
-              console.log('txIndex >>>');
-              console.dir(txIndex, { depth: null });
+            console.log('txIndex >>>');
+            console.dir(txIndex, { depth: null });
 
-              if (dispatchError) {
-                reject({
-                  ...StatusesMng.getStatusWithReason('WsClient', 'ErrorCommon'),
-                  success: false,
-                  reason: this.getTxSubDispatchErrorMessage(dispatchError),
-                  blockHash: this.getTxSubDispatchErrorBlockHash(status)
-                });
-                unsub();
-                return;
-              }
-
-              if (status.isInBlock) {
-                console.log(
-                  `Successful registration of domain ${domain} for address ${target}`
-                );
-                console.log(
-                  'status.asInBlock.toHex() - ',
-                  status.asInBlock.toHex()
-                );
-                resolve({
-                  success: true,
-                  blockHash: status.asInBlock.toHex()
-                });
-                unsub();
-                return;
-              } else {
-                console.log(`Status of registration: ${status.type}`);
-              }
-
-              if (isCompleted) {
-                unsub();
-              }
+            if (dispatchError) {
+              reject({
+                ...StatusesMng.getStatusWithReason('WsClient', 'ErrorCommon'),
+                success: false,
+                reason: this.getTxSubDispatchErrorMessage(dispatchError),
+                blockHash: this.getTxSubDispatchErrorBlockHash(status)
+              });
+              unsub();
+              return;
             }
-          );
+
+            if (status.isInBlock) {
+              console.log(
+                `Successful registration of domain ${domain} for address ${target}`
+              );
+              console.log(
+                'status.asInBlock.toHex() - ',
+                status.asInBlock.toHex()
+              );
+              resolve({
+                success: true,
+                blockHash: status.asInBlock.toHex()
+              });
+              unsub();
+              return;
+            } else {
+              console.log(`Status of registration: ${status.type}`);
+            }
+
+            if (isCompleted) {
+              unsub();
+            }
+          }
+        );
       } catch (e: unknown) {
         console.log(e);
         reject({

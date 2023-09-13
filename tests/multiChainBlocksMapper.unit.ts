@@ -6,7 +6,7 @@ describe('MultiChain Blocks Mapper Unit', () => {
   test('Gat parachain block hash by relaychain block number range', async () => {
     const blockHash =
       await MultiChainBlocksMapper.getInstance().getParaBlockHashByRelayBlockTimestamp(
-        1681335579674 //'2023-04-12T21:39:39.674Z'
+        1692523878000 //'2023-04-12T21:39:39.674Z'
       );
 
     expect(blockHash).toEqual(

@@ -29,6 +29,11 @@ export class MultiChainBlocksMapper {
     return MultiChainBlocksMapper.instance;
   }
 
+  /**
+   * Method can return null in case some error or if archive still doesn't have
+   * required block in DB. Usually it means that users requests latest block in
+   * blockchain and it's still not ingested by archive.
+   */
   async getParaBlockHashByRelayBlockTimestamp(
     blockTimestampRaw: number
   ): Promise<string | null> {

@@ -86,7 +86,7 @@ export const config: ProcessorConfig = {
       protName:
         (process.env
           .SELLER_ROCOCO_REMARK_PROT_NAME as SocialRemarkMessageProtocolName) ||
-        't_ss_t_0',
+        't_ss_t_2',
       version:
         (process.env
           .SELLER_ROCOCO_REMARK_PROT_VERSION as SocialRemarkMessageVersion) ||

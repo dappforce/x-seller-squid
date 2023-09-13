@@ -89,8 +89,12 @@ export class ServiceLocalStorage {
   private async deletePendingOrderWhenExpInitial() {
     const intervalMinutes =
       this.chainConfig.sellerIndexer.dmnRegPendingOrderExpTime / 60 / 1000;
-    const expiredPendingOrders = await this.repository.pendingOrder.findBy({
-      timestamp: { $lt: dayjs().subtract(intervalMinutes, 'm').toDate() }
+    const expiredPendingOrders = await this.repository.pendingOrder.find({
+      where: {
+        timestamp: {
+          $lt: dayjs().subtract(intervalMinutes, 'm').toDate()
+        }
+      }
     });
     const idsToDelete = expiredPendingOrders.map((or) => or.id);
     if (!idsToDelete || idsToDelete.length === 0) return;

@@ -74,7 +74,16 @@ export async function validateRegistrationPayment({
       )) ?? undefined
   });
 
-  if (registrationPrice === null || transferredAmount < registrationPrice)
+  if (registrationPrice === null) {
+    return await getFailedStatusWithMeta({
+      ...StatusesMng.getStatusWithReason(
+        'Domain',
+        'ErrorRegPriceCalculationError'
+      )
+    });
+  }
+
+  if (transferredAmount < registrationPrice)
     return await getFailedStatusWithMeta({
       ...StatusesMng.getStatusWithReason(
         'Domain',

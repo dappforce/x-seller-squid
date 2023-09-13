@@ -32,17 +32,20 @@ export async function saveDomainRegOrderOnRegistrationFailed(
   ctx: Ctx
 ): Promise<void> {
   const { config } = getChain();
-  const domainRegTgLogger = await DomainRegistrationTgLogger.getInstance().init();
+  const domainRegTgLogger =
+    await DomainRegistrationTgLogger.getInstance().init();
 
   domainRegistrationOrder.status = OrderRequestStatus.Failed;
   domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
   domainRegistrationOrder.errorRegistration = new OrderError(errorData);
 
-  if (config.sellerIndexer.autoRefundDisabled) {
-    ctx.log.error(
-      `Order ${domainRegistrationOrder.id} for domain name "${domainRegistrationOrder.domain.id}" has status Failed and refund is required.`
-    );
-  }
+  ctx.log.error(
+    `Order ${domainRegistrationOrder.id} for domain name "${
+      domainRegistrationOrder.domain.id
+    }" has status Failed${
+      config.sellerIndexer.autoRefundDisabled ? 'and refund is required.' : '.'
+    } `
+  );
 
   await saveRegOrderEntity(domainRegistrationOrder, ctx);
   await domainRegTgLogger.addOrderStatus(
@@ -56,7 +59,8 @@ export async function saveDomainRegOrderOnRefundFailed(
   errorData: ChainActionResult,
   ctx: Ctx
 ): Promise<void> {
-  const domainRegTgLogger = await DomainRegistrationTgLogger.getInstance().init();
+  const domainRegTgLogger =
+    await DomainRegistrationTgLogger.getInstance().init();
 
   registrationOrderEntity.refundStatus = OrderRefundStatus.Failed;
   registrationOrderEntity.errorRefund = new OrderError(errorData);
