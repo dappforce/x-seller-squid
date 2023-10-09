@@ -34,6 +34,7 @@ export async function saveDomainRegOrderOnRegistrationFailed(
   const { config } = getChain();
   const domainRegTgLogger =
     await DomainRegistrationTgLogger.getInstance().init();
+  const lsClient = await ServiceLocalStorage.getInstance().init();
 
   domainRegistrationOrder.status = OrderRequestStatus.Failed;
   domainRegistrationOrder.refundStatus = OrderRefundStatus.Waiting;
@@ -48,6 +49,9 @@ export async function saveDomainRegOrderOnRegistrationFailed(
   );
 
   await saveRegOrderEntity(domainRegistrationOrder, ctx);
+  await lsClient.updatePendingOrder(domainRegistrationOrder.domain.id, {
+    purchaseTxStarted: false
+  });
   await domainRegTgLogger.addOrderStatus(
     domainRegistrationOrder.id,
     'DmnRegFailed'

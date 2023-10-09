@@ -1,4 +1,4 @@
-import { ArgsType, Field, ObjectType } from 'type-graphql';
+import { ArgsType, Field, InputType, ObjectType } from 'type-graphql';
 import { IsString } from 'class-validator';
 
 @ObjectType()
@@ -21,8 +21,11 @@ export class PendingOrderData {
   @Field(() => String, { nullable: false })
   clientId!: string;
 
-  @Field(() => Boolean, { nullable: false })
-  purchaseInterrupted!: boolean;
+  @Field(() => Boolean, { nullable: true })
+  purchaseInterrupted?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  purchaseTxStarted?: boolean;
 
   @Field(() => Date, { nullable: false })
   timestamp!: Date;
@@ -50,4 +53,16 @@ export class GetPendingOrdersByIdsArgs {
     description: 'Pending Order domain names list.'
   })
   ids!: string[];
+}
+
+@ArgsType()
+export class UpdatePendingOrderPurchaseStatusArgs {
+  @Field(() => String!, { nullable: false })
+  id!: string;
+
+  @Field(() => Boolean!, { nullable: true })
+  interrupted?: boolean;
+
+  @Field(() => Boolean!, { nullable: true })
+  txStarted?: boolean;
 }

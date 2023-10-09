@@ -21,7 +21,7 @@ const { config } = getChain();
 
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
-    archive: lookupArchive('rococo', { release: 'FireSquid' })
+    archive: lookupArchive(config.sellerChain.chainName, { release: 'FireSquid' })
   })
   // .setBlockRange({ from: 4260800 })
   .addCall('System.remark', {

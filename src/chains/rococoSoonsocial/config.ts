@@ -66,9 +66,9 @@ export const config: ProcessorConfig = {
     prefix: 42,
     token: {
       name: TokenName.ROC,
-      decimal: 10,
+      decimal: 12,
       coefficientWithBuyerToken:
-        process.env.SELLER_TOKEN_PRICE_COEFF_ROC_SOON || '0.01' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001)
+        process.env.SELLER_TOKEN_PRICE_COEFF_ROC_SOON || '1' // Decimal part cannot be not more than 1e10 ( e.g. 0.000_000_001) // it's 1 but must be 0.01 because rococo has decimals 12 but not 10 like polkadot
     },
     dataSource: {
       archive: 'https://rococo.archive.subsquid.io/graphql',

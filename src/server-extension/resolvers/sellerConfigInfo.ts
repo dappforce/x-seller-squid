@@ -46,7 +46,9 @@ export class SellerConfigInfoResolver {
       remarkProtName: config.sellerChain.remark.protName,
       remarkProtVersion: config.sellerChain.remark.version,
       // domainRegistrationPriceFixed: registrationPrice
-      domainRegistrationPriceFixed: 0n
+      domainRegistrationPriceFixed: 0n,
+      domainRegistrationPriceFactor:
+        config.sellerChain.token.coefficientWithBuyerToken
     });
   }
 }

@@ -86,6 +86,26 @@ export class ServiceLocalStorage {
     await this.repository.pendingOrder.deleteOne({ id: { $eq: orderId } });
   }
 
+  async updatePendingOrder(
+    orderId: string,
+    data: Partial<PendingOrder>
+  ): Promise<void> {
+    this.sqdLogger.info(`>>>>> updatePendingOrderById - ${orderId}`);
+    const order = await this.repository.pendingOrder.findOneBy({
+      id: { $eq: orderId }
+    });
+
+    if (!order) return;
+
+    if (typeof data.purchaseTxStarted === 'boolean')
+      order.purchaseTxStarted = data.purchaseTxStarted;
+
+    if (typeof data.purchaseInterrupted === 'boolean')
+      order.purchaseInterrupted = data.purchaseInterrupted;
+
+    await this.repository.pendingOrder.save(order);
+  }
+
   private async deletePendingOrderWhenExpInitial() {
     const intervalMinutes =
       this.chainConfig.sellerIndexer.dmnRegPendingOrderExpTime / 60 / 1000;

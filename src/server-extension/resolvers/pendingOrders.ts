@@ -7,7 +7,8 @@ import {
 import {
   GetPendingOrdersByIdsArgs,
   PendingOrderData,
-  PendingOrdersList
+  PendingOrdersList,
+  UpdatePendingOrderPurchaseStatusArgs
 } from '../model/pendingOrder.model';
 import { WalletClient } from '../../walletClient';
 import { getChain } from '../../chains';
@@ -129,6 +130,63 @@ export class PendingOrdersResolver {
   }
 
   @Mutation(() => Boolean, {
+    description: 'Update Pending Order status'
+  })
+  async updatePendingOrderPurchaseStatus(
+    // @Args(() => UpdatePendingOrderPurchaseStatusArgs)
+    // args: UpdatePendingOrderPurchaseStatusArgs,
+    @Arg('id', {
+      nullable: true,
+      description: 'Purchase interruption status'
+    })
+    id: string,
+    @Arg('interrupted', {
+      nullable: true,
+      description: 'Purchase interruption status'
+    })
+    interrupted: boolean,
+
+    @Arg('txStarted', {
+      nullable: true,
+      description: 'Purchase transaction started'
+    })
+    txStarted: boolean,
+
+    @Ctx() ctx: any
+  ): Promise<boolean> {
+    const { config } = getChain();
+    if (config.sellerIndexer.processingDisabled) return true;
+
+    const requestClientId = ctx.openreader.clientId
+      ? WalletClient.addressToHex(ctx.openreader.clientId)
+      : '';
+    const lsClient = await ServiceLocalStorage.getInstance().init();
+    const itemForUpdate = await lsClient.repository.pendingOrder.findOneBy({
+      id: { $eq: id }
+    });
+    if (!itemForUpdate)
+      throw new Error(
+        `Domain registration Pending order for domain "${id} has not been found" `
+      );
+    if (!requestClientId || itemForUpdate.clientId !== requestClientId)
+      throw new Error(
+        `Permissions denied. Client ${requestClientId} can not update Domain registration Pending order for domain "${id}" `
+      );
+    if (interrupted !== null && interrupted !== undefined)
+      itemForUpdate.purchaseInterrupted = interrupted;
+
+    if (txStarted !== null && txStarted !== undefined)
+      itemForUpdate.purchaseTxStarted = txStarted;
+
+    console.log(
+      `updatePendingOrderPurchaseStatus - interrupted[${interrupted}] - txStarted[${txStarted}]`
+    );
+
+    await lsClient.repository.pendingOrder.save(itemForUpdate);
+    return true;
+  }
+
+  @Mutation(() => Boolean, {
     description: 'Delete Pending Order by ID'
   })
   async deletePendingOrderById(
@@ -147,7 +205,7 @@ export class PendingOrdersResolver {
       : '';
     const lsClient = await ServiceLocalStorage.getInstance().init();
     const itemForDelete = await lsClient.repository.pendingOrder.findOneBy({
-      id
+      id: { $eq: id }
     });
     if (!itemForDelete)
       throw new Error(
@@ -178,8 +236,10 @@ export class PendingOrdersResolver {
   ): Promise<PendingOrdersList> {
     const lsClient = await ServiceLocalStorage.getInstance().init();
 
-    const savedOrders = await lsClient.repository.pendingOrder.findBy({
-      id: { $in: ids }
+    const savedOrders = await lsClient.repository.pendingOrder.find({
+      where: {
+        id: { $in: ids }
+      }
     });
 
     return new PendingOrdersList({

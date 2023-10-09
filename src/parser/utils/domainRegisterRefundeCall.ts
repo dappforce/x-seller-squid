@@ -35,9 +35,9 @@ export function parseDomainRegisterRefundCall(
 
   if (
     !signer ||
-    !config.sellerIndexer.allowedRemarkSigners.has(
-      WalletClient.addressToHex(signer)
-    ) ||
+    // !config.sellerIndexer.allowedRemarkSigners.has(
+    //   WalletClient.addressToHex(signer)
+    // ) ||
     !callItem.call.parent ||
     callItem.call.parent.name !== 'Utility.batch_all' ||
     (callItem.call.parent.name === 'Utility.batch_all' &&

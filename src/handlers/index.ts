@@ -101,7 +101,7 @@ export async function handleSellerActions(
    * balance, squid won't be able to send remarks DMN_REG_OK on successful
    * registrations.
    */
-  if (config.sellerIndexer.autoRefundDisabled) {
+  if (!config.sellerIndexer.autoRefundDisabled) {
     if (
       ctx.isHead &&
       processingState.domainRegRefundFullProcessingAtBlock + 1000 <

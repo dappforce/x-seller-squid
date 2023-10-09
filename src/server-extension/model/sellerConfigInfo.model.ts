@@ -55,6 +55,9 @@ export class SellerConfigInfo {
   @Field(() => BigInt, { nullable: false })
   domainRegistrationPriceFixed!: bigint;
 
+  @Field(() => String, { nullable: false })
+  domainRegistrationPriceFactor!: string;
+
   constructor(props?: Partial<SellerConfigInfo>) {
     Object.assign(this, props);
   }

@@ -16,7 +16,9 @@ export function getTransferData(
       item.name === 'Balances.Transfer' &&
       item.event.call &&
       // @ts-ignore
-      item.event.call!.parent.id === parentBatchCallId &&
+      item.event.call!.parent &&
+      // @ts-ignore
+      item.event.call!.parent!.id === parentBatchCallId &&
       // @ts-ignore
       item.event.call.parent.name === 'Utility.batch_all'
   ) as EventItem | undefined;

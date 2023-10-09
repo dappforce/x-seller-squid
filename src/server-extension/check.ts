@@ -11,7 +11,8 @@ import utc from 'dayjs/plugin/utc';
 const protectedQueries = [
   'createPendingOrder',
   'deletePendingOrderById',
-  'updatePendingOrderPurchaseStatusById'
+  'updatePendingOrderPurchaseStatusById',
+  'updatePendingOrderPurchaseStatus'
 ];
 
 /**

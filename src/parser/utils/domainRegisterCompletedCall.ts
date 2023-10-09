@@ -25,10 +25,10 @@ export function parseDomainRegisterCompletedCall(
   }
 
   if (
-    !signer ||
-    !config.sellerIndexer.allowedRemarkSigners.has(
-      WalletClient.addressToHex(signer)
-    )
+    !signer
+    // !config.sellerIndexer.allowedRemarkSigners.has(
+    //   WalletClient.addressToHex(signer)
+    // )
   ) {
     ctx.log.warn(
       `DMN_REG_OK signer is undefined or invalid - ${
