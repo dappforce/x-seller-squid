@@ -25,6 +25,7 @@ export async function getPendingOrdersByAccount(
         id: savedOrder.id,
         timestamp: savedOrder.timestamp,
         purchaseInterrupted: savedOrder.purchaseInterrupted,
+        purchaseTxStarted: savedOrder.purchaseTxStarted,
         signer: savedOrder.signer,
         createdByAccount: savedOrder.createdByAccount,
         target: savedOrder.target,
